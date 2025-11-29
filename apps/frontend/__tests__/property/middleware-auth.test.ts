@@ -1,7 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, Mock } from "vitest";
 import fc from "fast-check";
 import { middleware } from "@/middleware";
-import { NextResponse } from "next/server";
+import { NextResponse, NextRequest } from "next/server";
 
 // Mock NextResponse
 vi.mock("next/server", async () => {
@@ -37,13 +37,13 @@ describe("Property 4: Protected Route Authorization", () => {
                         cookies: {
                             get: () => undefined, // No auth cookie
                         },
-                    } as any;
+                    } as unknown as NextRequest;
 
                     middleware(req);
 
                     expect(NextResponse.redirect).toHaveBeenCalled();
-                    const redirectUrl = (NextResponse.redirect as any).mock
-                        .lastCall[0];
+                    const redirectUrl = (NextResponse.redirect as Mock).mock
+                        .lastCall![0];
                     expect(redirectUrl.toString()).toContain("/login");
 
                     vi.clearAllMocks();
@@ -75,7 +75,7 @@ describe("Property 4: Protected Route Authorization", () => {
                         cookies: {
                             get: () => ({ value: JSON.stringify(authState) }),
                         },
-                    } as any;
+                    } as unknown as NextRequest;
 
                     middleware(req);
 
@@ -110,13 +110,13 @@ describe("Property 4: Protected Route Authorization", () => {
                         cookies: {
                             get: () => ({ value: JSON.stringify(authState) }),
                         },
-                    } as any;
+                    } as unknown as NextRequest;
 
                     middleware(req);
 
                     expect(NextResponse.redirect).toHaveBeenCalled();
-                    const redirectUrl = (NextResponse.redirect as any).mock
-                        .lastCall[0];
+                    const redirectUrl = (NextResponse.redirect as Mock).mock
+                        .lastCall![0];
                     expect(redirectUrl.toString()).toContain("/unauthorized");
 
                     vi.clearAllMocks();
@@ -147,7 +147,7 @@ describe("Property 4: Protected Route Authorization", () => {
                         cookies: {
                             get: () => ({ value: JSON.stringify(authState) }),
                         },
-                    } as any;
+                    } as unknown as NextRequest;
 
                     middleware(req);
 

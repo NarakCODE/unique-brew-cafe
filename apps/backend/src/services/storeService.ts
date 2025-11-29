@@ -47,7 +47,10 @@ export const calculateDistance = (
 };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createStore = async (storeData: any): Promise<IStore> => {
+type StoreResponse = any;
+type StoreData = Partial<IStore>;
+
+export const createStore = async (storeData: StoreData): Promise<IStore> => {
   const store = new Store(storeData);
   await store.save();
   return store;
@@ -59,11 +62,10 @@ export const createStore = async (storeData: any): Promise<IStore> => {
  * @param filters - Optional filters
  * @returns Paginated stores
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getAllStoresAdmin = async (
   paginationParams?: PaginationParams,
   filters?: StoreFilters
-): Promise<PaginationResult<any>> => {
+): Promise<PaginationResult<StoreResponse>> => {
   const query: Record<string, unknown> = {};
 
   // Apply filters
@@ -113,11 +115,10 @@ export const getAllStoresAdmin = async (
  * @param paginationParams - Pagination parameters
  * @returns Paginated stores with distance if location provided
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getAllStores = async (
   filters?: StoreFilters,
   paginationParams?: PaginationParams
-): Promise<PaginationResult<any>> => {
+): Promise<PaginationResult<StoreResponse>> => {
   const query: Record<string, unknown> = { isActive: true };
 
   // Apply city filter
@@ -208,8 +209,7 @@ export const getAllStores = async (
  * @returns Store details
  * @throws NotFoundError if store not found or inactive
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getStoreById = async (storeId: string): Promise<any> => {
+export const getStoreById = async (storeId: string): Promise<StoreResponse> => {
   const store = await Store.findOne({ _id: storeId, isActive: true });
 
   if (!store) {
@@ -230,8 +230,7 @@ export const getStoreById = async (storeId: string): Promise<any> => {
  * @returns Store details
  * @throws NotFoundError if store not found or inactive
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const getStoreBySlug = async (slug: string): Promise<any> => {
+export const getStoreBySlug = async (slug: string): Promise<StoreResponse> => {
   const store = await Store.findOne({ slug, isActive: true });
 
   if (!store) {
@@ -345,8 +344,7 @@ export const getStoreLocation = async (storeId: string) => {
  * @returns Updated store
  * @throws NotFoundError if store not found
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const updateStore = async (storeId: string, updateData: any) => {
+export const updateStore = async (storeId: string, updateData: StoreData) => {
   const store = await Store.findById(storeId);
 
   if (!store) {

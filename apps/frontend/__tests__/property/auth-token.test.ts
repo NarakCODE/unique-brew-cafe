@@ -27,6 +27,7 @@ describe("Property 1: Authentication Token Storage and Cleanup", () => {
     beforeEach(() => {
         useAuthStore.getState().logout();
         vi.clearAllMocks();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (Cookies as any)._clear();
     });
 
@@ -36,21 +37,33 @@ describe("Property 1: Authentication Token Storage and Cleanup", () => {
                 fc.string(), // accessToken
                 fc.string(), // refreshToken
                 fc.record({
-                    _id: fc.string(),
-                    name: fc.string(),
+                    id: fc.string(),
+                    fullName: fc.string(),
                     email: fc.emailAddress(),
                     role: fc.constantFrom("user", "admin", "moderator"),
+                    status: fc.constantFrom("active", "suspended", "deleted"),
+                    loyaltyTier: fc.constantFrom(
+                        "bronze",
+                        "silver",
+                        "gold",
+                        "platinum"
+                    ),
+                    totalOrders: fc.integer(),
+                    totalSpent: fc.integer(),
+                    createdAt: fc.string(),
                 }), // user
                 (accessToken, refreshToken, user) => {
                     // Arrange
                     const authData = {
                         accessToken,
                         refreshToken,
-                        user: user as any,
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        user: user as any, // We still cast to any here because the generated user might not match exactly if we don't include all optional fields, but let's try to match it better.
                     };
 
                     // Act
-                    useAuthStore.getState().setAuth(authData);
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    useAuthStore.getState().setAuth(authData as any);
 
                     // Assert
                     expect(Cookies.set).toHaveBeenCalledWith(
@@ -78,13 +91,19 @@ describe("Property 1: Authentication Token Storage and Cleanup", () => {
             accessToken: "access",
             refreshToken: "refresh",
             user: {
-                _id: "1",
-                name: "User",
+                id: "1",
+                fullName: "User",
                 email: "user@example.com",
                 role: "user",
-            } as any,
+                status: "active",
+                loyaltyTier: "bronze",
+                totalOrders: 0,
+                totalSpent: 0,
+                createdAt: new Date().toISOString(),
+            },
         };
-        useAuthStore.getState().setAuth(authData);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        useAuthStore.getState().setAuth(authData as any);
 
         // Act
         useAuthStore.getState().logout();

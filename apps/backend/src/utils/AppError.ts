@@ -4,15 +4,13 @@ export class AppError extends Error {
   statusCode: number;
   isOperational: boolean;
   errorCode: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  errors?: any[];
+  errors?: unknown[];
 
   constructor(
     message: string,
     statusCode: number,
     errorCode: string = ErrorCodes.SYS_INTERNAL_ERROR,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    errors?: any[]
+    errors?: unknown[]
   ) {
     super(message);
     this.statusCode = statusCode;
@@ -34,11 +32,10 @@ export class NotFoundError extends AppError {
 }
 
 export class BadRequestError extends AppError {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(
     message = 'Bad request',
     errorCode: ErrorCode = ErrorCodes.VAL_INVALID_INPUT,
-    errors?: any[]
+    errors?: unknown[]
   ) {
     super(message, 400, errorCode, errors);
   }
