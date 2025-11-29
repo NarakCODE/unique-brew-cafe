@@ -4,17 +4,6 @@ import { UnauthorizedError } from '../utils/AppError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 
 /**
- * Extend Express Request to include authenticated user information
- */
-declare module 'express-serve-static-core' {
-  interface Request {
-    userId?: string;
-    userEmail?: string;
-    userRole?: 'user' | 'admin' | 'moderator';
-  }
-}
-
-/**
  * Authentication middleware to protect routes
  * Verifies JWT token from Authorization header and attaches userId to request
  * Requirements: 19.5 - Reject authentication for suspended users
