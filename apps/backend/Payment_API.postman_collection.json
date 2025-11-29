@@ -1,0 +1,519 @@
+{
+  "info": {
+    "name": "Payment API",
+    "description": "Payment processing endpoints for Corner Coffee API. Includes payment intent creation, payment confirmation, and mock payment for development.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Create Payment Intent",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/:orderId/intent",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "payments", ":orderId", "intent"],
+          "variable": [
+            {
+              "key": "orderId",
+              "value": "{{orderId}}",
+              "description": "Order ID to create payment intent for"
+            }
+          ]
+        },
+        "description": "Create a payment intent for an order. This prepares the payment with the payment provider and returns intent details including provider intent ID. Order must be in 'pending' payment status.\n\n**Requirements:**\n- User must be authenticated\n- Order must belong to the authenticated user\n- Order payment status must be 'pending'\n\n**Response includes:**\n- Payment intent ID\n- Order ID\n- Amount and currency\n- Payment method\n- Provider intent ID\n- Status and creation timestamp"
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/:orderId/intent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", ":orderId", "intent"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"673a9876543210fedcba9876\",\n    \"orderId\": \"673a1234567890abcdef1234\",\n    \"amount\": 25.50,\n    \"currency\": \"USD\",\n    \"paymentMethod\": \"aba\",\n    \"status\": \"pending\",\n    \"providerIntentId\": \"ABA-INTENT-L8K9M2N-X7Y3Z1\",\n    \"createdAt\": \"2024-11-17T10:30:00.000Z\"\n  },\n  \"message\": \"Payment intent created successfully\"\n}"
+        },
+        {
+          "name": "Order Not Found",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/:orderId/intent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", ":orderId", "intent"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "invalid-order-id"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"error\": \"Order not found\"\n}"
+        },
+        {
+          "name": "Unauthorized Access",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/:orderId/intent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", ":orderId", "intent"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"error\": \"Unauthorized access to order\"\n}"
+        },
+        {
+          "name": "Invalid Payment Status",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/:orderId/intent",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", ":orderId", "intent"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"error\": \"Order payment status is completed. Cannot create payment intent.\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Confirm Payment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"paymentMethod\": \"aba\",\n  \"providerTransactionId\": \"ABA-TXN-1234567890\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/:orderId/confirm",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "payments", ":orderId", "confirm"],
+          "variable": [
+            {
+              "key": "orderId",
+              "value": "{{orderId}}",
+              "description": "Order ID to confirm payment for"
+            }
+          ]
+        },
+        "description": "Confirm payment for an order. Verifies payment with the payment provider and updates order status to 'confirmed' on success. If payment fails, order status remains 'pending_payment' and payment status is set to 'failed'.\n\n**Request Body:**\n- `paymentMethod` (required): Payment method used (aba, acleda, wing, cash)\n- `providerTransactionId` (optional): Transaction ID from payment provider\n\n**Success Flow:**\n1. Verifies payment with provider\n2. Updates order payment status to 'completed'\n3. Updates order status to 'confirmed'\n4. Stores provider transaction ID\n\n**Failure Flow:**\n1. Payment verification fails\n2. Updates order payment status to 'failed'\n3. Order status remains 'pending_payment'\n4. Returns error details"
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"aba\",\n  \"providerTransactionId\": \"ABA-TXN-1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/:orderId/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", ":orderId", "confirm"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"id\": \"673a1234567890abcdef1234\",\n    \"orderNumber\": \"ORD-L8K9M2N-X7Y3\",\n    \"status\": \"confirmed\",\n    \"paymentStatus\": \"completed\",\n    \"total\": 25.50\n  },\n  \"transactionId\": \"ABA-TXN-1234567890\",\n  \"message\": \"Payment completed successfully\"\n}"
+        },
+        {
+          "name": "Failed Payment Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"aba\",\n  \"providerTransactionId\": \"INVALID-TXN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/:orderId/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", ":orderId", "confirm"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"data\": {\n    \"id\": \"673a1234567890abcdef1234\",\n    \"orderNumber\": \"ORD-L8K9M2N-X7Y3\",\n    \"status\": \"pending_payment\",\n    \"paymentStatus\": \"failed\",\n    \"total\": 25.50\n  },\n  \"message\": \"Payment verification failed\"\n}"
+        },
+        {
+          "name": "Payment Already Completed",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"paymentMethod\": \"aba\",\n  \"providerTransactionId\": \"ABA-TXN-1234567890\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/:orderId/confirm",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", ":orderId", "confirm"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"error\": \"Payment already completed for this order\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Mock Payment Complete (Development)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/mock/:orderId/complete",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "payments", "mock", ":orderId", "complete"],
+          "variable": [
+            {
+              "key": "orderId",
+              "value": "{{orderId}}",
+              "description": "Order ID to complete mock payment for"
+            }
+          ]
+        },
+        "description": "Mock payment completion endpoint for development and testing. This endpoint is ONLY available when NODE_ENV is not 'production'. It immediately marks the order as paid without actual payment processing.\n\n**Use Cases:**\n- Testing order flows without payment provider integration\n- Development environment testing\n- Automated testing scenarios\n- Demo purposes\n\n**Behavior:**\n1. Checks NODE_ENV (rejects if production)\n2. Finds order by ID\n3. Generates mock transaction ID\n4. Updates payment status to 'completed'\n5. Updates order status to 'confirmed'\n\n**Important:** This endpoint will return 403 Forbidden in production environments."
+      },
+      "response": [
+        {
+          "name": "Success Response",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/mock/:orderId/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "mock", ":orderId", "complete"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": true,\n  \"message\": \"Mock payment completed successfully\"\n}"
+        },
+        {
+          "name": "Production Environment Error",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/mock/:orderId/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "mock", ":orderId", "complete"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "673a1234567890abcdef1234"
+                }
+              ]
+            }
+          },
+          "status": "Forbidden",
+          "code": 403,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"error\": \"Mock payment endpoint is not available in production\"\n}"
+        },
+        {
+          "name": "Order Not Found",
+          "originalRequest": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/payments/mock/:orderId/complete",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "payments", "mock", ":orderId", "complete"],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "invalid-order-id"
+                }
+              ]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "body": "{\n  \"success\": false,\n  \"error\": \"Order not found\"\n}"
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string",
+      "description": "Base URL for the API"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string",
+      "description": "JWT access token for authentication"
+    },
+    {
+      "key": "orderId",
+      "value": "",
+      "type": "string",
+      "description": "Order ID for payment operations"
+    }
+  ]
+}

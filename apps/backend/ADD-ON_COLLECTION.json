@@ -1,0 +1,136 @@
+{
+  "info": {
+    "_postman_id": "addon-management-collection",
+    "name": "Add-on Management",
+    "description": "Collection for managing product add-ons",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Add-ons",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/addons",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "addons"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Create Add-on",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"name\": \"Vanilla Syrup\",\n    \"description\": \"Sweet vanilla flavor\",\n    \"price\": 0.5,\n    \"category\": \"syrup\",\n    \"isAvailable\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/addons",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "addons"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Add-on",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"price\": 0.75,\n    \"isAvailable\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/addons/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "addons", ":id"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "ADD_ON_ID_HERE"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete Add-on",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{accessToken}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/addons/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "addons", ":id"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "ADD_ON_ID_HERE"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ]
+}

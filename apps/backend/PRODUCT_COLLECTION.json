@@ -1,0 +1,258 @@
+{
+  "info": {
+    "name": "Product Management",
+    "description": "Collection for Product Management API endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/search?q=latte",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", "search"],
+          "query": [
+            {
+              "key": "q",
+              "value": "latte",
+              "description": "Search query (required)"
+            },
+            {
+              "key": "categoryId",
+              "value": "",
+              "disabled": true,
+              "description": "Filter by category ID"
+            },
+            {
+              "key": "isFeatured",
+              "value": "true",
+              "disabled": true,
+              "description": "Filter by featured status"
+            },
+            {
+              "key": "minPrice",
+              "value": "0",
+              "disabled": true,
+              "description": "Minimum price"
+            },
+            {
+              "key": "maxPrice",
+              "value": "100",
+              "disabled": true,
+              "description": "Maximum price"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product By Slug",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/slug/:slug",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", "slug", ":slug"],
+          "variable": [
+            {
+              "key": "slug",
+              "value": "classic-coffee",
+              "description": "Product slug"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get All Products",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products"],
+          "query": [
+            {
+              "key": "categoryId",
+              "value": "",
+              "disabled": true,
+              "description": "Filter by category ID"
+            },
+            {
+              "key": "isFeatured",
+              "value": "true",
+              "disabled": true,
+              "description": "Filter by featured status"
+            },
+            {
+              "key": "isBestSelling",
+              "value": "true",
+              "disabled": true,
+              "description": "Filter by best selling status"
+            },
+            {
+              "key": "tags",
+              "value": "",
+              "disabled": true,
+              "description": "Filter by tags"
+            },
+            {
+              "key": "minPrice",
+              "value": "0",
+              "disabled": true,
+              "description": "Minimum price"
+            },
+            {
+              "key": "maxPrice",
+              "value": "100",
+              "disabled": true,
+              "description": "Maximum price"
+            },
+            {
+              "key": "search",
+              "value": "",
+              "disabled": true,
+              "description": "Search term"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product By ID",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/:id",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", ":id"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "",
+              "description": "Product ID"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product Customizations",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/:id/customizations",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", ":id", "customizations"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "",
+              "description": "Product ID"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get Product Add-ons",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/:id/addons",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", ":id", "addons"],
+          "variable": [
+            {
+              "key": "id",
+              "value": "",
+              "description": "Product ID"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Update Product Status (Admin)",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"isAvailable\": true\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/products/:productId/status",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", ":productId", "status"],
+          "variable": [
+            {
+              "key": "productId",
+              "value": "",
+              "description": "Product ID"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Duplicate Product (Admin)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/products/:productId/duplicate",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "products", ":productId", "duplicate"],
+          "variable": [
+            {
+              "key": "productId",
+              "value": "",
+              "description": "Product ID"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ]
+}

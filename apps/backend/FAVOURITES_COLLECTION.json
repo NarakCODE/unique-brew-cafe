@@ -1,0 +1,470 @@
+{
+  "info": {
+    "_postman_id": "favorites-api-collection",
+    "name": "Favorites API",
+    "description": "API endpoints for managing user favorites (wishlist) in Corner Coffee app. Allows users to save their favorite products for quick access.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Get All Favorites",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success true', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response contains favorites array', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('favorites');",
+              "    pm.expect(jsonData.data.favorites).to.be.an('array');",
+              "});",
+              "",
+              "pm.test('Response contains count', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('count');",
+              "    pm.expect(jsonData.data.count).to.be.a('number');",
+              "});",
+              "",
+              "if (pm.response.json().data.favorites.length > 0) {",
+              "    pm.test('Favorite item has required fields', function () {",
+              "        const favorite = pm.response.json().data.favorites[0];",
+              "        pm.expect(favorite).to.have.property('favoriteId');",
+              "        pm.expect(favorite).to.have.property('productId');",
+              "        pm.expect(favorite).to.have.property('name');",
+              "        pm.expect(favorite).to.have.property('slug');",
+              "        pm.expect(favorite).to.have.property('basePrice');",
+              "        pm.expect(favorite).to.have.property('currency');",
+              "        pm.expect(favorite).to.have.property('isAvailable');",
+              "        pm.expect(favorite).to.have.property('favoritedAt');",
+              "    });",
+              "    ",
+              "    // Save first productId for other requests",
+              "    pm.collectionVariables.set('productId', pm.response.json().data.favorites[0].productId);",
+              "}"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/favorites",
+          "host": ["{{baseUrl}}"],
+          "path": ["favorites"]
+        },
+        "description": "Retrieves all favorited products for the authenticated user. Returns product details including current price, availability, rating, and when it was favorited. Products are sorted by most recently added."
+      },
+      "response": [
+        {
+          "name": "Success - With Favorites",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"favorites\": [\n      {\n        \"favoriteId\": \"507f1f77bcf86cd799439011\",\n        \"productId\": \"507f191e810c19729de860ea\",\n        \"name\": \"Caramel Macchiato\",\n        \"slug\": \"caramel-macchiato\",\n        \"description\": \"Espresso with vanilla syrup, steamed milk, and caramel drizzle\",\n        \"images\": [\n          \"https://example.com/images/caramel-macchiato.jpg\"\n        ],\n        \"basePrice\": 4.95,\n        \"currency\": \"USD\",\n        \"isAvailable\": true,\n        \"rating\": 4.7,\n        \"totalReviews\": 128,\n        \"categoryId\": \"507f191e810c19729de860eb\",\n        \"preparationTime\": 5,\n        \"favoritedAt\": \"2025-11-20T10:30:00.000Z\"\n      },\n      {\n        \"favoriteId\": \"507f1f77bcf86cd799439012\",\n        \"productId\": \"507f191e810c19729de860ec\",\n        \"name\": \"Vanilla Latte\",\n        \"slug\": \"vanilla-latte\",\n        \"description\": \"Smooth espresso with vanilla syrup and steamed milk\",\n        \"images\": [\n          \"https://example.com/images/vanilla-latte.jpg\"\n        ],\n        \"basePrice\": 4.25,\n        \"currency\": \"USD\",\n        \"isAvailable\": true,\n        \"rating\": 4.5,\n        \"totalReviews\": 95,\n        \"categoryId\": \"507f191e810c19729de860eb\",\n        \"preparationTime\": 4,\n        \"favoritedAt\": \"2025-11-19T14:20:00.000Z\"\n      }\n    ],\n    \"count\": 2\n  }\n}"
+        },
+        {
+          "name": "Success - Empty Favorites",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"favorites\": [],\n    \"count\": 0\n  }\n}"
+        }
+      ]
+    },
+    {
+      "name": "Add Product to Favorites",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success true', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response contains message', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('message');",
+              "    pm.expect(jsonData.data.message).to.be.oneOf([",
+              "        'Product added to favorites',",
+              "        'Product already in favorites'",
+              "    ]);",
+              "});",
+              "",
+              "pm.test('Response contains productId', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('productId');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/favorites/:productId",
+          "host": ["{{baseUrl}}"],
+          "path": ["favorites", ":productId"],
+          "variable": [
+            {
+              "key": "productId",
+              "value": "{{productId}}",
+              "description": "MongoDB ObjectId of the product to add to favorites"
+            }
+          ]
+        },
+        "description": "Adds a product to the user's favorites list. If the product is already favorited, returns a success message without error. Validates that the product exists before adding."
+      },
+      "response": [
+        {
+          "name": "Success - Added",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/507f191e810c19729de860ea",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "507f191e810c19729de860ea"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Product added to favorites\",\n    \"productId\": \"507f191e810c19729de860ea\"\n  }\n}"
+        },
+        {
+          "name": "Success - Already Favorited",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/507f191e810c19729de860ea",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "507f191e810c19729de860ea"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Product already in favorites\",\n    \"productId\": \"507f191e810c19729de860ea\"\n  }\n}"
+        },
+        {
+          "name": "Error - Product Not Found",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/507f191e810c19729de860ea",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "507f191e810c19729de860ea"]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Product not found\"\n}"
+        },
+        {
+          "name": "Error - Invalid Product ID",
+          "originalRequest": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/invalid-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "invalid-id"]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Invalid product ID format\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Remove Product from Favorites",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Response has success true', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.true;",
+              "});",
+              "",
+              "pm.test('Response contains message', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('message');",
+              "    pm.expect(jsonData.data.message).to.equal('Product removed from favorites');",
+              "});",
+              "",
+              "pm.test('Response contains productId', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.data).to.have.property('productId');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/favorites/:productId",
+          "host": ["{{baseUrl}}"],
+          "path": ["favorites", ":productId"],
+          "variable": [
+            {
+              "key": "productId",
+              "value": "{{productId}}",
+              "description": "MongoDB ObjectId of the product to remove from favorites"
+            }
+          ]
+        },
+        "description": "Removes a product from the user's favorites list. Returns an error if the product was not in favorites."
+      },
+      "response": [
+        {
+          "name": "Success",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/507f191e810c19729de860ea",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "507f191e810c19729de860ea"]
+            }
+          },
+          "status": "OK",
+          "code": 200,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": true,\n  \"data\": {\n    \"message\": \"Product removed from favorites\",\n    \"productId\": \"507f191e810c19729de860ea\"\n  }\n}"
+        },
+        {
+          "name": "Error - Favorite Not Found",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/507f191e810c19729de860ea",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "507f191e810c19729de860ea"]
+            }
+          },
+          "status": "Not Found",
+          "code": 404,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Favorite not found\"\n}"
+        },
+        {
+          "name": "Error - Invalid Product ID",
+          "originalRequest": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites/invalid-id",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites", "invalid-id"]
+            }
+          },
+          "status": "Bad Request",
+          "code": 400,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Invalid product ID format\"\n}"
+        }
+      ]
+    },
+    {
+      "name": "Error - Unauthorized (No Token)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 401', function () {",
+              "    pm.response.to.have.status(401);",
+              "});",
+              "",
+              "pm.test('Response has success false', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.success).to.be.false;",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/favorites",
+          "host": ["{{baseUrl}}"],
+          "path": ["favorites"]
+        },
+        "description": "Example of unauthorized access when no authentication token is provided. All favorites endpoints require authentication."
+      },
+      "response": [
+        {
+          "name": "Error - Unauthorized",
+          "originalRequest": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/favorites",
+              "host": ["{{baseUrl}}"],
+              "path": ["favorites"]
+            }
+          },
+          "status": "Unauthorized",
+          "code": 401,
+          "_postman_previewlanguage": "json",
+          "header": [
+            {
+              "key": "Content-Type",
+              "value": "application/json"
+            }
+          ],
+          "cookie": [],
+          "body": "{\n  \"success\": false,\n  \"message\": \"Authentication required\"\n}"
+        }
+      ]
+    }
+  ]
+}

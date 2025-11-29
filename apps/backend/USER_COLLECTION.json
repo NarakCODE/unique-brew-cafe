@@ -1,0 +1,337 @@
+{
+  "info": {
+    "name": "User Management API",
+    "description": "Complete API collection for user management endpoints including profile management, admin user operations, and account management",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "userId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "User Profile Management",
+      "item": [
+        {
+          "name": "Upload Avatar",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me/avatar",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me", "avatar"]
+            },
+            "description": "Upload or update user avatar image. Requires authentication.\n\n**Requirements:** 18.3\n\n**Request:**\n- Content-Type: multipart/form-data\n- Body: avatar (file)\n\n**Response:**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"profileImage\": \"https://example.com/avatars/user123.jpg\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Own Account",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"currentPassword123\",\n  \"reason\": \"No longer need the service\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            },
+            "description": "Delete authenticated user's account. Account will be anonymized.\n\n**Requirements:** 18.4\n\n**Request:**\n```json\n{\n  \"password\": \"string (required)\",\n  \"reason\": \"string (optional)\"\n}\n```\n\n**Response:**\n```json\n{\n  \"success\": true,\n  \"message\": \"Account deleted successfully\"\n}\n```"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for authenticated users to manage their own profile"
+    },
+    {
+      "name": "Admin - User Management",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users?page=1&limit=20&status=active&role=user&search=",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Items per page (default: 20, max: 100)"
+                },
+                {
+                  "key": "status",
+                  "value": "active",
+                  "description": "Filter by status: active, suspended, deleted",
+                  "disabled": true
+                },
+                {
+                  "key": "role",
+                  "value": "user",
+                  "description": "Filter by role: user, admin, moderator",
+                  "disabled": true
+                },
+                {
+                  "key": "search",
+                  "value": "",
+                  "description": "Search by name or email",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get paginated list of all users. Admin only.\n\n**Requirements:** 19.1\n\n**Query Parameters:**\n- page (number, optional): Page number, default 1\n- limit (number, optional): Items per page, default 20, max 100\n- status (string, optional): Filter by status (active, suspended, deleted)\n- role (string, optional): Filter by role (user, admin, moderator)\n- search (string, optional): Search by name or email\n\n**Response:**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"users\": [...],\n    \"pagination\": {\n      \"page\": 1,\n      \"limit\": 20,\n      \"total\": 150,\n      \"pages\": 8\n    }\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}"]
+            },
+            "description": "Get detailed information about a specific user. Admin only.\n\n**Requirements:** 19.2\n\n**Response:**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"user123\",\n    \"fullName\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"phoneNumber\": \"+1234567890\",\n    \"role\": \"user\",\n    \"status\": \"active\",\n    \"emailVerified\": true,\n    \"loyaltyPoints\": 150,\n    \"loyaltyTier\": \"silver\",\n    \"totalOrders\": 25,\n    \"totalSpent\": 450.50,\n    \"createdAt\": \"2024-01-01T00:00:00.000Z\",\n    \"lastLoginAt\": \"2024-01-15T10:30:00.000Z\"\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User Order History",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "orders"]
+            },
+            "description": "Get all orders placed by a specific user. Admin only.\n\n**Requirements:** 19.3\n\n**Response:**\n```json\n{\n  \"success\": true,\n  \"data\": [\n    {\n      \"_id\": \"order123\",\n      \"orderNumber\": \"ORD-2024-001\",\n      \"status\": \"completed\",\n      \"total\": 45.50,\n      \"createdAt\": \"2024-01-15T10:00:00.000Z\"\n    }\n  ]\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"suspended\",\n  \"reason\": \"Violation of terms of service\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/{{userId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "{{userId}}", "status"]
+            },
+            "description": "Update user status (active/suspended). Admin only.\n\n**Requirements:** 19.4, 19.5\n\n**Request:**\n```json\n{\n  \"status\": \"active\" | \"suspended\",\n  \"reason\": \"string (optional)\"\n}\n```\n\n**Response:**\n```json\n{\n  \"success\": true,\n  \"data\": {\n    \"_id\": \"user123\",\n    \"status\": \"suspended\",\n    \"fullName\": \"John Doe\",\n    \"email\": \"john@example.com\"\n  }\n}\n```\n\n**Note:** Suspended users will be rejected during authentication attempts."
+          },
+          "response": []
+        }
+      ],
+      "description": "Admin-only endpoints for managing users"
+    },
+    {
+      "name": "Legacy Endpoints",
+      "item": [
+        {
+          "name": "Get All Users (Legacy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/legacy/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "legacy", "all"]
+            },
+            "description": "Legacy endpoint for getting all users. Use GET /users instead.\n\n**Admin only**"
+          },
+          "response": []
+        },
+        {
+          "name": "Get User By ID (Legacy)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/legacy/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "legacy", "{{userId}}"]
+            },
+            "description": "Legacy endpoint for getting user by ID. Use GET /users/:userId instead.\n\n**Admin only or own profile**"
+          },
+          "response": []
+        },
+        {
+          "name": "Create User (Legacy)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Smith\",\n  \"email\": \"jane@example.com\",\n  \"password\": \"SecurePass123!\",\n  \"phoneNumber\": \"+1234567890\",\n  \"role\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/legacy/create",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "legacy", "create"]
+            },
+            "description": "Legacy endpoint for creating users. Admin only."
+          },
+          "response": []
+        },
+        {
+          "name": "Update User (Legacy)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fullName\": \"Jane Smith Updated\",\n  \"phoneNumber\": \"+1234567899\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/legacy/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "legacy", "{{userId}}"]
+            },
+            "description": "Legacy endpoint for updating users. Admin only or own profile."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete User (Legacy)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/legacy/{{userId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "legacy", "{{userId}}"]
+            },
+            "description": "Legacy endpoint for deleting users. Admin only or own profile."
+          },
+          "response": []
+        }
+      ],
+      "description": "Legacy endpoints maintained for backward compatibility"
+    },
+    {
+      "name": "Setup & Authentication",
+      "item": [
+        {
+          "name": "Login (Get Access Token)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    if (response.success && response.data.accessToken) {",
+                  "        pm.collectionVariables.set('accessToken', response.data.accessToken);",
+                  "        console.log('Access token saved to collection variable');",
+                  "    }",
+                  "    if (response.data.user && response.data.user._id) {",
+                  "        pm.collectionVariables.set('userId', response.data.user._id);",
+                  "        console.log('User ID saved to collection variable');",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"Admin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login to get access token. This will automatically save the token to collection variables.\n\n**For Admin Access:**\n- Use admin credentials to test admin endpoints\n\n**For User Access:**\n- Use regular user credentials to test user endpoints"
+          },
+          "response": []
+        }
+      ],
+      "description": "Setup requests to authenticate and get access tokens"
+    }
+  ]
+}

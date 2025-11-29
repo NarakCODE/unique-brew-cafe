@@ -1,0 +1,413 @@
+
+[1m[46m RUN [49m[22m [36mv3.2.4 [39m[90mE:/corner-coffee-pickup-app/backend[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [31mΓ¥»[39m tests/unit/services/orderService.test.ts [2m([22m[2m22 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 2424[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrders[2m > [22mshould get user orders for non-admin[32m 276[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrders[2m > [22mshould filter orders by status[32m 73[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrders[2m > [22mshould paginate results[32m 75[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrderById[2m > [22mshould get order by id for owner[32m 77[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrderById[2m > [22mshould throw error for invalid order id[32m 66[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrderById[2m > [22mshould throw error if order not found[32m 64[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrderById[2m > [22mshould throw error if user does not own order[32m 123[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mgetOrderTracking[2m > [22mshould get order tracking information[32m 68[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mcancelOrder[2m > [22mshould cancel order within 5 minutes[32m 69[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mcancelOrder[2m > [22mshould throw error if order not found[32m 65[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mcancelOrder[2m > [22mshould throw error if already cancelled[32m 65[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mcancelOrder[2m > [22mshould throw error if order is completed[32m 66[2mms[22m[39m
+[31m   [31m├ù[31m OrderService[2m > [22mcancelOrder[2m > [22mshould throw error if past 5 minutes[39m[32m 84[2mms[22m[39m
+[31m     ΓåÆ promise resolved "{ ΓÇª(21) }" instead of rejecting[39m
+   [32mΓ£ô[39m OrderService[2m > [22mrateOrder[2m > [22mshould rate a completed order[32m 71[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mrateOrder[2m > [22mshould throw error for invalid rating[32m 65[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mrateOrder[2m > [22mshould throw error if order not completed[32m 66[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mupdateOrderStatus[2m > [22mshould update order status with valid transition[32m 70[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mupdateOrderStatus[2m > [22mshould set actualReadyTime when status is ready[32m 67[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22mupdateOrderStatus[2m > [22mshould throw error for invalid status transition[32m 67[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22maddInternalNotes[2m > [22mshould add internal notes to order[32m 65[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22massignDriver[2m > [22mshould assign driver to order[32m 121[2mms[22m[39m
+   [32mΓ£ô[39m OrderService[2m > [22massignDriver[2m > [22mshould throw error for invalid order status[32m 122[2mms[22m[39m
+ [31mΓ¥»[39m tests/unit/middlewares/auth.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m4 failed[39m[2m)[22m[33m 562[2mms[22m[39m
+[31m   [31m├ù[31m Auth Middleware[2m > [22mshould authenticate with valid token[39m[32m 118[2mms[22m[39m
+[31m     ΓåÆ expected "spy" to be called at least once[39m
+[31m   [31m├ù[31m Auth Middleware[2m > [22mshould reject request without token[39m[32m 4[2mms[22m[39m
+[31m     ΓåÆ expected "spy" to be called with arguments: [ 401 ][90m
+
+Number of calls: [1m0[22m
+[31m[39m
+[31m   [31m├ù[31m Auth Middleware[2m > [22mshould reject request with invalid token format[39m[32m 5[2mms[22m[39m
+[31m     ΓåÆ expected "spy" to be called with arguments: [ 401 ][90m
+
+Number of calls: [1m0[22m
+[31m[39m
+[31m   [31m├ù[31m Auth Middleware[2m > [22mshould reject request with expired token[39m[32m 4[2mms[22m[39m
+[31m     ΓåÆ expected "spy" to be called with arguments: [ 401 ][90m
+
+Number of calls: [1m0[22m
+[31m[39m
+ [31mΓ¥»[39m tests/unit/models/User.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 762[2mms[22m[39m
+   [32mΓ£ô[39m User Model[2m > [22mshould create a user with valid attributes[32m 84[2mms[22m[39m
+   [32mΓ£ô[39m User Model[2m > [22mshould fail if required fields are missing[32m 4[2mms[22m[39m
+[31m   [31m├ù[31m User Model[2m > [22mshould fail if email is invalid[39m[32m 73[2mms[22m[39m
+[31m     ΓåÆ promise resolved "{ fullName: 'Test User', ΓÇª(16) }" instead of rejecting[39m
+   [32mΓ£ô[39m User Model[2m > [22mshould compare password correctly[32m 164[2mms[22m[39m
+ [31mΓ¥»[39m tests/unit/controllers/authController.test.ts [2m([22m[2m5 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[33m 481[2mms[22m[39m
+[31m   [31m├ù[31m AuthController[2m > [22mlogin[2m > [22mshould login user and return tokens[39m[32m 21[2mms[22m[39m
+[31m     ΓåÆ expected "loginUser" to be called with arguments: [ { ΓÇª(2) }, Any<Object> ][90m
+
+Number of calls: [1m0[22m
+[31m[39m
+   [32mΓ£ô[39m AuthController[2m > [22mlogin[2m > [22mshould throw error if email or password missing[32m 4[2mms[22m[39m
+[31m   [31m├ù[31m AuthController[2m > [22mregister[2m > [22mshould register user and return tokens[39m[32m 4[2mms[22m[39m
+[31m     ΓåÆ expected "registerUser" to be called with arguments: [ Array(2) ][90m
+
+Number of calls: [1m0[22m
+[31m[39m
+   [32mΓ£ô[39m AuthController[2m > [22mlogout[2m > [22mshould logout user[32m 3[2mms[22m[39m
+   [32mΓ£ô[39m AuthController[2m > [22mlogout[2m > [22mshould throw error if refresh token missing[32m 15[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/models/Favorite.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 1503[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/models/Order.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 1361[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/favoriteService.test.ts [2m([22m[2m23 tests[22m[2m)[22m[33m 2463[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/models/Notification.test.ts [2m([22m[2m9 tests[22m[2m)[22m[33m 1111[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/notificationService.test.ts [2m([22m[2m20 tests[22m[2m)[22m[33m 1849[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/models/Product.test.ts [2m([22m[2m3 tests[22m[2m)[22m[33m 608[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/authService.test.ts [2m([22m[2m13 tests[22m[2m)[22m[33m 1577[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/models/Otp.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 580[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/productService.test.ts [2m([22m[2m34 tests[22m[2m)[22m[33m 777[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/checkoutService.test.ts [2m([22m[2m19 tests[22m[2m)[22m[33m 710[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/searchService.test.ts [2m([22m[2m24 tests[22m[2m)[22m[33m 632[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/cartService.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 589[2mms[22m[39m
+(node:20284) [MONGOOSE] Warning: Duplicate schema index on {"ticketNumber":1} found. This is often due to declaring an index using both "index: true" and "schema.index()". Please remove the duplicate index definition.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32mΓ£ô[39m tests/unit/services/supportService.test.ts [2m([22m[2m27 tests[22m[2m)[22m[33m 596[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/reportService.test.ts [2m([22m[2m25 tests[22m[2m)[22m[33m 573[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/otpService.test.ts [2m([22m[2m29 tests[22m[2m)[22m[33m 572[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/userService.test.ts [2m([22m[2m45 tests[22m[2m)[22m[33m 555[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/configService.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 504[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/storeService.test.ts [2m([22m[2m32 tests[22m[2m)[22m[33m 515[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/announcementService.test.ts [2m([22m[2m14 tests[22m[2m)[22m[33m 534[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/addonService.test.ts [2m([22m[2m10 tests[22m[2m)[22m[33m 506[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/categoryService.test.ts [2m([22m[2m11 tests[22m[2m)[22m[33m 465[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/addressService.test.ts [2m([22m[2m17 tests[22m[2m)[22m[33m 478[2mms[22m[39m
+ [32mΓ£ô[39m tests/unit/services/emailService.test.ts [2m([22m[2m18 tests[22m[2m)[22m[33m 421[2mms[22m[39m
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ» Failed Tests 8 ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»
+
+ FAIL  tests/unit/controllers/authController.test.ts > AuthController > login > should login user and return tokens
+AssertionError: expected "loginUser" to be called with arguments: [ { ΓÇª(2) }, Any<Object> ]
+
+Number of calls: 0
+
+ Γ¥» tests/unit/controllers/authController.test.ts:49:37
+     47|       await authController.login(req as Request, res as Response, vi.fΓÇª
+     48| 
+     49|       expect(authService.loginUser).toHaveBeenCalledWith(
+       |                                     ^
+     50|         { email: 'test@example.com', password: 'Password123!' },
+     51|         expect.any(Object)
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[1/8]ΓÄ»
+
+ FAIL  tests/unit/controllers/authController.test.ts > AuthController > register > should register user and return tokens
+AssertionError: expected "registerUser" to be called with arguments: [ Array(2) ]
+
+Number of calls: 0
+
+ Γ¥» tests/unit/controllers/authController.test.ts:97:40
+     95|       await authController.register(req as Request, res as Response, vΓÇª
+     96| 
+     97|       expect(authService.registerUser).toHaveBeenCalledWith(
+       |                                        ^
+     98|         {
+     99|           fullName: 'New User',
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[2/8]ΓÄ»
+
+ FAIL  tests/unit/middlewares/auth.test.ts > Auth Middleware > should authenticate with valid token
+AssertionError: expected "spy" to be called at least once
+ Γ¥» tests/unit/middlewares/auth.test.ts:31:22
+     29|     await authenticate(req, res, mockNext);
+     30| 
+     31|     expect(mockNext).toHaveBeenCalled();
+       |                      ^
+     32|     expect(req.userId).toBe(user.id);
+     33|   });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[3/8]ΓÄ»
+
+ FAIL  tests/unit/middlewares/auth.test.ts > Auth Middleware > should reject request without token
+AssertionError: expected "spy" to be called with arguments: [ 401 ]
+
+Number of calls: 0
+
+ Γ¥» tests/unit/middlewares/auth.test.ts:41:24
+     39|     await authenticate(req, res, mockNext);
+     40| 
+     41|     expect(res.status).toHaveBeenCalledWith(401);
+       |                        ^
+     42|     expect(mockNext).not.toHaveBeenCalled();
+     43|   });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[4/8]ΓÄ»
+
+ FAIL  tests/unit/middlewares/auth.test.ts > Auth Middleware > should reject request with invalid token format
+AssertionError: expected "spy" to be called with arguments: [ 401 ]
+
+Number of calls: 0
+
+ Γ¥» tests/unit/middlewares/auth.test.ts:51:24
+     49|     await authenticate(req, res, mockNext);
+     50| 
+     51|     expect(res.status).toHaveBeenCalledWith(401);
+       |                        ^
+     52|   });
+     53| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[5/8]ΓÄ»
+
+ FAIL  tests/unit/middlewares/auth.test.ts > Auth Middleware > should reject request with expired token
+AssertionError: expected "spy" to be called with arguments: [ 401 ]
+
+Number of calls: 0
+
+ Γ¥» tests/unit/middlewares/auth.test.ts:62:24
+     60|     await authenticate(req, res, mockNext);
+     61| 
+     62|     expect(res.status).toHaveBeenCalledWith(401);
+       |                        ^
+     63|   });
+     64| });
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[6/8]ΓÄ»
+
+ FAIL  tests/unit/models/User.test.ts > User Model > should fail if email is invalid
+AssertionError: promise resolved "{ fullName: 'Test User', ΓÇª(16) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "_id": "69283d9909d1fa60a26ecbcc",
++   "createdAt": 2025-11-27T12:01:29.801Z,
++   "email": "invalid-email",
++   "emailVerified": false,
++   "fullName": "Test User",
++   "loyaltyPoints": 0,
++   "loyaltyTier": "bronze",
++   "phoneVerified": false,
++   "preferences": {
++     "currency": "USD",
++     "emailNotifications": true,
++     "language": "en",
++     "notifications": {
++       "announcements": true,
++       "orderUpdates": true,
++       "promotions": true,
++       "systemNotifications": true,
++     },
++     "notificationsEnabled": true,
++     "pushNotifications": true,
++     "smsNotifications": true,
++   },
++   "referralCode": "REFmihdutahH",
++   "role": "user",
++   "status": "active",
++   "totalOrders": 0,
++   "totalSpent": 0,
++   "updatedAt": 2025-11-27T12:01:29.801Z,
+  }
+
+ Γ¥» tests/unit/models/User.test.ts:38:39
+     36|     };
+     37| 
+     38|     await expect(User.create(userData)).rejects.toThrow();
+       |                                       ^
+     39|   });
+     40| 
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[7/8]ΓÄ»
+
+ FAIL  tests/unit/services/orderService.test.ts > OrderService > cancelOrder > should throw error if past 5 minutes
+AssertionError: promise resolved "{ ΓÇª(21) }" instead of rejecting
+
+- Expected
++ Received
+
+- Error {
+-   "message": "rejected promise",
++ {
++   "cancellationReason": "Test reason",
++   "cancelledAt": 2025-11-27T12:01:26.664Z,
++   "cancelledBy": "customer",
++   "createdAt": 2025-11-27T12:01:26.658Z,
++   "currency": "USD",
++   "deliveryFee": 0,
++   "discount": 0,
++   "id": "69283d96cea2c7c067c7df66",
++   "loyaltyPointsEarned": 0,
++   "loyaltyPointsUsed": 0,
++   "orderNumber": "ORD-MIHDUQV6-EBSN",
++   "paymentMethod": "cash",
++   "paymentStatus": "pending",
++   "status": "cancelled",
++   "storeId": "69283d96cea2c7c067c7df63",
++   "subtotal": 50,
++   "tax": 0,
++   "total": 50,
++   "updatedAt": 2025-11-27T12:01:26.665Z,
++   "userId": "69283d96cea2c7c067c7df60",
+  }
+
+ Γ¥» tests/unit/services/orderService.test.ts:248:7
+    246|       await expect(
+    247|         orderService.cancelOrder(order._id.toString(), userId, 'Test rΓÇª
+    248|       ).rejects.toThrow(
+       |       ^
+    249|         'Order can only be cancelled within 5 minutes of placement'
+    250|       );
+
+ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»ΓÄ»[8/8]ΓÄ»
+
+
+[2m Test Files [22m [1m[31m4 failed[39m[22m[2m | [22m[1m[32m23 passed[39m[22m[90m (27)[39m
+[2m      Tests [22m [1m[31m8 failed[39m[22m[2m | [22m[1m[32m486 passed[39m[22m[90m (494)[39m
+[2m   Start at [22m 19:01:24
+[2m   Duration [22m 44.93s[2m (transform 644ms, setup 8.35s, collect 5.30s, tests 23.71s, environment 5ms, prepare 2.37s)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   45.19 |     80.4 |   68.13 |   45.19 |                   
+ config            |   13.33 |        0 |       0 |   13.33 |                   
+  brevo.ts         |   70.58 |      100 |       0 |   70.58 | 20-22,26-27       
+  database.ts      |       0 |        0 |       0 |       0 | 1-45              
+  env.ts           |       0 |        0 |       0 |       0 | 1-14              
+  multer.ts        |       0 |        0 |       0 |       0 | 1-43              
+ controllers       |    2.45 |       88 |     100 |    2.45 |                   
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-87              
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-173             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-173             
+  ...Controller.ts |   34.22 |     62.5 |     100 |   34.22 | ...36-260,269-283 
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-258             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-119             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-156             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-150             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-89              
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-368             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-332             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-88              
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-442             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-143             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-159             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-340             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-195             
+  ...Controller.ts |       0 |      100 |     100 |       0 | 2-342             
+ middlewares       |    8.08 |       75 |    87.5 |    8.08 |                   
+  auth.ts          |   43.54 |     62.5 |     100 |   43.54 | ...2,67-80,90-109 
+  authorize.ts     |       0 |      100 |     100 |       0 | 2-58              
+  errorHandler.ts  |       0 |      100 |     100 |       0 | 2-103             
+  notFound.ts      |       0 |      100 |     100 |       0 | 2-7               
+  ...erformance.ts |       0 |      100 |     100 |       0 | 6-145             
+  security.ts      |       0 |        0 |       0 |       0 | 1-16              
+  validate.ts      |       0 |      100 |     100 |       0 | 21-44             
+  ...ateRequest.ts |       0 |      100 |     100 |       0 | 2-30              
+  ...teResource.ts |       0 |      100 |     100 |       0 | 2-42              
+ models            |      78 |    78.94 |      20 |      78 |                   
+  AddOn.ts         |   90.74 |      100 |       0 |   90.74 | 66-70             
+  Address.ts       |   67.36 |      100 |       0 |   67.36 | ...56-166,178-182 
+  Announcement.ts  |    92.3 |      100 |       0 |    92.3 | 91-96             
+  AppConfig.ts     |     100 |      100 |     100 |     100 |                   
+  Cafe.ts          |       0 |        0 |       0 |       0 | 1-402             
+  Cart.ts          |    93.5 |      100 |       0 |    93.5 | 96-100            
+  CartItem.ts      |   92.53 |      100 |       0 |   92.53 | 88-92             
+  Category.ts      |   92.53 |       50 |       0 |   92.53 | 83-87             
+  DeliveryZone.ts  |     100 |      100 |     100 |     100 |                   
+  DeviceToken.ts   |   89.65 |      100 |       0 |   89.65 | 65-70             
+  FAQ.ts           |     100 |      100 |     100 |     100 |                   
+  Favorite.ts      |     100 |      100 |     100 |     100 |                   
+  Notification.ts  |     100 |      100 |     100 |     100 |                   
+  ...icationLog.ts |   89.83 |      100 |       0 |   89.83 | 64-69             
+  Order.ts         |     100 |      100 |     100 |     100 |                   
+  OrderItem.ts     |   94.04 |      100 |       0 |   94.04 | 102-106           
+  ...tusHistory.ts |   89.79 |      100 |       0 |   89.79 | 55-59             
+  Otp.ts           |     100 |      100 |     100 |     100 |                   
+  Product.ts       |   91.21 |    66.66 |   33.33 |   91.21 | 173-180,197-201   
+  ProductAddOn.ts  |   86.48 |      100 |       0 |   86.48 | 41-45             
+  ...tomization.ts |   78.57 |      100 |       0 |   78.57 | ...11-113,125-129 
+  PromoCode.ts     |   89.13 |      100 |       0 |   89.13 | 98-102,108-112    
+  ...oCodeUsage.ts |   89.79 |      100 |       0 |   89.79 | 55-59             
+  RefreshToken.ts  |     100 |      100 |     100 |     100 |                   
+  SearchHistory.ts |   88.09 |      100 |       0 |   88.09 | 46-50             
+  Store.ts         |   58.73 |      100 |       0 |   58.73 | ...10-267,275-279 
+  ...ortMessage.ts |     100 |      100 |     100 |     100 |                   
+  SupportTicket.ts |     100 |      100 |     100 |     100 |                   
+  User.ts          |   98.85 |     87.5 |     100 |   98.85 | 199-200           
+ routes            |       0 |        0 |       0 |       0 |                   
+  addonRoutes.ts   |       0 |        0 |       0 |       0 | 1-44              
+  addressRoutes.ts |       0 |        0 |       0 |       0 | 1-69              
+  ...mentRoutes.ts |       0 |        0 |       0 |       0 | 1-49              
+  authRoutes.ts    |       0 |        0 |       0 |       0 | 1-101             
+  cartRoutes.ts    |       0 |        0 |       0 |       0 | 1-57              
+  ...goryRoutes.ts |       0 |        0 |       0 |       0 | 1-44              
+  ...koutRoutes.ts |       0 |        0 |       0 |       0 | 1-66              
+  configRoutes.ts  |       0 |        0 |       0 |       0 | 1-32              
+  ...riteRoutes.ts |       0 |        0 |       0 |       0 | 1-43              
+  index.ts         |       0 |        0 |       0 |       0 | 1-59              
+  ...tionRoutes.ts |       0 |        0 |       0 |       0 | 1-75              
+  orderRoutes.ts   |       0 |        0 |       0 |       0 | 1-68              
+  paymentRoutes.ts |       0 |        0 |       0 |       0 | 1-40              
+  productRoutes.ts |       0 |        0 |       0 |       0 | 1-78              
+  profileRoutes.ts |       0 |        0 |       0 |       0 | 1-35              
+  reportRoutes.ts  |       0 |        0 |       0 |       0 | 1-25              
+  searchRoutes.ts  |       0 |        0 |       0 |       0 | 1-54              
+  storeRoutes.ts   |       0 |        0 |       0 |       0 | 1-162             
+  supportRoutes.ts |       0 |        0 |       0 |       0 | 1-38              
+  userRoutes.ts    |       0 |        0 |       0 |       0 | 1-149             
+ schemas           |       0 |     7.14 |    7.14 |       0 |                   
+  ...ess.schema.ts |       0 |        0 |       0 |       0 | 1-83              
+  auth.schema.ts   |       0 |        0 |       0 |       0 | 1-133             
+  cart.schema.ts   |       0 |        0 |       0 |       0 | 1-74              
+  ...ory.schema.ts |       0 |        0 |       0 |       0 | 1-31              
+  ...out.schema.ts |       0 |        0 |       0 |       0 | 1-62              
+  common.schema.ts |       0 |        0 |       0 |       0 | 1-103             
+  ...ite.schema.ts |       0 |        0 |       0 |       0 | 1-16              
+  index.ts         |       0 |      100 |     100 |       0 | 18-31             
+  order.schema.ts  |       0 |        0 |       0 |       0 | 1-106             
+  ...ent.schema.ts |       0 |        0 |       0 |       0 | 1-33              
+  ...uct.schema.ts |       0 |        0 |       0 |       0 | 1-66              
+  search.schema.ts |       0 |        0 |       0 |       0 | 1-44              
+  store.schema.ts  |       0 |        0 |       0 |       0 | 1-154             
+  user.schema.ts   |       0 |        0 |       0 |       0 | 1-122             
+ services          |   73.97 |    84.61 |   90.64 |   73.97 |                   
+  addonService.ts  |     100 |      100 |     100 |     100 |                   
+  ...essService.ts |   66.98 |    68.96 |     100 |   66.98 | ...03-304,308-311 
+  ...entService.ts |     100 |      100 |     100 |     100 |                   
+  authService.ts   |   83.95 |    78.26 |   91.66 |   83.95 | ...79-380,385-386 
+  cartService.ts   |   63.63 |    88.57 |      60 |   63.63 | ...00-423,432-433 
+  ...oryService.ts |     100 |      100 |     100 |     100 |                   
+  ...outService.ts |   65.65 |       75 |      90 |   65.65 | ...66-467,473-474 
+  configService.ts |     100 |    94.11 |     100 |     100 | 93                
+  emailService.ts  |     100 |      100 |     100 |     100 |                   
+  ...iteService.ts |    97.5 |     92.3 |     100 |    97.5 | 92-93             
+  ...ionService.ts |   62.75 |    70.27 |   76.47 |   62.75 | ...80-435,466-471 
+  orderService.ts  |   38.98 |    61.42 |      75 |   38.98 | ...89-790,795-796 
+  otpService.ts    |     100 |      100 |     100 |     100 |                   
+  ...entService.ts |       0 |        0 |       0 |       0 | 1-250             
+  ...uctService.ts |   84.39 |    90.16 |     100 |   84.39 | ...97-513,520-553 
+  reportService.ts |     100 |      100 |     100 |     100 |                   
+  searchService.ts |     100 |      100 |     100 |     100 |                   
+  storeService.ts  |   99.16 |    89.36 |     100 |   99.16 | 71-72             
+  ...ortService.ts |     100 |      100 |     100 |     100 |                   
+  userService.ts   |      80 |    84.52 |   88.88 |      80 | ...07-308,465-480 
+ utils             |   34.83 |    78.26 |      56 |   34.83 |                   
+  AppError.ts      |    91.8 |      100 |   85.71 |    91.8 | 67-71             
+  asyncHandler.ts  |     100 |      100 |     100 |     100 |                   
+  errorCodes.ts    |     100 |      100 |     100 |     100 |                   
+  ...timization.ts |       0 |      100 |     100 |       0 | 8-271             
+  jwt.ts           |   79.31 |     62.5 |     100 |   79.31 | ...3,77-78,95-102 
+  logger.ts        |       0 |        0 |       0 |       0 | 1-16              
+  pagination.ts    |   52.11 |       80 |      40 |   52.11 | ...16-135,141-146 
+  validators.ts    |    8.21 |      100 |       0 |    8.21 | ...16-117,125-131 
+-------------------|---------|----------|---------|---------|-------------------
