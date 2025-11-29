@@ -1,5 +1,5 @@
 {
-  "name": "my-turborepo",
+  "name": "unique-brew-picking-up",
   "private": true,
   "scripts": {
     "build": "turbo run build",
