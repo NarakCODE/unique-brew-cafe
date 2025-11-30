@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   createTicket,
   getTickets,
@@ -12,7 +12,7 @@ import {
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 
-const router = Router();
+const router = express.Router();
 
 // Public routes
 router.get('/faq', getFAQs);

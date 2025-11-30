@@ -559,3 +559,79 @@ export const duplicateProduct = async (productId: string): Promise<any> => {
     category: result?.categoryId,
   };
 };
+
+/**
+ * Create a new product
+ * @param productData - Product data
+ * @returns Created product
+ */
+export const createProduct = async (
+  productData: Partial<IProduct>
+): Promise<ProductResponse> => {
+  const product = await Product.create(productData);
+
+  const populatedProduct = await Product.findById(product._id)
+    .populate('categoryId', 'name slug imageUrl icon')
+    .lean();
+
+  if (!populatedProduct) {
+    throw new Error('Failed to create product');
+  }
+
+  return {
+    ...populatedProduct,
+    id: populatedProduct._id.toString(),
+    category: populatedProduct.categoryId,
+  } as unknown as ProductResponse;
+};
+
+/**
+ * Update a product
+ * @param productId - Product ID
+ * @param updateData - Data to update
+ * @returns Updated product
+ */
+export const updateProduct = async (
+  productId: string,
+  updateData: Partial<IProduct>
+): Promise<ProductResponse> => {
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new BadRequestError('Invalid product ID');
+  }
+
+  const product = await Product.findByIdAndUpdate(productId, updateData, {
+    new: true,
+  })
+    .populate('categoryId', 'name slug imageUrl icon')
+    .lean();
+
+  if (!product) {
+    throw new NotFoundError('Product not found');
+  }
+
+  return {
+    ...product,
+    id: product._id.toString(),
+    category: product.categoryId,
+  } as unknown as ProductResponse;
+};
+
+/**
+ * Delete a product (soft delete)
+ * @param productId - Product ID
+ */
+export const deleteProduct = async (productId: string): Promise<void> => {
+  if (!mongoose.Types.ObjectId.isValid(productId)) {
+    throw new BadRequestError('Invalid product ID');
+  }
+
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new NotFoundError('Product not found');
+  }
+
+  // Soft delete
+  product.deletedAt = new Date();
+  product.isAvailable = false;
+  await product.save();
+};

@@ -78,3 +78,42 @@ export type UpdateProductStatusInput = z.infer<
 export type ProductSlugParams = z.infer<
   typeof productSlugParamSchema
 >['params'];
+
+/**
+ * Schema for creating a product
+ */
+export const createProductSchema = z.object({
+  body: z.object({
+    name: z.string().min(1, 'Name is required'),
+    description: z.string().min(1, 'Description is required'),
+    categoryId: objectIdSchema,
+    basePrice: z.number().min(0, 'Base price must be non-negative'),
+    currency: z.enum(['USD', 'KHR']).default('USD'),
+    preparationTime: z.number().min(1).default(5),
+    images: z.array(z.string()).min(1, 'At least one image is required'),
+    isAvailable: z.boolean().default(true),
+    isFeatured: z.boolean().default(false),
+    isBestSelling: z.boolean().default(false),
+    allergens: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    displayOrder: z.number().min(0).default(0),
+    nutritionalInfo: z
+      .object({
+        protein: z.number().min(0).optional(),
+        carbohydrates: z.number().min(0).optional(),
+        fat: z.number().min(0).optional(),
+        caffeine: z.number().min(0).optional(),
+      })
+      .optional(),
+  }),
+});
+
+/**
+ * Schema for updating a product
+ */
+export const updateProductSchema = z.object({
+  params: z.object({
+    id: objectIdSchema,
+  }),
+  body: createProductSchema.shape.body.partial(),
+});

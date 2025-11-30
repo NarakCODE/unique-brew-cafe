@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   getDashboardStats,
   getSalesReport,
@@ -10,7 +10,7 @@ import {
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 
-const router = Router();
+const router = express.Router();
 
 // All report routes require admin access
 router.use(authenticate, authorize({ roles: ['admin'] }));

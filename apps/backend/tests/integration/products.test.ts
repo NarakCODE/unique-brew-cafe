@@ -52,7 +52,9 @@ describe('Products API', () => {
 
       expect(response.body.success).toBe(true);
       expect(
-        response.body.data.every((p: any) => p.categoryId === categoryId)
+        response.body.data.every(
+          (p: any) => p.category._id.toString() === categoryId
+        )
       ).toBe(true);
     });
 

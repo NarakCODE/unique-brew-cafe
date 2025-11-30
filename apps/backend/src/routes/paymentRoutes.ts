@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   createPaymentIntent,
   confirmPayment,
@@ -11,7 +11,7 @@ import {
   confirmPaymentSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 // All payment routes require authentication
 router.use(authenticate);

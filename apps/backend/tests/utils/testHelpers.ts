@@ -80,12 +80,20 @@ export const createTestStore = async (overrides = {}) => {
 /**
  * Create a test category
  */
-export const createTestCategory = async (overrides = {}) => {
+export const createTestCategory = async (overrides: any = {}) => {
+  let storeId = overrides.storeId;
+
+  if (!storeId) {
+    const store = await createTestStore();
+    storeId = store.id;
+  }
+
   const defaultCategory = {
     name: 'Test Category',
     slug: 'test-category',
     displayOrder: 1,
     isActive: true,
+    storeId,
   };
 
   const category = await Category.create({ ...defaultCategory, ...overrides });

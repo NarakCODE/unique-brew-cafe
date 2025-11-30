@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import {
   getPublicConfig,
   getDeliveryZones,
@@ -11,7 +11,7 @@ import {
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Public routes
 router.get('/app', getPublicConfig);

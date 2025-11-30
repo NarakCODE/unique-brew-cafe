@@ -24,8 +24,8 @@ describe('Cart API', () => {
   beforeEach(async () => {
     const user = await createTestUser();
     const store = await createTestStore();
-    const category = await createTestCategory();
-    const product = await createTestProduct(category.id, { storeId: store.id });
+    const category = await createTestCategory({ storeId: store.id });
+    const product = await createTestProduct(category.id);
 
     userId = user.id;
     productId = product.id;

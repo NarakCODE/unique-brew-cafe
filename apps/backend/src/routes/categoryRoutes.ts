@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import * as categoryController from '../controllers/categoryController.js';
 import * as productController from '../controllers/productController.js';
 import { authenticate } from '../middlewares/auth.js';
@@ -11,7 +11,7 @@ import {
   reorderCategoriesSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 // Public routes
 router.get('/', categoryController.getCategories);

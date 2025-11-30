@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import * as storeController from '../controllers/storeController.js';
 import * as productController from '../controllers/productController.js';
 import { authenticate } from '../middlewares/auth.js';
@@ -15,7 +15,7 @@ import {
   updateStoreSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 // Admin-only routes - Create store
 router.post(

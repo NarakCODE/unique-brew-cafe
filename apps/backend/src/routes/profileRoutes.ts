@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   getProfile,
   updateProfile,
@@ -18,7 +18,7 @@ import {
   deleteAccountSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 // All profile routes require authentication
 router.use(authenticate);

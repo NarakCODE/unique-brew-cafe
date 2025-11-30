@@ -6,9 +6,9 @@ import {
   verifyRefreshToken,
 } from '../utils/jwt.js';
 import {
-  BadRequestError,
   UnauthorizedError,
   NotFoundError,
+  ConflictError,
 } from '../utils/AppError.js';
 import {
   createRegistrationOtp,
@@ -99,7 +99,7 @@ export const completeRegistration = async (
   // Check if user already exists (double-check)
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new BadRequestError('Email is already registered');
+    throw new ConflictError('Email is already registered');
   }
 
   // Create new user
@@ -151,7 +151,7 @@ export const registerUser = async (
   // Check if user already exists
   const existingUser = await User.findOne({ email });
   if (existingUser) {
-    throw new BadRequestError('Email is already registered');
+    throw new ConflictError('Email is already registered');
   }
 
   // Create new user

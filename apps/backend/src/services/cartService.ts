@@ -59,6 +59,10 @@ export const getCart = async (userId: string) => {
       cart: null,
       items: [],
       itemCount: 0,
+      subtotal: 0,
+      tax: 0,
+      deliveryFee: 0,
+      total: 0,
     };
   }
 

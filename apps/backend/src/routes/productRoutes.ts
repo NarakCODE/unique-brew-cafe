@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import * as productController from '../controllers/productController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
@@ -10,9 +10,11 @@ import {
   idParamSchema,
   updateProductStatusSchema,
   duplicateProductSchema,
+  createProductSchema,
+  updateProductSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 /**
  * Product Routes
@@ -73,6 +75,32 @@ router.post(
   authorize({ roles: ['admin'] }),
   validate(duplicateProductSchema),
   productController.duplicateProduct
+);
+
+// Admin only: Create product
+router.post(
+  '/',
+  authenticate,
+  authorize({ roles: ['admin'] }),
+  validate(createProductSchema),
+  productController.createProduct
+);
+
+// Admin only: Update product
+router.patch(
+  '/:id',
+  authenticate,
+  authorize({ roles: ['admin'] }),
+  validate(updateProductSchema),
+  productController.updateProduct
+);
+
+// Admin only: Delete product
+router.delete(
+  '/:id',
+  authenticate,
+  authorize({ roles: ['admin'] }),
+  productController.deleteProduct
 );
 
 export default router;

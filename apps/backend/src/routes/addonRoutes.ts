@@ -1,11 +1,11 @@
-import { Router } from 'express';
+import express from 'express';
 import * as addonController from '../controllers/addonController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 import { validate } from '../middlewares/validate.js';
 import { idParamSchema } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 /**
  * Add-on Routes

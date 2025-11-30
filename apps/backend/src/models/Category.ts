@@ -10,6 +10,7 @@ export interface ICategory extends Document {
   imageUrl?: string;
   icon?: string;
   parentId?: mongoose.Types.ObjectId;
+  storeId: mongoose.Types.ObjectId;
   displayOrder: number;
   isActive: boolean;
   createdAt: Date;
@@ -46,6 +47,11 @@ const categorySchema = new Schema<ICategory>(
       ref: 'Category',
       default: null,
     },
+    storeId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Store',
+      required: [true, 'Store ID is required'],
+    },
     displayOrder: {
       type: Number,
       default: 0,
@@ -72,6 +78,7 @@ categorySchema.pre('save', function (next) {
 });
 
 // Indexes (slug already has unique index)
+categorySchema.index({ storeId: 1 });
 categorySchema.index({ parentId: 1 });
 categorySchema.index({ isActive: 1 });
 categorySchema.index({ displayOrder: 1 });

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import { authenticate } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
 import * as cartController from '../controllers/cartController.js';
@@ -10,7 +10,7 @@ import {
   setCartNotesSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 // All cart routes require authentication
 router.use(authenticate);

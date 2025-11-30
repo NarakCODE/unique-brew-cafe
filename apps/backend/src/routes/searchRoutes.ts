@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   search,
   getSuggestions,
@@ -14,7 +14,7 @@ import {
   deleteSearchSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 /**
  * Public search endpoint

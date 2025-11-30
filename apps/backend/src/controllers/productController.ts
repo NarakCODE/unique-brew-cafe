@@ -440,3 +440,59 @@ export const duplicateProduct = asyncHandler(
     });
   }
 );
+
+/**
+ * Create a new product
+ * POST /api/products
+ * Admin only
+ */
+export const createProduct = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const product = await productService.createProduct(req.body);
+
+    res.status(201).json({
+      success: true,
+      message: 'Product created successfully',
+      data: product,
+    });
+  }
+);
+
+/**
+ * Update a product
+ * PATCH /api/products/:id
+ * Admin only
+ */
+export const updateProduct = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    if (!id) throw new BadRequestError('Product ID is required');
+
+    const product = await productService.updateProduct(id, req.body);
+
+    res.status(200).json({
+      success: true,
+      message: 'Product updated successfully',
+      data: product,
+    });
+  }
+);
+
+/**
+ * Delete a product
+ * DELETE /api/products/:id
+ * Admin only
+ */
+export const deleteProduct = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    if (!id) throw new BadRequestError('Product ID is required');
+
+    await productService.deleteProduct(id);
+
+    res.status(200).json({
+      success: true,
+      message: 'Product deleted successfully',
+    });
+  }
+);

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   validateCheckout,
   createCheckoutSession,
@@ -18,7 +18,7 @@ import {
   confirmCheckoutSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 // All checkout routes require authentication
 router.use(authenticate);

@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   getOrders,
   getOrderById,
@@ -25,7 +25,7 @@ import {
   assignDriverSchema,
 } from '../schemas/index.js';
 
-const router = Router();
+const router = express.Router();
 
 // All order routes require authentication
 router.use(authenticate);

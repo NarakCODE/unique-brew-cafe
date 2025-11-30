@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   registerDevice,
   unregisterDevice,
@@ -19,7 +19,7 @@ import {
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 
-const router = Router();
+const router = express.Router();
 
 // All notification routes require authentication
 router.use(authenticate);

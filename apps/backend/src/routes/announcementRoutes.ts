@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import express from 'express';
 import {
   createAnnouncement,
   updateAnnouncement,
@@ -12,7 +12,7 @@ import {
 import { authenticate, optionalAuthenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 
-const router = Router();
+const router = express.Router();
 
 // Public routes (some with optional auth for targeting)
 router.get('/', optionalAuthenticate, getAnnouncements);
