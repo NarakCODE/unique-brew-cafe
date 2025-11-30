@@ -37,6 +37,10 @@ describe('CartService', () => {
         cart: null,
         items: [],
         itemCount: 0,
+        subtotal: 0,
+        tax: 0,
+        deliveryFee: 0,
+        total: 0,
       });
     });
 
@@ -162,8 +166,6 @@ describe('CartService', () => {
         _id: storeId,
       } as any);
 
-      vi.mocked(Cart.findOne).mockResolvedValue(null);
-
       const newCart = {
         _id: 'newCart123',
         userId,
@@ -171,9 +173,20 @@ describe('CartService', () => {
         status: 'active',
         save: vi.fn(),
       };
+
+      // First call to Cart.findOne in addItem - checking for existing cart
+      // Second call to Cart.findOne in getCart
+      vi.mocked(Cart.findOne)
+        .mockResolvedValueOnce(null) // First call - no existing cart
+        .mockReturnValueOnce({
+          // Second call in getCart
+          populate: vi.fn().mockResolvedValue(newCart),
+        } as any);
+
       vi.mocked(Cart.create).mockResolvedValue(newCart as any);
       vi.mocked(Cart.findById).mockResolvedValue(newCart as any);
       vi.mocked(CartItem.create).mockResolvedValue({} as any);
+
       // For calculateTotals
       vi.mocked(CartItem.find).mockResolvedValueOnce([
         { totalPrice: 20 },
@@ -183,14 +196,6 @@ describe('CartService', () => {
       vi.mocked(CartItem.find).mockReturnValueOnce({
         populate: vi.fn().mockResolvedValue([]),
       } as any);
-
-      // Mock getCart to return something
-      vi.mocked(Cart.findOne)
-        .mockReturnValueOnce(null) // First call for check
-        .mockReturnValueOnce({
-          // Second call inside getCart
-          populate: vi.fn().mockResolvedValue(newCart),
-        } as any);
 
       await cartService.addItem(userId, itemData);
 

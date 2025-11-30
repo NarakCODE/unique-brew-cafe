@@ -51,7 +51,7 @@ export const generateAuthToken = (userId: string, role: string = 'user') => {
 export const createTestStore = async (overrides = {}) => {
   const defaultStore = {
     name: 'Test Store',
-    slug: 'test-store',
+    slug: `test-store-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
     address: '123 Test St',
     city: 'Test City',
     state: 'Test State',

@@ -92,8 +92,25 @@ describe('Stores API', () => {
           phone: '+9876543210',
           latitude: 40.7128,
           longitude: -74.006,
+          slug: 'new-store',
+          email: 'store@example.com',
+          openingHours: {
+            monday: { open: '09:00', close: '17:00' },
+            tuesday: { open: '09:00', close: '17:00' },
+            wednesday: { open: '09:00', close: '17:00' },
+            thursday: { open: '09:00', close: '17:00' },
+            friday: { open: '09:00', close: '17:00' },
+            saturday: { open: '10:00', close: '16:00' },
+            sunday: { open: '10:00', close: '16:00' },
+          },
         })
-        .expect(201);
+        .expect(201)
+        .catch((err) => {
+          if (err.response) {
+            console.log(JSON.stringify(err.response.body, null, 2));
+          }
+          throw err;
+        });
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('name', 'New Store');
@@ -138,7 +155,16 @@ describe('Stores API', () => {
         .send({
           name: 'Updated Store Name',
         })
-        .expect(200);
+        .expect(200)
+        .catch((err) => {
+          if (err.response) {
+            console.log(
+              'Update failed:',
+              JSON.stringify(err.response.body, null, 2)
+            );
+          }
+          throw err;
+        });
 
       expect(response.body.success).toBe(true);
       expect(response.body.data).toHaveProperty('name', 'Updated Store Name');
@@ -171,7 +197,7 @@ describe('Stores API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data.images).toBeInstanceOf(Array);
     });
   });
 

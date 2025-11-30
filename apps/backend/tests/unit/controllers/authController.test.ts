@@ -15,7 +15,10 @@ describe('AuthController', () => {
   beforeEach(() => {
     json = vi.fn();
     status = vi.fn().mockReturnValue({ json });
-    req = {};
+    req = {
+      ip: '127.0.0.1',
+      get: vi.fn().mockReturnValue('test-user-agent'),
+    };
     res = {
       status,
       json,

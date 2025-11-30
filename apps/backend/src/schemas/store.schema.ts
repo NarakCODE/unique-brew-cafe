@@ -6,32 +6,6 @@ import { objectIdSchema, phoneSchema, emailSchema } from './common.schema.js';
  */
 
 /**
- * Schema for opening hours
- */
-const openingHoursSchema = z.object({
-  dayOfWeek: z.number().min(0).max(6),
-  openTime: z
-    .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
-  closeTime: z
-    .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Invalid time format (HH:MM)'),
-  isOpen: z.boolean(),
-});
-
-/**
- * Schema for store location
- */
-const locationSchema = z.object({
-  type: z.literal('Point'),
-  coordinates: z.tuple([
-    z.number().min(-180).max(180), // Longitude
-    z.number().min(-90).max(90), // Latitude
-  ]),
-  address: z.string().min(1, 'Address is required'),
-});
-
-/**
  * Schema for creating a new store
  */
 export const createStoreSchema = z.object({
@@ -47,11 +21,25 @@ export const createStoreSchema = z.object({
         'Slug must contain only lowercase letters, numbers, and hyphens'
       ),
     description: z.string().trim().max(1000).optional(),
-    phoneNumber: phoneSchema,
+    phone: phoneSchema,
     email: emailSchema.optional(),
     images: z.array(z.string().url()).optional(),
-    openingHours: z.array(openingHoursSchema).optional(),
-    location: locationSchema,
+    openingHours: z.object({
+      monday: z.object({ open: z.string(), close: z.string() }).optional(),
+      tuesday: z.object({ open: z.string(), close: z.string() }).optional(),
+      wednesday: z.object({ open: z.string(), close: z.string() }).optional(),
+      thursday: z.object({ open: z.string(), close: z.string() }).optional(),
+      friday: z.object({ open: z.string(), close: z.string() }).optional(),
+      saturday: z.object({ open: z.string(), close: z.string() }).optional(),
+      sunday: z.object({ open: z.string(), close: z.string() }).optional(),
+    }),
+    address: z.string().min(1, 'Address is required'),
+    city: z.string().min(1, 'City is required'),
+    state: z.string().min(1, 'State is required'),
+    country: z.string().default('Cambodia'),
+    postalCode: z.string().optional(),
+    latitude: z.number().min(-90).max(90),
+    longitude: z.number().min(-180).max(180),
     isActive: z.boolean().optional(),
   }),
 });

@@ -14,10 +14,10 @@ describe('OrderService', () => {
   beforeEach(async () => {
     orderService = new OrderService();
     const user = await createTestUser();
-    userId = user._id.toString();
+    userId = user.id.toString();
 
     const store = await createTestStore();
-    storeId = store._id.toString();
+    storeId = store.id.toString();
   });
 
   describe('getOrders', () => {
@@ -82,7 +82,7 @@ describe('OrderService', () => {
       });
 
       await OrderItem.create({
-        orderId: order._id,
+        orderId: order.id,
         productId: new mongoose.Types.ObjectId(),
         productName: 'Coffee',
         productImage: 'coffee.jpg',
@@ -92,7 +92,7 @@ describe('OrderService', () => {
       });
 
       const result = await orderService.getOrderById(
-        order._id.toString(),
+        order.id.toString(),
         userId,
         'user'
       );
@@ -119,7 +119,7 @@ describe('OrderService', () => {
       const otherUser = await createTestUser({ email: 'other@example.com' });
 
       const order = await Order.create({
-        userId: otherUser._id,
+        userId: otherUser.id,
         storeId: new mongoose.Types.ObjectId(storeId),
         paymentMethod: 'cash',
         subtotal: 50,
@@ -127,7 +127,7 @@ describe('OrderService', () => {
       });
 
       await expect(
-        orderService.getOrderById(order._id.toString(), userId, 'user')
+        orderService.getOrderById(order.id.toString(), userId, 'user')
       ).rejects.toThrow('You do not have permission to view this order');
     });
   });
@@ -144,19 +144,19 @@ describe('OrderService', () => {
       });
 
       await OrderStatusHistory.create({
-        orderId: order._id,
+        orderId: order.id,
         status: 'confirmed',
         changedBy: 'system',
       });
 
       await OrderStatusHistory.create({
-        orderId: order._id,
+        orderId: order.id,
         status: 'preparing',
         changedBy: 'admin',
       });
 
       const result = await orderService.getOrderTracking(
-        order._id.toString(),
+        order.id.toString(),
         userId
       );
 
@@ -178,7 +178,7 @@ describe('OrderService', () => {
       });
 
       const result = await orderService.cancelOrder(
-        order._id.toString(),
+        order.id.toString(),
         userId,
         'Changed my mind'
       );
@@ -208,7 +208,7 @@ describe('OrderService', () => {
       });
 
       await expect(
-        orderService.cancelOrder(order._id.toString(), userId, 'Test reason')
+        orderService.cancelOrder(order.id.toString(), userId, 'Test reason')
       ).rejects.toThrow('Order is already cancelled');
     });
 
@@ -223,7 +223,7 @@ describe('OrderService', () => {
       });
 
       await expect(
-        orderService.cancelOrder(order._id.toString(), userId, 'Test reason')
+        orderService.cancelOrder(order.id.toString(), userId, 'Test reason')
       ).rejects.toThrow('Cannot cancel a completed order');
     });
 
@@ -237,14 +237,17 @@ describe('OrderService', () => {
         status: 'confirmed',
       });
 
-      // Manually update createdAt to be more than 5 minutes ago
-      await Order.updateOne(
-        { _id: order._id },
-        { createdAt: new Date(Date.now() - 6 * 60 * 1000) }
+      // Explicitly set createdAt to 6 minutes ago
+      // Use raw MongoDB operation to bypass Mongoose's timestamp protection
+      const sixMinutesAgo = new Date(Date.now() - 6 * 60 * 1000);
+
+      await Order.collection.updateOne(
+        { _id: new mongoose.Types.ObjectId(order.id) },
+        { $set: { createdAt: sixMinutesAgo } }
       );
 
       await expect(
-        orderService.cancelOrder(order._id.toString(), userId, 'Test reason')
+        orderService.cancelOrder(order.id.toString(), userId, 'Test reason')
       ).rejects.toThrow(
         'Order can only be cancelled within 5 minutes of placement'
       );
@@ -263,13 +266,13 @@ describe('OrderService', () => {
       });
 
       await orderService.rateOrder(
-        order._id.toString(),
+        order.id.toString(),
         userId,
         5,
         'Excellent service!'
       );
 
-      const updated = await Order.findById(order._id);
+      const updated = await Order.findById(order.id);
       expect(updated?.notes).toContain('Rating: 5/5');
       expect(updated?.notes).toContain('Review: Excellent service!');
     });
@@ -285,7 +288,7 @@ describe('OrderService', () => {
       });
 
       await expect(
-        orderService.rateOrder(order._id.toString(), userId, 6)
+        orderService.rateOrder(order.id.toString(), userId, 6)
       ).rejects.toThrow('Rating must be between 1 and 5');
     });
 
@@ -300,7 +303,7 @@ describe('OrderService', () => {
       });
 
       await expect(
-        orderService.rateOrder(order._id.toString(), userId, 5)
+        orderService.rateOrder(order.id.toString(), userId, 5)
       ).rejects.toThrow('Only completed orders can be rated');
     });
   });
@@ -317,14 +320,14 @@ describe('OrderService', () => {
       });
 
       const result = await orderService.updateOrderStatus(
-        order._id.toString(),
+        order.id.toString(),
         'preparing'
       );
 
       expect(result.status).toBe('preparing');
 
       const history = await OrderStatusHistory.findOne({
-        orderId: order._id,
+        orderId: order.id,
         status: 'preparing',
       });
       expect(history).toBeDefined();
@@ -341,7 +344,7 @@ describe('OrderService', () => {
       });
 
       const result = await orderService.updateOrderStatus(
-        order._id.toString(),
+        order.id.toString(),
         'ready'
       );
 
@@ -359,7 +362,7 @@ describe('OrderService', () => {
       });
 
       await expect(
-        orderService.updateOrderStatus(order._id.toString(), 'preparing')
+        orderService.updateOrderStatus(order.id.toString(), 'preparing')
       ).rejects.toThrow('Invalid status transition');
     });
   });
@@ -375,7 +378,7 @@ describe('OrderService', () => {
       });
 
       const result = await orderService.addInternalNotes(
-        order._id.toString(),
+        order.id.toString(),
         'Special handling required'
       );
 
@@ -397,11 +400,11 @@ describe('OrderService', () => {
       });
 
       const result = await orderService.assignDriver(
-        order._id.toString(),
-        driver._id.toString()
+        order.id.toString(),
+        driver.id.toString()
       );
 
-      expect(result.assignedDriverId?.toString()).toBe(driver._id.toString());
+      expect(result.assignedDriverId?.toString()).toBe(driver.id.toString());
     });
 
     it('should throw error for invalid order status', async () => {
@@ -417,7 +420,7 @@ describe('OrderService', () => {
       });
 
       await expect(
-        orderService.assignDriver(order._id.toString(), driver._id.toString())
+        orderService.assignDriver(order.id.toString(), driver.id.toString())
       ).rejects.toThrow('Cannot assign driver to order');
     });
   });

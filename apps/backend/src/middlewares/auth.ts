@@ -2,6 +2,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { verifyAccessToken } from '../utils/jwt.js';
 import { UnauthorizedError } from '../utils/AppError.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
+import { User } from '../models/User.js';
 
 /**
  * Authentication middleware to protect routes
@@ -30,8 +31,6 @@ export const authenticate = asyncHandler(
     const decoded = verifyAccessToken(token);
 
     // Check if user account is suspended
-    // Import User model to check status
-    const { User } = await import('../models/User.js');
     const user = await User.findById(decoded.userId)
       .select('status lastLogoutAt')
       .lean();

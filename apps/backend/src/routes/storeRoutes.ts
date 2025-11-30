@@ -127,7 +127,7 @@ router.get(
  * PUT /api/stores/:id
  * Update store details (Admin only)
  */
-router.put(
+router.patch(
   '/:id',
   authenticate,
   authorize({ roles: ['admin'] }),

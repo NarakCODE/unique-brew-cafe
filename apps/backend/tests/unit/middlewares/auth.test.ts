@@ -33,7 +33,8 @@ describe('Auth Middleware', () => {
       const user = await createTestUser({
         email: `auth-test-${Date.now()}@example.com`,
       });
-      const token = generateAuthToken(user.id, 'user');
+
+      const token = generateAuthToken((user._id as any).toString(), 'user');
       const req = mockRequest(`Bearer ${token}`);
       const res = mockResponse();
 
@@ -41,8 +42,8 @@ describe('Auth Middleware', () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockNext).not.toHaveBeenCalledWith(expect.any(Error));
-      expect(req.userId).toBe(user.id);
-      expect(req.userRole).toBe('user');
+      expect((req as any).userId).toBe((user._id as any).toString());
+      expect((req as any).userRole).toBe('user');
     });
 
     it('should reject request without authorization header', async () => {
@@ -86,7 +87,7 @@ describe('Auth Middleware', () => {
         email: `suspended-${Date.now()}@example.com`,
         status: 'suspended',
       });
-      const token = generateAuthToken(user.id, 'user');
+      const token = generateAuthToken((user._id as any).toString(), 'user');
       const req = mockRequest(`Bearer ${token}`);
       const res = mockResponse();
 
@@ -102,7 +103,7 @@ describe('Auth Middleware', () => {
         email: `deleted-${Date.now()}@example.com`,
         status: 'deleted',
       });
-      const token = generateAuthToken(user.id, 'user');
+      const token = generateAuthToken((user._id as any).toString(), 'user');
       const req = mockRequest(`Bearer ${token}`);
       const res = mockResponse();
 
@@ -128,14 +129,14 @@ describe('Auth Middleware', () => {
         email: `admin-${Date.now()}@example.com`,
         role: 'admin',
       });
-      const token = generateAuthToken(admin.id, 'admin');
+      const token = generateAuthToken((admin._id as any).toString(), 'admin');
       const req = mockRequest(`Bearer ${token}`);
       const res = mockResponse();
 
       await authenticate(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
-      expect(req.userRole).toBe('admin');
+      expect((req as any).userRole).toBe('admin');
     });
   });
 
@@ -144,7 +145,7 @@ describe('Auth Middleware', () => {
       const user = await createTestUser({
         email: `optional-${Date.now()}@example.com`,
       });
-      const token = generateAuthToken(user.id, 'user');
+      const token = generateAuthToken((user._id as any).toString(), 'user');
       const req = mockRequest(`Bearer ${token}`);
       const res = mockResponse();
 
@@ -152,7 +153,7 @@ describe('Auth Middleware', () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockNext).not.toHaveBeenCalledWith(expect.any(Error));
-      expect(req.userId).toBe(user.id);
+      expect((req as any).userId).toBe((user._id as any).toString());
     });
 
     it('should proceed without error when no token provided', async () => {
@@ -163,7 +164,7 @@ describe('Auth Middleware', () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockNext).not.toHaveBeenCalledWith(expect.any(Error));
-      expect(req.userId).toBeUndefined();
+      expect((req as any).userId).toBeUndefined();
     });
 
     it('should proceed without error when invalid token provided', async () => {
@@ -174,7 +175,7 @@ describe('Auth Middleware', () => {
 
       expect(mockNext).toHaveBeenCalled();
       expect(mockNext).not.toHaveBeenCalledWith(expect.any(Error));
-      expect(req.userId).toBeUndefined();
+      expect((req as any).userId).toBeUndefined();
     });
 
     it('should proceed without error when token format is wrong', async () => {
@@ -184,7 +185,7 @@ describe('Auth Middleware', () => {
       await optionalAuthenticate(req, res, mockNext);
 
       expect(mockNext).toHaveBeenCalled();
-      expect(req.userId).toBeUndefined();
+      expect((req as any).userId).toBeUndefined();
     });
   });
 });

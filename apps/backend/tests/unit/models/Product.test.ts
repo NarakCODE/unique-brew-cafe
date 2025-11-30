@@ -10,6 +10,7 @@ describe('Product Model', () => {
     const category = await Category.create({
       name: 'Test Category',
       slug: 'test-category',
+      storeId: new mongoose.Types.ObjectId(),
     });
     categoryId = category._id as mongoose.Types.ObjectId;
   });

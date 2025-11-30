@@ -100,6 +100,7 @@ describe('Products API', () => {
           basePrice: 15.99,
           currency: 'USD',
           preparationTime: 10,
+          images: ['test.jpg'],
         })
         .expect(201);
 
