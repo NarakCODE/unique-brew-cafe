@@ -35,8 +35,8 @@ export const reportService = {
     // Active Users
     const activeUsers = await User.countDocuments({ status: 'active' });
 
-    // Top Selling Products (Limit 5)
-    const topProducts = await Order.aggregate([
+    // Top Selling Products (Limit 5) - Get total revenue from top 5 products
+    const topProductsData = await Order.aggregate([
       { $match: query },
       {
         $lookup: {
@@ -59,11 +59,16 @@ export const reportService = {
       { $limit: 5 },
     ]);
 
+    const topProductsAmount = topProductsData.reduce(
+      (sum, product) => sum + product.revenue,
+      0
+    );
+
     return {
       totalRevenue,
       totalOrders,
       activeUsers,
-      topProducts,
+      topProducts: topProductsAmount,
     };
   },
 

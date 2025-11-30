@@ -2,12 +2,7 @@ export interface DashboardStats {
     totalRevenue: number;
     totalOrders: number;
     activeUsers: number;
-    topProducts: {
-        _id: string;
-        name: string;
-        totalSold: number;
-        revenue: number;
-    }[];
+    topProducts: number;
 }
 
 export interface SalesReport {

@@ -7,32 +7,31 @@ description: Generate a unit test file for an existing component or function
 3. Create a new test file in the same directory with .test.js extension.
 4. Write comprehensive unit tests for the exported functions using standard Jest/React Testing Library syntax.
 5. Verify that all imports in the test file are correct.
+   Usage:
 
-Usage:
-
--   Say "Generate tests for [filename]" or use /generate_test
--   Provide path to file to test
--   AI reads file and creates comprehensive tests
+- Say "Generate tests for [filename]" or use /generate_test
+- Provide path to file to test
+- AI reads file and creates comprehensive tests
 
 Benefits:
 
--   Saves time writing boilerplate tests
--   Ensures test coverage
--   Uses best practices (Jest/RTL)
--   Tests all exported functions
--   Correct import paths
+- Saves time writing boilerplate tests
+- Ensures test coverage
+- Uses best practices (Jest/RTL)
+- Tests all exported functions
+- Correct import paths
 
 Generated Test Structure:
 
--   describe blocks for each function/component
--   Multiple test cases per function
--   Edge case testing
--   Mock setup when needed
--   Proper assertions
+- describe blocks for each function/component
+- Multiple test cases per function
+- Edge case testing
+- Mock setup when needed
+- Proper assertions
 
 Customization:
 
--   Add snapshot testing
--   Include integration tests
--   Add coverage thresholds
--   Support different test frameworks
+- Add snapshot testing
+- Include integration tests
+- Add coverage thresholds
+- Support different test frameworks

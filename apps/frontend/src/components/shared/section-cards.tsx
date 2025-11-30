@@ -110,7 +110,7 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
                 <CardHeader>
                     <CardDescription>Top Product</CardDescription>
                     <CardTitle className="text-xl font-semibold tabular-nums @[250px]/card:text-2xl truncate">
-                        {stats?.topProducts?.[0]?.name ?? "N/A"}
+                        {stats?.topProducts ?? "N/A"}
                     </CardTitle>
                     <CardAction>
                         <Badge variant="outline">
@@ -121,7 +121,7 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
                 </CardHeader>
                 <CardFooter className="flex-col items-start gap-1.5 text-sm">
                     <div className="line-clamp-1 flex gap-2 font-medium">
-                        {stats?.topProducts?.[0]?.totalSold ?? 0} sold
+                        {stats?.topProducts ?? "0"} sold
                         <IconTrendingUp className="size-4" />
                     </div>
                     <div className="text-muted-foreground">

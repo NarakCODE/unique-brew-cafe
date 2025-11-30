@@ -4,7 +4,7 @@ import {
   optionalAuthenticate,
 } from '../../../src/middlewares/auth.js';
 import { generateAuthToken, createTestUser } from '../../utils/testHelpers.js';
-import type { Request, Response, NextFunction } from 'express';
+import type { Request, Response } from 'express';
 import { UnauthorizedError } from '../../../src/utils/AppError.js';
 
 describe('Auth Middleware', () => {
