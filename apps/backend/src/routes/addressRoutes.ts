@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import {
   getAddresses,
   addAddress,
@@ -14,7 +14,7 @@ import {
   addressParamSchema,
 } from '../schemas/index.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * AUTHENTICATED: Get all addresses for user

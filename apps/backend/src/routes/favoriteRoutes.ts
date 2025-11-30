@@ -1,10 +1,10 @@
-import express from 'express';
+import express, { Router } from 'express';
 import * as favoriteController from '../controllers/favoriteController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { validate } from '../middlewares/validate.js';
 import { favoriteProductParamSchema } from '../schemas/index.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * All favorite routes require authentication

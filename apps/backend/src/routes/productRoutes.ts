@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import * as productController from '../controllers/productController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
@@ -14,7 +14,7 @@ import {
   updateProductSchema,
 } from '../schemas/index.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * Product Routes

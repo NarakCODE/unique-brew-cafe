@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import userRoutes from './userRoutes.js';
 import authRoutes from './authRoutes.js';
 import profileRoutes from './profileRoutes.js';
@@ -20,7 +20,7 @@ import configRoutes from './configRoutes.js';
 
 import addonRoutes from './addonRoutes.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 // Authentication routes
 router.use('/auth', authRoutes);

@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import * as authController from '../controllers/authController.js';
 import { authenticate } from '../middlewares/auth.js';
 import validate from '../middlewares/validate.js';
@@ -14,7 +14,7 @@ import {
   logoutSchema,
 } from '../schemas/auth.schema.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * POST /api/auth/register/initiate

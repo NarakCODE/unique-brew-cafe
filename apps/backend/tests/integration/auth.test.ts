@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
-import express from 'express';
+import express, { Router } from 'express';
 import routes from '../../src/routes/index.js';
 import { errorHandler } from '../../src/middlewares/errorHandler.js';
 import { createTestUser } from '../utils/testHelpers.js';

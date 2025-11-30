@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Router } from 'express';
 import {
   getAllUsers,
   getUserById,
@@ -24,7 +24,7 @@ import {
   deleteAccountSchema,
 } from '../schemas/index.js';
 
-const router = express.Router();
+const router: Router = express.Router();
 
 /**
  * AUTHENTICATED: Upload avatar
