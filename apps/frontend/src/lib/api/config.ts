@@ -14,11 +14,13 @@ export const apiConfig = {
         // Auth
         auth: {
             login: "/auth/login",
-            register: "/auth/register",
+            register: "/auth/register", // Legacy
+            initiateRegistration: "/auth/register/initiate",
+            verifyRegistration: "/auth/register/verify",
             logout: "/auth/logout",
             refresh: "/auth/refresh",
             verifyEmail: "/auth/verify-email",
-            resendVerification: "/auth/resend-verification",
+            resendVerification: "/auth/resend-otp", // Updated to match backend
             forgotPassword: "/auth/forgot-password",
             resetPassword: "/auth/reset-password",
             me: "/auth/me",
@@ -115,6 +117,17 @@ export const apiConfig = {
             getTicket: (id: string) => `/support/tickets/${id}`,
             updateTicket: (id: string) => `/support/tickets/${id}`,
             addMessage: (id: string) => `/support/tickets/${id}/messages`,
+        },
+
+        // Profile (authenticated user)
+        profile: {
+            get: "/profile",
+            update: "/profile",
+            uploadImage: "/profile/image",
+            updatePassword: "/profile/password",
+            updateSettings: "/profile/settings",
+            referralStats: "/profile/referral",
+            delete: "/profile",
         },
 
         // Health

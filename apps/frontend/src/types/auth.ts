@@ -27,3 +27,16 @@ export interface AuthResponse {
     refreshToken: string;
     user: User;
 }
+
+export interface InitiateRegistrationInput {
+    email: string;
+    password: string;
+    fullName: string;
+}
+
+export interface VerifyRegistrationInput {
+    email: string;
+    password: string;
+    fullName: string;
+    otpCode: string;
+}

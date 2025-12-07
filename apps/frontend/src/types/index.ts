@@ -13,3 +13,4 @@ export * from "./addon";
 export * from "./report";
 export * from "./config";
 export * from "./support";
+export * from "./profile";

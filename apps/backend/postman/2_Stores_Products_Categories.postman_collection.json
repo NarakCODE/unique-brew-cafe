@@ -1,0 +1,816 @@
+{
+  "info": {
+    "name": "2. Stores, Products & Categories",
+    "description": "Complete API collection for stores, products, categories, addons, and search",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "storeId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "categoryId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Stores",
+      "item": [
+        {
+          "name": "Get All Stores",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores?latitude=40.7128&longitude=-74.0060&radius=10",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores"],
+              "query": [
+                {
+                  "key": "latitude",
+                  "value": "40.7128"
+                },
+                {
+                  "key": "longitude",
+                  "value": "-74.0060"
+                },
+                {
+                  "key": "radius",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Store by Slug",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/slug/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "slug", ":slug"],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "downtown-coffee"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Store by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Store Pickup Times",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}/pickup-times?date=2025-12-07",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}", "pickup-times"],
+              "query": [
+                {
+                  "key": "date",
+                  "value": "2025-12-07"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Store Gallery",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}/gallery",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}", "gallery"]
+            }
+          }
+        },
+        {
+          "name": "Get Store Hours",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}/hours",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}", "hours"]
+            }
+          }
+        },
+        {
+          "name": "Get Store Location",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}/location",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}", "location"]
+            }
+          }
+        },
+        {
+          "name": "Get Store Menu",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}/menu?categoryId=&isFeatured=true&minPrice=0&maxPrice=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}", "menu"],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": ""
+                },
+                {
+                  "key": "isFeatured",
+                  "value": "true"
+                },
+                {
+                  "key": "minPrice",
+                  "value": "0"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Store (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown Coffee\",\n  \"slug\": \"downtown-coffee\",\n  \"description\": \"Best coffee in downtown\",\n  \"location\": {\n    \"address\": \"123 Main St\",\n    \"city\": \"New York\",\n    \"state\": \"NY\",\n    \"zipCode\": \"10001\",\n    \"country\": \"USA\",\n    \"coordinates\": {\n      \"latitude\": 40.7128,\n      \"longitude\": -74.0060\n    }\n  },\n  \"contactInfo\": {\n    \"phone\": \"+1234567890\",\n    \"email\": \"downtown@coffee.com\"\n  },\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/stores",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores"]
+            }
+          }
+        },
+        {
+          "name": "Update Store (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Downtown Coffee Updated\",\n  \"description\": \"Updated description\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Store Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Delete Store (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/{{storeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "{{storeId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get All Stores (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/stores/admin/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["stores", "admin", "all"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories"]
+            }
+          }
+        },
+        {
+          "name": "Get Category by Slug",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/slug/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "slug", ":slug"],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "hot-beverages"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Category by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Subcategories",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}/subcategories",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}", "subcategories"]
+            }
+          }
+        },
+        {
+          "name": "Get Products by Category",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/categories/{{categoryId}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "{{categoryId}}", "products"]
+            }
+          }
+        },
+        {
+          "name": "Reorder Categories (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"categoryOrders\": [\n    { \"categoryId\": \"id1\", \"order\": 1 },\n    { \"categoryId\": \"id2\", \"order\": 2 }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/categories/reorder",
+              "host": ["{{baseUrl}}"],
+              "path": ["categories", "reorder"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Products",
+      "item": [
+        {
+          "name": "Get All Products",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products?categoryId=&storeId=&isFeatured=true&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"],
+              "query": [
+                {
+                  "key": "categoryId",
+                  "value": ""
+                },
+                {
+                  "key": "storeId",
+                  "value": ""
+                },
+                {
+                  "key": "isFeatured",
+                  "value": "true"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Products",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/search?query=coffee&categoryId=&minPrice=0&maxPrice=100",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "coffee"
+                },
+                {
+                  "key": "categoryId",
+                  "value": ""
+                },
+                {
+                  "key": "minPrice",
+                  "value": "0"
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by Slug",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/slug/:slug",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "slug", ":slug"],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "cappuccino"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Product by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Get Product Customizations",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/customizations",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}", "customizations"]
+            }
+          }
+        },
+        {
+          "name": "Get Product Add-ons",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/addons",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}", "addons"]
+            }
+          }
+        },
+        {
+          "name": "Create Product (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cappuccino\",\n  \"slug\": \"cappuccino\",\n  \"description\": \"Classic Italian coffee\",\n  \"categoryId\": \"{{categoryId}}\",\n  \"basePrice\": 4.50,\n  \"sizes\": [\n    { \"name\": \"Small\", \"price\": 4.50 },\n    { \"name\": \"Medium\", \"price\": 5.50 },\n    { \"name\": \"Large\", \"price\": 6.50 }\n  ],\n  \"isAvailable\": true,\n  \"isFeatured\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products",
+              "host": ["{{baseUrl}}"],
+              "path": ["products"]
+            }
+          }
+        },
+        {
+          "name": "Update Product (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium Cappuccino\",\n  \"basePrice\": 5.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          }
+        },
+        {
+          "name": "Update Product Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isAvailable\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Duplicate Product (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"newName\": \"Cappuccino Copy\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}/duplicate",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}", "duplicate"]
+            }
+          }
+        },
+        {
+          "name": "Delete Product (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/products/{{productId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["products", "{{productId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Add-ons",
+      "item": [
+        {
+          "name": "Get All Add-ons",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/addons",
+              "host": ["{{baseUrl}}"],
+              "path": ["addons"]
+            }
+          }
+        },
+        {
+          "name": "Create Add-on (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Extra Shot\",\n  \"price\": 0.50,\n  \"isAvailable\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addons",
+              "host": ["{{baseUrl}}"],
+              "path": ["addons"]
+            }
+          }
+        },
+        {
+          "name": "Update Add-on (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Double Shot\",\n  \"price\": 1.00\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/addons/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["addons", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Add-on (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/addons/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["addons", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search",
+      "item": [
+        {
+          "name": "Global Search",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search?query=coffee&type=all",
+              "host": ["{{baseUrl}}"],
+              "path": ["search"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "coffee"
+                },
+                {
+                  "key": "type",
+                  "value": "all"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Search Suggestions",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/suggestions?query=cof",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "suggestions"],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "cof"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Recent Searches",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/recent",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "recent"]
+            }
+          }
+        },
+        {
+          "name": "Delete All Searches",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/recent",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "recent"]
+            }
+          }
+        },
+        {
+          "name": "Delete Specific Search",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/search/recent/:searchId",
+              "host": ["{{baseUrl}}"],
+              "path": ["search", "recent", ":searchId"],
+              "variable": [
+                {
+                  "key": "searchId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

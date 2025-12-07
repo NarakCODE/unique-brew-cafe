@@ -1,19 +1,23 @@
 "use client";
 
 import * as React from "react";
+// 1. Import the wrapper component
+import { HugeiconsIcon } from "@hugeicons/react";
+// 2. Import the specific icon definitions
 import {
-    BarChart3,
-    Bell,
-    Coffee,
-    LayoutDashboard,
-    LifeBuoy,
-    Megaphone,
-    Settings,
-    ShoppingBag,
-    Store,
-    Tags,
-    Users,
-} from "lucide-react";
+    Analytics01Icon, // Replaces BarChart3
+    Notification03Icon, // Replaces Bell
+    Coffee01Icon, // Replaces Coffee
+    DashboardSquare02Icon, // Replaces LayoutDashboard
+    CustomerSupportIcon, // Replaces LifeBuoy
+    Megaphone01Icon, // Replaces Megaphone
+    Settings01Icon, // Replaces Settings
+    ShoppingBag01Icon, // Replaces ShoppingBag
+    Store01Icon, // Replaces Store
+    DiscountTag02Icon, // Replaces Tags
+    UserGroupIcon, // Replaces Users
+} from "@hugeicons/core-free-icons";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -32,61 +36,62 @@ import {
 } from "@/components/ui/sidebar";
 
 // Menu items.
+// Note: 'icon' is now the icon object, not a React Component
 const items = [
     {
         title: "Dashboard",
         url: "/dashboard",
-        icon: LayoutDashboard,
+        icon: DashboardSquare02Icon,
     },
     {
         title: "Stores",
         url: "/stores",
-        icon: Store,
+        icon: Store01Icon,
     },
     {
         title: "Categories",
         url: "/categories",
-        icon: Tags,
+        icon: DiscountTag02Icon,
     },
     {
         title: "Products",
         url: "/products",
-        icon: Coffee,
+        icon: Coffee01Icon,
     },
     {
         title: "Orders",
         url: "/orders",
-        icon: ShoppingBag,
+        icon: ShoppingBag01Icon,
     },
     {
         title: "Users",
         url: "/users",
-        icon: Users,
+        icon: UserGroupIcon,
     },
     {
         title: "Announcements",
         url: "/announcements",
-        icon: Megaphone,
+        icon: Megaphone01Icon,
     },
     {
         title: "Notifications",
         url: "/notifications",
-        icon: Bell,
+        icon: Notification03Icon,
     },
     {
         title: "Support",
         url: "/support",
-        icon: LifeBuoy,
+        icon: CustomerSupportIcon,
     },
     {
         title: "Reports",
         url: "/reports",
-        icon: BarChart3,
+        icon: Analytics01Icon,
     },
     {
         title: "Settings",
         url: "/settings",
-        icon: Settings,
+        icon: Settings01Icon,
     },
 ];
 
@@ -101,7 +106,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarMenuButton size="lg" asChild>
                             <Link href="/dashboard">
                                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                                    <Coffee className="size-4" />
+                                    {/* Header Icon Implementation */}
+                                    <HugeiconsIcon
+                                        icon={Coffee01Icon}
+                                        size={16}
+                                        strokeWidth={2}
+                                        className="text-primary-foreground"
+                                    />
                                 </div>
                                 <div className="flex flex-col gap-0.5 leading-none">
                                     <span className="font-semibold">
@@ -130,7 +141,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                                         tooltip={item.title}
                                     >
                                         <Link href={item.url}>
-                                            <item.icon />
+                                            {/* Menu List Icon Implementation */}
+                                            <HugeiconsIcon
+                                                icon={item.icon}
+                                                size={20} // Standard sidebar icon size
+                                                strokeWidth={1.5}
+                                            />
                                             <span>{item.title}</span>
                                         </Link>
                                     </SidebarMenuButton>
@@ -140,9 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarGroupContent>
                 </SidebarGroup>
             </SidebarContent>
-            <SidebarFooter>
-                {/* User menu will be in the Header as per requirements, but we can put a footer here if needed */}
-            </SidebarFooter>
+            <SidebarFooter>{/* User menu placeholder */}</SidebarFooter>
             <SidebarRail />
         </Sidebar>
     );

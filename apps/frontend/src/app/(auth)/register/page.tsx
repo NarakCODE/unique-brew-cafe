@@ -1,34 +1,66 @@
-import Link from "next/link";
+"use client";
 
-// import { Command } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
 
 import { RegisterForm } from "@/components/forms/register-form";
+import { OtpVerificationForm } from "@/components/forms/otp-verification-form";
 import { GoogleButton } from "@/components/forms/google-button";
+import { InitiateRegistrationInput } from "@/types/auth";
 
 export default function RegisterV1() {
+    const [step, setStep] = useState<"details" | "otp">("details");
+    const [registrationData, setRegistrationData] =
+        useState<InitiateRegistrationInput | null>(null);
+
+    const handleRegistrationSuccess = (data: InitiateRegistrationInput) => {
+        setRegistrationData(data);
+        setStep("otp");
+    };
+
+    const handleBackToRegister = () => {
+        setStep("details");
+    };
+
     return (
         <div className="flex h-dvh">
             <div className="bg-background flex w-full items-center justify-center p-8 lg:w-2/3">
                 <div className="w-full max-w-md space-y-10 py-24 lg:py-32">
-                    <div className="space-y-4 text-center">
-                        <div className="font-medium tracking-tight">
-                            Register
-                        </div>
-                        <div className="text-muted-foreground mx-auto max-w-xl">
-                            Fill in your details below. We promise not to quiz
-                            you about your first pet&apos;s name (this time).
-                        </div>
-                    </div>
-                    <div className="space-y-4">
-                        <RegisterForm />
-                        <GoogleButton className="w-full" variant="outline" />
-                        <p className="text-muted-foreground text-center text-xs">
-                            Already have an account?{" "}
-                            <Link href="login" className="text-primary">
-                                Login
-                            </Link>
-                        </p>
-                    </div>
+                    {step === "details" ? (
+                        <>
+                            <div className="space-y-4 text-center">
+                                <div className="font-medium tracking-tight">
+                                    Register
+                                </div>
+                                <div className="text-muted-foreground mx-auto max-w-xl">
+                                    Fill in your details below. We promise not
+                                    to quiz you about your first pet&apos;s name
+                                    (this time).
+                                </div>
+                            </div>
+                            <div className="space-y-4">
+                                <RegisterForm
+                                    onSuccess={handleRegistrationSuccess}
+                                />
+                                <GoogleButton
+                                    className="w-full"
+                                    variant="outline"
+                                />
+                                <p className="text-muted-foreground text-center text-xs">
+                                    Already have an account?{" "}
+                                    <Link href="login" className="text-primary">
+                                        Login
+                                    </Link>
+                                </p>
+                            </div>
+                        </>
+                    ) : (
+                        <OtpVerificationForm
+                            email={registrationData?.email || ""}
+                            registrationData={registrationData!}
+                            onBack={handleBackToRegister}
+                        />
+                    )}
                 </div>
             </div>
 

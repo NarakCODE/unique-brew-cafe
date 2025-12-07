@@ -11,3 +11,4 @@ export * from "./use-cart";
 export * from "./use-favorites";
 export * from "./use-users";
 export * from "./use-notifications";
+export * from "./use-profile";

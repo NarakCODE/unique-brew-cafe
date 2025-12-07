@@ -1,0 +1,603 @@
+{
+  "info": {
+    "name": "4. Notifications & Support",
+    "description": "Complete API collection for notifications, announcements, and support",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api",
+      "type": "string"
+    },
+    {
+      "key": "accessToken",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "notificationId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "announcementId",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "ticketId",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Register Device Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"firebase-cloud-messaging-token\",\n  \"platform\": \"ios\",\n  \"deviceId\": \"device-unique-id\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/devices/register",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "devices", "register"]
+            }
+          }
+        },
+        {
+          "name": "Unregister Device Token",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/devices/:tokenId",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "devices", ":tokenId"],
+              "variable": [
+                {
+                  "key": "tokenId",
+                  "value": ""
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page=1&limit=20&isRead=false",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                },
+                {
+                  "key": "isRead",
+                  "value": "false"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "unread-count"]
+            }
+          }
+        },
+        {
+          "name": "Mark as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}/read",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "{{notificationId}}", "read"]
+            }
+          }
+        },
+        {
+          "name": "Mark All as Read",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "read-all"]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/{{notificationId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "{{notificationId}}"]
+            }
+          }
+        },
+        {
+          "name": "Delete All Notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications"]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Settings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "settings"]
+            }
+          }
+        },
+        {
+          "name": "Update Notification Settings",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"emailNotifications\": true,\n  \"pushNotifications\": true,\n  \"smsNotifications\": false,\n  \"orderUpdates\": true,\n  \"promotions\": false,\n  \"newsletter\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/settings",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "settings"]
+            }
+          }
+        },
+        {
+          "name": "Send Notification (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"user123\",\n  \"title\": \"Order Update\",\n  \"message\": \"Your order is ready for pickup\",\n  \"type\": \"order\",\n  \"data\": {\n    \"orderId\": \"order123\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/send",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "send"]
+            }
+          }
+        },
+        {
+          "name": "Broadcast Notification (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"System Maintenance\",\n  \"message\": \"We will be performing maintenance from 2AM-4AM\",\n  \"type\": \"system\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/broadcast",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "broadcast"]
+            }
+          }
+        },
+        {
+          "name": "Send to Segment (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"segment\": \"premium_users\",\n  \"title\": \"Exclusive Offer\",\n  \"message\": \"Get 20% off on your next order\",\n  \"type\": \"promotion\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/segment",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "segment"]
+            }
+          }
+        },
+        {
+          "name": "Get Notification Stats (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/stats",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Get Notification History (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/history?page=1&limit=50",
+              "host": ["{{baseUrl}}"],
+              "path": ["notifications", "history"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "50"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Announcements",
+      "item": [
+        {
+          "name": "Get All Announcements",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/announcements?isPublished=true",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements"],
+              "query": [
+                {
+                  "key": "isPublished",
+                  "value": "true"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Announcement by ID",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/announcements/{{announcementId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements", "{{announcementId}}"]
+            }
+          }
+        },
+        {
+          "name": "Track Announcement View",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/announcements/{{announcementId}}/view",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements", "{{announcementId}}", "view"]
+            }
+          }
+        },
+        {
+          "name": "Track Announcement Click",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/announcements/{{announcementId}}/click",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements", "{{announcementId}}", "click"]
+            }
+          }
+        },
+        {
+          "name": "Create Announcement (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Holiday Special Offer\",\n  \"content\": \"Get 25% off all beverages this weekend!\",\n  \"type\": \"promotion\",\n  \"priority\": \"high\",\n  \"startDate\": \"2025-12-20T00:00:00Z\",\n  \"endDate\": \"2025-12-22T23:59:59Z\",\n  \"isPublished\": true,\n  \"targetAudience\": \"all\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/announcements",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements"]
+            }
+          }
+        },
+        {
+          "name": "Update Announcement (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated Holiday Special\",\n  \"content\": \"Get 30% off all beverages this weekend!\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/announcements/{{announcementId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements", "{{announcementId}}"]
+            }
+          }
+        },
+        {
+          "name": "Toggle Publish Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/announcements/{{announcementId}}/publish",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements", "{{announcementId}}", "publish"]
+            }
+          }
+        },
+        {
+          "name": "Delete Announcement (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/announcements/{{announcementId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["announcements", "{{announcementId}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Support",
+      "item": [
+        {
+          "name": "Get FAQs",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/support/faq?category=orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "faq"],
+              "query": [
+                {
+                  "key": "category",
+                  "value": "orders"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Support Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Issue with my order\",\n  \"category\": \"order\",\n  \"priority\": \"medium\",\n  \"description\": \"I didn't receive all items in my order\",\n  \"orderId\": \"order123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/support/tickets",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "tickets"]
+            }
+          }
+        },
+        {
+          "name": "Get All Tickets",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/support/tickets?status=open&page=1&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "tickets"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "open"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/support/tickets/{{ticketId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "tickets", "{{ticketId}}"]
+            }
+          }
+        },
+        {
+          "name": "Add Message to Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Here are more details about the issue...\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/support/tickets/{{ticketId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "tickets", "{{ticketId}}", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Get Ticket Messages",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/support/tickets/{{ticketId}}/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "tickets", "{{ticketId}}", "messages"]
+            }
+          }
+        },
+        {
+          "name": "Update Ticket Status (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"resolved\",\n  \"resolution\": \"Issue has been resolved by issuing a refund\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/support/tickets/{{ticketId}}/status",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "tickets", "{{ticketId}}", "status"]
+            }
+          }
+        },
+        {
+          "name": "Create FAQ (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"How do I cancel my order?\",\n  \"answer\": \"You can cancel your order from the order details page within 5 minutes of placing it.\",\n  \"category\": \"orders\",\n  \"order\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/support/faq",
+              "host": ["{{baseUrl}}"],
+              "path": ["support", "faq"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

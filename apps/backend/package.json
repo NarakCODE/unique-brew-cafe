@@ -22,13 +22,14 @@
     "test:unit": "vitest run tests/unit",
     "test:integration": "vitest run tests/integration",
     "seed:admin": "tsx src/seeders/adminSeeder.ts",
+    "seed:store": "tsx src/seeders/storeSeeder.ts",
     "seed:categories": "tsx src/seeders/categorySeeder.ts",
     "seed:products": "tsx src/seeders/productSeeder.ts",
     "seed:promos": "tsx src/seeders/promoCodeSeeder.ts",
     "seed:faqs": "tsx src/seeders/faqSeeder.ts",
     "seed:config": "tsx src/seeders/appConfigSeeder.ts",
     "seed:zones": "tsx src/seeders/deliveryZoneSeeder.ts",
-    "seed:all": "npm run seed:admin && npm run seed:categories && npm run seed:products && npm run seed:promos && npm run seed:faqs && npm run seed:config && npm run seed:zones"
+    "seed:all": "npm run seed:admin && npm run seed:store && npm run seed:categories && npm run seed:products && npm run seed:promos && npm run seed:faqs && npm run seed:config && npm run seed:zones"
   },
   "lint-staged": {
     "*.ts": [

@@ -7,7 +7,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/store/auth.store";
 import { useRouter } from "next/navigation";
-import type { LoginCredentials, AuthResponse } from "@/types/auth";
+import type {
+    LoginCredentials,
+    AuthResponse,
+    InitiateRegistrationInput,
+    VerifyRegistrationInput,
+} from "@/types/auth";
 
 // ============================================================================
 // QUERY KEYS
@@ -70,7 +75,41 @@ export function useLogin() {
 }
 
 /**
- * Register mutation
+ * Initiate Registration mutation
+ */
+export function useInitiateRegistration() {
+    return useMutation({
+        mutationFn: (data: InitiateRegistrationInput) =>
+            api.auth.initiateRegistration(data),
+    });
+}
+
+/**
+ * Verify Registration mutation
+ */
+export function useVerifyRegistration() {
+    const queryClient = useQueryClient();
+    const { setAuth } = useAuthStore();
+    const router = useRouter();
+
+    return useMutation({
+        mutationFn: (data: VerifyRegistrationInput) =>
+            api.auth.verifyRegistration(data),
+        onSuccess: (data: AuthResponse) => {
+            // Store tokens in Zustand
+            setAuth(data);
+
+            // Set user data in cache
+            queryClient.setQueryData(authKeys.me(), data.user);
+
+            // Redirect to dashboard
+            router.push("/dashboard");
+        },
+    });
+}
+
+/**
+ * Register mutation (Legacy)
  */
 export function useRegister() {
     const queryClient = useQueryClient();
@@ -135,7 +174,10 @@ export function useVerifyEmail() {
  */
 export function useResendVerification() {
     return useMutation({
-        mutationFn: (email: string) => api.auth.resendVerification(email),
+        mutationFn: (data: {
+            email: string;
+            type?: "registration" | "password_reset";
+        }) => api.auth.resendVerification(data.email, data.type),
     });
 }
 

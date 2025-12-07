@@ -1,11 +1,21 @@
 import dotenv from 'dotenv';
+import mongoose from 'mongoose';
 import { Category } from '../models/Category.js';
+import { Store } from '../models/Store.js';
 import { connectDB } from '../config/database.js';
 
 // Load environment variables
 dotenv.config();
 
-const categories = [
+interface CategoryData {
+  name: string;
+  description: string;
+  icon: string;
+  displayOrder: number;
+  isActive: boolean;
+}
+
+const categoriesData: CategoryData[] = [
   {
     name: 'Hot Coffee',
     description: 'Freshly brewed hot coffee beverages',
@@ -68,12 +78,30 @@ const seedCategories = async () => {
   try {
     await connectDB();
 
+    // Get the default store (required for categories)
+    const store = await Store.findOne({});
+    if (!store) {
+      console.error(
+        '❌ No store found. Please run the store seeder first: pnpm seed:store'
+      );
+      process.exit(1);
+    }
+
+    const storeId = store._id as mongoose.Types.ObjectId;
+    console.log(`Using store: ${store.name} (${storeId})`);
+
     // Clear existing categories
     await Category.deleteMany({});
     console.log('Cleared existing categories');
 
+    // Add storeId to each category
+    const categoriesWithStore = categoriesData.map((cat) => ({
+      ...cat,
+      storeId,
+    }));
+
     // Insert new categories (using create to trigger pre-save hooks)
-    const createdCategories = await Category.create(categories);
+    const createdCategories = await Category.create(categoriesWithStore);
     console.log(
       `✅ Successfully seeded ${createdCategories.length} categories`
     );

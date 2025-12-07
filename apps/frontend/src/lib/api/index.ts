@@ -1,7 +1,13 @@
 import { apiClient, fetchClient, ApiClientError } from "./client";
 import { apiConfig } from "./config";
 import type { PaginatedResponse } from "@/types/api";
-import type { LoginCredentials, AuthResponse, AuthTokens } from "@/types/auth";
+import type {
+    LoginCredentials,
+    AuthResponse,
+    AuthTokens,
+    InitiateRegistrationInput,
+    VerifyRegistrationInput,
+} from "@/types/auth";
 import type {
     User,
     UpdateUserData,
@@ -26,6 +32,12 @@ import type {
     CreateDeliveryZoneData,
     UpdateDeliveryZoneData,
     SupportTicket,
+    UserProfile,
+    UpdateProfileData,
+    UpdateSettingsData,
+    UpdatePasswordData,
+    ReferralStats,
+    DeleteAccountData,
 } from "@/types";
 
 // ============================================================================
@@ -82,7 +94,31 @@ export const api = {
         },
 
         /**
-         * Register new user
+         * Initiate registration
+         */
+        async initiateRegistration(
+            data: InitiateRegistrationInput
+        ): Promise<{ message: string; email: string }> {
+            return apiClient.post<{ message: string; email: string }>(
+                apiConfig.endpoints.auth.initiateRegistration,
+                data
+            );
+        },
+
+        /**
+         * Verify registration
+         */
+        async verifyRegistration(
+            data: VerifyRegistrationInput
+        ): Promise<AuthResponse> {
+            return apiClient.post<AuthResponse>(
+                apiConfig.endpoints.auth.verifyRegistration,
+                data
+            );
+        },
+
+        /**
+         * Register new user (Legacy)
          */
         async register(data: {
             email: string;
@@ -126,10 +162,13 @@ export const api = {
         /**
          * Resend verification email
          */
-        async resendVerification(email: string): Promise<void> {
+        async resendVerification(
+            email: string,
+            type: "registration" | "password_reset" = "registration"
+        ): Promise<void> {
             return apiClient.post<void>(
                 apiConfig.endpoints.auth.resendVerification,
-                { email }
+                { email, verificationType: type }
             );
         },
 
@@ -745,6 +784,81 @@ export const api = {
             return apiClient.post<SupportTicket>(
                 apiConfig.endpoints.support.addMessage(id),
                 { message }
+            );
+        },
+    },
+
+    // ========================================
+    // PROFILE (Authenticated User)
+    // ========================================
+    profile: {
+        /**
+         * Get current user's profile
+         */
+        async get(): Promise<UserProfile> {
+            return apiClient.get<UserProfile>(apiConfig.endpoints.profile.get);
+        },
+
+        /**
+         * Update current user's profile
+         */
+        async update(data: UpdateProfileData): Promise<UserProfile> {
+            return apiClient.put<UserProfile>(
+                apiConfig.endpoints.profile.update,
+                data
+            );
+        },
+
+        /**
+         * Upload profile image
+         */
+        async uploadImage(imageUrl: string): Promise<{ profileImage: string }> {
+            return apiClient.post<{ profileImage: string }>(
+                apiConfig.endpoints.profile.uploadImage,
+                { imageUrl }
+            );
+        },
+
+        /**
+         * Update password
+         */
+        async updatePassword(
+            data: UpdatePasswordData
+        ): Promise<{ message: string }> {
+            return apiClient.put<{ message: string }>(
+                apiConfig.endpoints.profile.updatePassword,
+                data
+            );
+        },
+
+        /**
+         * Update settings/preferences
+         */
+        async updateSettings(data: UpdateSettingsData): Promise<UserProfile> {
+            return apiClient.put<UserProfile>(
+                apiConfig.endpoints.profile.updateSettings,
+                data
+            );
+        },
+
+        /**
+         * Get referral statistics
+         */
+        async getReferralStats(): Promise<ReferralStats> {
+            return apiClient.get<ReferralStats>(
+                apiConfig.endpoints.profile.referralStats
+            );
+        },
+
+        /**
+         * Delete account
+         */
+        async deleteAccount(
+            data: DeleteAccountData
+        ): Promise<{ message: string }> {
+            return apiClient.delete<{ message: string }>(
+                apiConfig.endpoints.profile.delete,
+                { data }
             );
         },
     },
