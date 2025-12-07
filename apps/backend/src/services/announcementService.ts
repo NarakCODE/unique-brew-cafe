@@ -152,6 +152,29 @@ export const announcementService = {
   },
 
   /**
+   * Get all announcements for admin users (no filtering)
+   * Admin users can see all announcements regardless of status, date, or target audience
+   */
+  async getAdminAnnouncements(userId?: string): Promise<IAnnouncement[]> {
+    if (!userId) {
+      throw new NotFoundError('User ID is required for admin announcements');
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new NotFoundError('User not found');
+    }
+
+    // Verify user has admin role
+    if (user.role !== 'admin') {
+      throw new NotFoundError('Access denied. Admin role required.');
+    }
+
+    // Return all announcements for admin to manage
+    return Announcement.find({}).sort({ priority: -1, createdAt: -1 });
+  },
+
+  /**
    * Get announcement by ID
    */
   async getAnnouncementById(id: string): Promise<IAnnouncement> {

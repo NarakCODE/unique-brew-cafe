@@ -8,6 +8,7 @@ import {
   getAnnouncement,
   trackView,
   trackClick,
+  getAdminAnnouncements,
 } from '../controllers/announcementController.js';
 import { authenticate, optionalAuthenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
@@ -16,6 +17,12 @@ const router: Router = express.Router();
 
 // Public routes (some with optional auth for targeting)
 router.get('/', optionalAuthenticate, getAnnouncements);
+router.get(
+  '/all',
+  authenticate,
+  authorize({ roles: ['admin'] }),
+  getAdminAnnouncements
+);
 router.get('/:id', getAnnouncement);
 router.post('/:id/view', trackView);
 router.post('/:id/click', trackClick);

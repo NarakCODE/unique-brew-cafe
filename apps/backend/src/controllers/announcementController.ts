@@ -114,6 +114,23 @@ export const getAnnouncements = asyncHandler(
 );
 
 /**
+ * Get admin announcements
+ * GET /admin/announcements
+ */
+export const getAdminAnnouncements = asyncHandler(
+  async (req: Request, res: Response) => {
+    const adminAnnouncements = await announcementService.getAdminAnnouncements(
+      req.userId
+    );
+
+    res.status(200).json({
+      success: true,
+      data: adminAnnouncements,
+    });
+  }
+);
+
+/**
  * Get announcement details
  * GET /announcements/:id
  */
