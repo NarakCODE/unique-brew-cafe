@@ -38,6 +38,9 @@ import type {
     UpdatePasswordData,
     ReferralStats,
     DeleteAccountData,
+    Store,
+    CreateStoreData,
+    UpdateStoreData,
 } from "@/types";
 
 // ============================================================================
@@ -253,6 +256,95 @@ export const api = {
             return apiClient.patch<User>(
                 apiConfig.endpoints.users.updateRole(id),
                 { role }
+            );
+        },
+    },
+
+    // ========================================
+    // STORES
+    // ========================================
+    stores: {
+        /**
+         * Get list of stores (public)
+         */
+        async list(params?: {
+            latitude?: number;
+            longitude?: number;
+            radius?: number;
+            city?: string;
+            page?: number;
+            limit?: number;
+        }): Promise<PaginatedResponse<Store>> {
+            const url = buildUrl(apiConfig.endpoints.stores.list, params);
+            return apiClient.getPaginated<Store>(url);
+        },
+
+        /**
+         * Get all stores including inactive (admin only)
+         */
+        async adminList(params?: {
+            page?: number;
+            limit?: number;
+            city?: string;
+            isActive?: boolean;
+            sortBy?: string;
+            sortOrder?: "asc" | "desc";
+        }): Promise<PaginatedResponse<Store>> {
+            const url = buildUrl(apiConfig.endpoints.stores.adminList, params);
+            return apiClient.getPaginated<Store>(url);
+        },
+
+        /**
+         * Get store by ID
+         */
+        async get(id: string): Promise<Store> {
+            return apiClient.get<Store>(apiConfig.endpoints.stores.get(id));
+        },
+
+        /**
+         * Get store by Slug
+         */
+        async getBySlug(slug: string): Promise<Store> {
+            return apiClient.get<Store>(
+                apiConfig.endpoints.stores.getBySlug(slug)
+            );
+        },
+
+        /**
+         * Create store (admin only)
+         */
+        async create(data: CreateStoreData): Promise<Store> {
+            return apiClient.post<Store>(
+                apiConfig.endpoints.stores.create,
+                data
+            );
+        },
+
+        /**
+         * Update store (admin only)
+         */
+        async update(id: string, data: UpdateStoreData): Promise<Store> {
+            return apiClient.patch<Store>(
+                apiConfig.endpoints.stores.update(id),
+                data
+            );
+        },
+
+        /**
+         * Delete store (admin only)
+         */
+        async delete(id: string): Promise<void> {
+            return apiClient.delete<void>(
+                apiConfig.endpoints.stores.delete(id)
+            );
+        },
+
+        /**
+         * Toggle store status (admin only)
+         */
+        async toggleStatus(id: string): Promise<Store> {
+            return apiClient.patch<Store>(
+                apiConfig.endpoints.stores.toggleStatus(id)
             );
         },
     },

@@ -1,5 +1,5 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
-import { ApiResponse, ApiError } from "@/types/api";
+import { ApiResponse, ApiError, PaginatedResponse } from "@/types/api";
 import { useAuthStore } from "@/store/auth.store";
 
 // API Configuration
@@ -190,6 +190,17 @@ class AxiosApiClient {
         return response.data.data;
     }
 
+    async getPaginated<T>(
+        url: string,
+        config?: AxiosRequestConfig
+    ): Promise<PaginatedResponse<T>> {
+        const response = await this.client.get<PaginatedResponse<T>>(
+            url,
+            config
+        );
+        return response.data;
+    }
+
     async post<T>(
         url: string,
         data?: unknown,
@@ -260,7 +271,8 @@ class FetchApiClient {
 
     private async request<T>(
         url: string,
-        options: RequestInit = {}
+        options: RequestInit = {},
+        unwrap = true
     ): Promise<T> {
         const { accessToken } = useAuthStore.getState();
 
@@ -271,9 +283,8 @@ class FetchApiClient {
         };
 
         if (accessToken) {
-            (
-                headers as Record<string, string>
-            ).Authorization = `Bearer ${accessToken}`;
+            (headers as Record<string, string>).Authorization =
+                `Bearer ${accessToken}`;
         }
 
         // Create abort controller for timeout
@@ -301,7 +312,10 @@ class FetchApiClient {
                 throw this.transformError(data, response.status);
             }
 
-            return data.data as T;
+            if (unwrap) {
+                return data.data as T;
+            }
+            return data as T;
         } catch (error) {
             clearTimeout(timeoutId);
 
@@ -334,12 +348,13 @@ class FetchApiClient {
 
     private async handleUnauthorized<T>(
         url: string,
-        options: RequestInit
+        options: RequestInit,
+        unwrap = true
     ): Promise<T> {
         if (this.isRefreshing) {
             return new Promise((resolve, reject) => {
                 this.failedQueue.push({ resolve, reject });
-            }).then(() => this.request<T>(url, options)) as Promise<T>;
+            }).then(() => this.request<T>(url, options, unwrap)) as Promise<T>;
         }
 
         this.isRefreshing = true;
@@ -381,7 +396,7 @@ class FetchApiClient {
             this.processQueue(null);
 
             // Retry the original request
-            return this.request<T>(url, options);
+            return this.request<T>(url, options, unwrap);
         } catch (error) {
             this.processQueue(error);
             useAuthStore.getState().logout();
@@ -420,6 +435,17 @@ class FetchApiClient {
     // HTTP Methods
     async get<T>(url: string, config?: RequestInit): Promise<T> {
         return this.request<T>(url, { ...config, method: "GET" });
+    }
+
+    async getPaginated<T>(
+        url: string,
+        config?: RequestInit
+    ): Promise<PaginatedResponse<T>> {
+        return this.request<PaginatedResponse<T>>(
+            url,
+            { ...config, method: "GET" },
+            false
+        );
     }
 
     async post<T>(

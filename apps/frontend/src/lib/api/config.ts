@@ -35,6 +35,23 @@ export const apiConfig = {
             updateRole: (id: string) => `/users/${id}/role`,
         },
 
+        // Stores
+        stores: {
+            list: "/stores",
+            adminList: "/stores/admin/all",
+            get: (id: string) => `/stores/${id}`,
+            getBySlug: (slug: string) => `/stores/slug/${slug}`,
+            create: "/stores",
+            update: (id: string) => `/stores/${id}`,
+            delete: (id: string) => `/stores/${id}`,
+            toggleStatus: (id: string) => `/stores/${id}/status`,
+            pickupTimes: (id: string) => `/stores/${id}/pickup-times`,
+            gallery: (id: string) => `/stores/${id}/gallery`,
+            hours: (id: string) => `/stores/${id}/hours`,
+            location: (id: string) => `/stores/${id}/location`,
+            menu: (id: string) => `/stores/${id}/menu`,
+        },
+
         // Products
         products: {
             list: "/products",
