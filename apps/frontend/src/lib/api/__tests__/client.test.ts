@@ -44,14 +44,16 @@ describe("API Client", () => {
 
     describe("ApiClientError", () => {
         it("should create an error with all properties", () => {
-            const error = new ApiClientError("Test error", 400, "TEST_ERROR", {
-                field: "value",
-            });
+            const error = new ApiClientError("Test error", 400, "TEST_ERROR", [
+                { field: "field", message: "Error message", code: "code" },
+            ]);
 
             expect(error.message).toBe("Test error");
             expect(error.statusCode).toBe(400);
             expect(error.code).toBe("TEST_ERROR");
-            expect(error.details).toEqual({ field: "value" });
+            expect(error.errors).toEqual([
+                { field: "field", message: "Error message", code: "code" },
+            ]);
             expect(error.name).toBe("ApiClientError");
         });
     });

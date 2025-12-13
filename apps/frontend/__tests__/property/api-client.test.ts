@@ -9,18 +9,24 @@ describe("Property 19: API Client & Error Handling", () => {
                 fc.string(),
                 fc.integer(),
                 fc.string(),
-                fc.dictionary(fc.string(), fc.string()),
-                (message, status, code, details) => {
+                fc.array(
+                    fc.record({
+                        field: fc.string(),
+                        message: fc.string(),
+                        code: fc.string(),
+                    })
+                ),
+                (message, status, code, errors) => {
                     const error = new ApiClientError(
                         message,
                         status,
                         code,
-                        details
+                        errors
                     );
                     expect(error.message).toBe(message);
                     expect(error.statusCode).toBe(status);
                     expect(error.code).toBe(code);
-                    expect(error.details).toEqual(details);
+                    expect(error.errors).toEqual(errors);
                     expect(error.name).toBe("ApiClientError");
                 }
             )

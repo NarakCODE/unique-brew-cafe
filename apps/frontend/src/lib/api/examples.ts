@@ -211,7 +211,7 @@ export async function handleManualApiCall() {
                 message: error.message,
                 code: error.code,
                 status: error.statusCode,
-                details: error.details,
+                errors: error.errors,
             });
         } else {
             console.error("Unexpected error:", error);

@@ -6,6 +6,7 @@ import { columns } from "./columns";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { useAdminStores } from "@/hooks/use-stores";
 import { Loader2, Plus } from "lucide-react";
+import Link from "next/link";
 
 export default function StoresPage() {
     const { data: response, isLoading } = useAdminStores({
@@ -28,9 +29,11 @@ export default function StoresPage() {
     return (
         <div>
             <PageHeader title="Stores" description="Manage your stores here.">
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Store
+                <Button asChild>
+                    <Link href="/stores/create">
+                        <Plus className="mr-2 h-4 w-4" />
+                        Add Store
+                    </Link>
                 </Button>
             </PageHeader>
             <DataTable

@@ -1,4 +1,3 @@
-
 // API Response Types
 export interface ApiResponse<T> {
     success: boolean;
@@ -19,11 +18,16 @@ export interface PaginatedResponse<T> {
     };
 }
 
+export interface ApiValidationError {
+    field: string;
+    message: string;
+    code: string;
+}
+
 export interface ApiError {
     success: false;
-    error: {
-        code: string;
-        message: string;
-        details?: Record<string, string>;
-    };
+    message: string;
+    errorCode: string;
+    errors?: ApiValidationError[];
+    stack?: string;
 }

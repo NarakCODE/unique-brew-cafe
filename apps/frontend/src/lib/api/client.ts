@@ -1,5 +1,10 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError } from "axios";
-import { ApiResponse, ApiError, PaginatedResponse } from "@/types/api";
+import {
+    ApiResponse,
+    ApiError,
+    PaginatedResponse,
+    ApiValidationError,
+} from "@/types/api";
 import { useAuthStore } from "@/store/auth.store";
 
 // API Configuration
@@ -12,7 +17,7 @@ export class ApiClientError extends Error {
         message: string,
         public statusCode?: number,
         public code?: string,
-        public details?: Record<string, string>
+        public errors?: ApiValidationError[]
     ) {
         super(message);
         this.name = "ApiClientError";
@@ -162,10 +167,10 @@ class AxiosApiClient {
         if (error.response?.data) {
             const apiError = error.response.data;
             return new ApiClientError(
-                apiError.error.message,
+                apiError.message,
                 error.response.status,
-                apiError.error.code,
-                apiError.error.details
+                apiError.errorCode,
+                apiError.errors
             );
         }
 
@@ -425,10 +430,10 @@ class FetchApiClient {
 
     private transformError(data: ApiError, status: number): ApiClientError {
         return new ApiClientError(
-            data.error.message,
+            data.message,
             status,
-            data.error.code,
-            data.error.details
+            data.errorCode,
+            data.errors
         );
     }
 

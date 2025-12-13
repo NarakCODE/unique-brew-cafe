@@ -42,7 +42,7 @@ export function QueryProvider({ children }: { children: React.ReactNode }) {
                                     message: error.message,
                                     code: error.code,
                                     status: error.statusCode,
-                                    details: error.details,
+                                    errors: error.errors,
                                 });
                             }
                         },

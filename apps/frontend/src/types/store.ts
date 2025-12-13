@@ -49,6 +49,7 @@ export interface Store {
 
 export interface CreateStoreData {
     name: string;
+    slug: string;
     description?: string;
     address: string;
     city: string;
