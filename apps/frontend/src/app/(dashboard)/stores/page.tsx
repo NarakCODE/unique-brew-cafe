@@ -15,7 +15,9 @@ import {
     OnChangeFn,
 } from "@tanstack/react-table";
 
-export default function StoresPage() {
+import { Suspense } from "react";
+
+function StoresContent() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -200,5 +202,13 @@ export default function StoresPage() {
                 ]}
             />
         </div>
+    );
+}
+
+export default function StoresPage() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <StoresContent />
+        </Suspense>
     );
 }

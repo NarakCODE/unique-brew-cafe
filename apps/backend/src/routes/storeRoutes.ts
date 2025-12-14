@@ -28,7 +28,7 @@ interface MulterRequest extends Request {
   file?: Express.Multer.File;
 }
 
-const processMultipart = (req: Request, res: Response, next: NextFunction) => {
+const processMultipart = (req: Request, _res: Response, next: NextFunction) => {
   const multerReq = req as MulterRequest;
   if (multerReq.file) {
     req.body.imageUrl = multerReq.file.path;
@@ -42,6 +42,8 @@ const processMultipart = (req: Request, res: Response, next: NextFunction) => {
         req.body[field] = JSON.parse(req.body[field]);
       } catch (error) {
         // Let validation handle invalid format
+
+        throw new Error('Invalid JSON format for ' + field + error);
       }
     }
   });

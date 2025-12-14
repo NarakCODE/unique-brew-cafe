@@ -1,8 +1,5 @@
 import axios from 'axios';
 import FormData from 'form-data';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 
 // Valid 1x1 PNG Buffer
 const PNG_BUFFER = Buffer.from(
@@ -94,13 +91,17 @@ async function testUpload() {
         '⚠️ Verification Warning: Image URL might not be from Cloudinary or is missing.'
       );
     }
-  } catch (error: any) {
+  } catch (error) {
     console.error('\n❌ Test Failed!');
-    if (error.response) {
-      console.error('Status:', error.response.status);
-      console.error('Data:', JSON.stringify(error.response.data, null, 2));
-    } else {
+
+    if (axios.isAxiosError(error)) {
+      console.error('Status:', error.response?.status);
+      console.error('Data:', JSON.stringify(error.response?.data, null, 2));
+      console.error('Message:', error.message);
+    } else if (error instanceof Error) {
       console.error('Error:', error.message);
+    } else {
+      console.error('Unknown Error:', error);
     }
   }
 }

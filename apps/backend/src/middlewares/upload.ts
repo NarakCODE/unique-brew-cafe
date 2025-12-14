@@ -8,12 +8,12 @@ const storage = new CloudinaryStorage({
   params: {
     folder: 'stores',
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp'],
-    public_id: (req: Request, file: Express.Multer.File) => {
+    public_id: (_req: Request, file: Express.Multer.File) => {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
       const name = file.originalname.split('.')[0];
       return `${name}-${uniqueSuffix}`;
     },
-  } as any, // casting to any to avoid strict type definition issues often found with this library
+  } as Record<string, unknown>,
 });
 
 export const upload = multer({
