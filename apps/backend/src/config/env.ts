@@ -11,4 +11,8 @@ export const config = {
   brevoSenderEmail: process.env.BREVO_SENDER_EMAIL || '',
   brevoSenderName: process.env.BREVO_SENDER_NAME || '',
   brevoPartnerKey: process.env.BREVO_PARTNER_KEY || '',
+
+  cloudinaryCloudName: process.env.CLOUDINARY_CLOUD_NAME || '',
+  cloudinaryApiKey: process.env.CLOUDINARY_API_KEY || '',
+  cloudinaryApiSecret: process.env.CLOUDINARY_API_SECRET || '',
 };

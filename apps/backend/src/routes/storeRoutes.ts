@@ -1,4 +1,9 @@
-import express, { Router } from 'express';
+import express, {
+  Router,
+  type Request,
+  type Response,
+  type NextFunction,
+} from 'express';
 import * as storeController from '../controllers/storeController.js';
 import * as productController from '../controllers/productController.js';
 import { authenticate } from '../middlewares/auth.js';
@@ -15,13 +20,42 @@ import {
   updateStoreSchema,
 } from '../schemas/index.js';
 
+import { upload } from '../middlewares/upload.js';
+
 const router: Router = express.Router();
+
+interface MulterRequest extends Request {
+  file?: Express.Multer.File;
+}
+
+const processMultipart = (req: Request, res: Response, next: NextFunction) => {
+  const multerReq = req as MulterRequest;
+  if (multerReq.file) {
+    req.body.imageUrl = multerReq.file.path;
+  }
+
+  // Parse JSON fields that might be strings in multipart/form-data
+  const jsonFields = ['openingHours', 'features', 'specialHours', 'images'];
+  jsonFields.forEach((field) => {
+    if (req.body && req.body[field] && typeof req.body[field] === 'string') {
+      try {
+        req.body[field] = JSON.parse(req.body[field]);
+      } catch (error) {
+        // Let validation handle invalid format
+      }
+    }
+  });
+
+  next();
+};
 
 // Admin-only routes - Create store
 router.post(
   '/',
   authenticate,
   authorize({ roles: ['admin'] }),
+  upload.single('image'),
+  processMultipart,
   validate(createStoreSchema),
   storeController.createStore
 );
@@ -131,6 +165,8 @@ router.patch(
   '/:id',
   authenticate,
   authorize({ roles: ['admin'] }),
+  upload.single('image'),
+  processMultipart,
   validate(updateStoreSchema),
   storeController.updateStore
 );
