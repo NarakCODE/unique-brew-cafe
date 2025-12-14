@@ -89,7 +89,7 @@ describe('Stores API', () => {
           city: 'New City',
           state: 'New State',
           country: 'New Country',
-          phone: '+9876543210',
+          phone: '0987654321',
           latitude: 40.7128,
           longitude: -74.006,
           slug: 'new-store',
