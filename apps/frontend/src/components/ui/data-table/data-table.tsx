@@ -94,13 +94,13 @@ export function DataTable<TData, TValue>({
     const table = useReactTable({
         data,
         columns,
-        pageCount: pageCount ?? -1, // -1 means unknown page count for client-side, but if server-side needs accurate total
+        pageCount: manualPagination ? (pageCount ?? -1) : undefined,
         state: {
             sorting,
             columnVisibility,
             rowSelection,
             columnFilters,
-            pagination,
+            ...(pagination ? { pagination } : {}),
         },
         enableRowSelection: true,
         onRowSelectionChange: setRowSelection,
