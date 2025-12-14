@@ -69,6 +69,7 @@ export const reportService = {
       totalOrders,
       activeUsers,
       topProducts: topProductsData,
+      topProductsAmount: topProductsAmount,
     };
   },
 
