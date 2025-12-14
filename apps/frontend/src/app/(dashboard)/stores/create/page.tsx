@@ -29,6 +29,8 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { PageHeader } from "@/components/layout/page-header";
+import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const formSchema = z.object({
     name: z.string().min(1, "Store name is required").max(100),
@@ -40,7 +42,7 @@ const formSchema = z.object({
             /^[a-z0-9-]+$/,
             "Slug must contain only lowercase letters, numbers, and hyphens"
         ),
-    description: z.string().max(1000).or(z.literal("")),
+    description: z.string().max(1000),
     phone: z
         .string()
         .regex(
@@ -51,8 +53,8 @@ const formSchema = z.object({
     address: z.string().min(1, "Address is required"),
     city: z.string().min(1, "City is required"),
     state: z.string().min(1, "State is required"),
-    country: z.string(),
-    postalCode: z.string().or(z.literal("")),
+    country: z.string().default("Cambodia"),
+    postalCode: z.string(),
     latitude: z
         .string()
         .min(1, "Latitude is required")
@@ -73,6 +75,13 @@ const formSchema = z.object({
                 parseFloat(val) <= 180,
             "Must be valid longitude (-180 to 180)"
         ),
+    isActive: z.boolean(),
+    features: z.object({
+        parking: z.boolean(),
+        wifi: z.boolean(),
+        outdoorSeating: z.boolean(),
+        driveThrough: z.boolean(),
+    }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -82,7 +91,8 @@ export default function StoreCreatePage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const form = useForm<FormValues>({
-        resolver: zodResolver(formSchema),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        resolver: zodResolver(formSchema) as any,
         defaultValues: {
             name: "",
             slug: "",
@@ -96,14 +106,20 @@ export default function StoreCreatePage() {
             postalCode: "",
             latitude: "",
             longitude: "",
+            isActive: true,
+            features: {
+                parking: false,
+                wifi: false,
+                outdoorSeating: false,
+                driveThrough: false,
+            },
         },
     });
 
     async function onSubmit(values: FormValues) {
         setIsSubmitting(true);
         try {
-            // Construct the full payload including openingHours (defaulting to standard hours for now)
-            // In a real app, we'd have a UI to edit these.
+            // Construct the full payload
             const payload = {
                 ...values,
                 latitude: parseFloat(values.latitude),
@@ -117,13 +133,24 @@ export default function StoreCreatePage() {
                     saturday: { open: "09:00", close: "21:00" },
                     sunday: { open: "09:00", close: "21:00" },
                 },
-                // Remove empty strings for optional fields
+                // Remove empty strings for optional fields to match strict API expectations if needed
+                // But z.string() allows empty string, backend schema allows optional.
+                // If backend validation says `z.string().optional()`, it means string OR undefined.
+                // If I send "", it depends on backend. Backend schema says:
+                // email: emailSchema.optional(). emailSchema is z.string().email().
+                // So "" is INVALID for email. I MUST send undefined if empty.
                 email: values.email === "" ? undefined : values.email,
-                description:
-                    values.description === "" ? undefined : values.description,
+
+                // description: max 1000. optional.
+                // If I send "", backend z.string().trim().max(1000).optional()
+                // "" is valid string.
+                description: values.description,
+
+                // postalCode: optional.
                 postalCode:
                     values.postalCode === "" ? undefined : values.postalCode,
-                images: [], // Start with no images
+
+                images: [],
             };
 
             await api.stores.create(payload);
@@ -177,7 +204,7 @@ export default function StoreCreatePage() {
                                                     {...field}
                                                     onChange={(e) => {
                                                         field.onChange(e);
-                                                        // Auto-generate slug from name if slug is empty or matches previous slugified name
+                                                        // Auto-generate slug logic
                                                         if (
                                                             !form.getValues(
                                                                 "slug"
@@ -254,6 +281,129 @@ export default function StoreCreatePage() {
                                                 />
                                             </FormControl>
                                             <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <div className="flex flex-row items-center justify-between rounded-lg border p-4">
+                                    <div className="space-y-0.5">
+                                        <FormLabel className="text-base">
+                                            Active Status
+                                        </FormLabel>
+                                        <FormDescription>
+                                            Disabling will hide the store from
+                                            consumers.
+                                        </FormDescription>
+                                    </div>
+                                    <FormField
+                                        control={form.control}
+                                        name="isActive"
+                                        render={({ field }) => (
+                                            <FormControl>
+                                                <Switch
+                                                    checked={field.value}
+                                                    onCheckedChange={
+                                                        field.onChange
+                                                    }
+                                                />
+                                            </FormControl>
+                                        )}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Store Features */}
+                        <Card className="col-span-2 lg:col-span-1">
+                            <CardHeader>
+                                <CardTitle>Features</CardTitle>
+                                <CardDescription>
+                                    Select available amenities.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {/* Parking */}
+                                <FormField
+                                    control={form.control}
+                                    name="features.parking"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={
+                                                        field.onChange
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel>Parking</FormLabel>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                                {/* Wifi */}
+                                <FormField
+                                    control={form.control}
+                                    name="features.wifi"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={
+                                                        field.onChange
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel>
+                                                    Free Wi-Fi
+                                                </FormLabel>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                                {/* Outdoor Seating */}
+                                <FormField
+                                    control={form.control}
+                                    name="features.outdoorSeating"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={
+                                                        field.onChange
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel>
+                                                    Outdoor Seating
+                                                </FormLabel>
+                                            </div>
+                                        </FormItem>
+                                    )}
+                                />
+                                {/* Drive Through */}
+                                <FormField
+                                    control={form.control}
+                                    name="features.driveThrough"
+                                    render={({ field }) => (
+                                        <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                                            <FormControl>
+                                                <Checkbox
+                                                    checked={field.value}
+                                                    onCheckedChange={
+                                                        field.onChange
+                                                    }
+                                                />
+                                            </FormControl>
+                                            <div className="space-y-1 leading-none">
+                                                <FormLabel>
+                                                    Drive Through
+                                                </FormLabel>
+                                            </div>
                                         </FormItem>
                                     )}
                                 />

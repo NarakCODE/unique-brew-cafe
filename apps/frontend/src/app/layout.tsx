@@ -5,6 +5,7 @@ import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { SessionTimeoutHandler } from "@/components/auth/session-timeout-handler";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -36,6 +37,7 @@ export default function RootLayout({
                         <AuthProvider>
                             <SessionTimeoutHandler />
                             {children}
+                            <Toaster />
                         </AuthProvider>
                     </QueryProvider>
                 </ThemeProvider>

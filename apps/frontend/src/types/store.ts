@@ -12,13 +12,6 @@ export interface StoreFeatures {
     driveThrough?: boolean;
 }
 
-export interface StoreFeatures {
-    parking?: boolean;
-    wifi?: boolean;
-    outdoorSeating?: boolean;
-    driveThrough?: boolean;
-}
-
 export interface Store {
     id: string;
     name: string;

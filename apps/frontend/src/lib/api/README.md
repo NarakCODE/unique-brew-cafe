@@ -6,23 +6,23 @@ This directory contains the API client implementation for the Corner Coffee appl
 
 The API client provides two implementations:
 
--   **Axios-based client** (default, recommended)
--   **Fetch-based client** (lightweight alternative)
+- **Axios-based client** (default, recommended)
+- **Fetch-based client** (lightweight alternative)
 
 Both implementations feature:
 
--   ✅ Automatic token management
--   ✅ Token refresh on 401 errors
--   ✅ Request/response interceptors
--   ✅ Error handling and transformation
--   ✅ TypeScript support
--   ✅ Centralized configuration
+- ✅ Automatic token management
+- ✅ Token refresh on 401 errors
+- ✅ Request/response interceptors
+- ✅ Error handling and transformation
+- ✅ TypeScript support
+- ✅ Centralized configuration
 
 ## Files
 
--   **`client.ts`** - Core API client implementation (Axios & Fetch)
--   **`config.ts`** - API configuration and endpoint definitions
--   **`index.ts`** - High-level API service layer with convenience methods
+- **`client.ts`** - Core API client implementation (Axios & Fetch)
+- **`config.ts`** - API configuration and endpoint definitions
+- **`index.ts`** - High-level API service layer with convenience methods
 
 ## Usage
 
@@ -54,7 +54,7 @@ const order = await api.orders.create({
 
 ### Using the Client Directly
 
-```typescript
+````typescript
 import { apiClient, fetchClient } from "@/lib/api";
 
 // Using Axios client (default)
@@ -64,7 +64,37 @@ const result = await apiClient.post("/api/custom-endpoint", { key: "value" });
 // Using Fetch client
 const data = await fetchClient.get("/api/custom-endpoint");
 const result = await fetchClient.post("/api/custom-endpoint", { key: "value" });
-```
+
+### Store Management
+```typescript
+import { api } from "@/lib/api";
+
+// Create a new store
+const newStore = await api.stores.create({
+    name: "Unique Brew - Riverside",
+    slug: "unique-brew-riverside",
+    description: "Scenic view by the river.",
+    phone: "012345678",
+    address: "Riverside",
+    city: "Phnom Penh",
+    state: "Phnom Penh",
+    latitude: 11.5564,
+    longitude: 104.9282,
+    openingHours: {
+        monday: { open: "08:00", close: "20:00" },
+        // ... other days
+    },
+    // ... other fields
+});
+
+// List stores
+const stores = await api.stores.list({
+    city: "Phnom Penh",
+    limit: 10
+});
+````
+
+````
 
 ### Error Handling
 
@@ -81,7 +111,7 @@ try {
         console.error("Details:", error.details);
     }
 }
-```
+````
 
 ### Building Custom URLs
 
@@ -301,9 +331,9 @@ Ensure your backend allows requests from your frontend origin. Check backend COR
 
 Check that:
 
--   The API server is running
--   The `NEXT_PUBLIC_API_URL` is correct
--   Firewall/network allows the connection
+- The API server is running
+- The `NEXT_PUBLIC_API_URL` is correct
+- Firewall/network allows the connection
 
 ### Type Errors
 
