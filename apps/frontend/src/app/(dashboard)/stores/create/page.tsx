@@ -31,6 +31,13 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import {
+    Map,
+    MapMarker,
+    MapPopup,
+    MapTileLayer,
+    MapZoomControl,
+} from "@/components/ui/map";
 
 const formSchema = z.object({
     name: z.string().min(1, "Store name is required").max(100),
@@ -605,6 +612,17 @@ export default function StoreCreatePage() {
                     </div>
                 </form>
             </Form>
+
+            <Map center={[11.5564, 104.9282]} zoom={13}>
+                <MapTileLayer
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}"
+                    attribution="Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC"
+                />
+                <MapZoomControl />
+                <MapMarker position={[11.5564, 104.9282]}>
+                    <MapPopup>A map component for shadcn/ui.</MapPopup>
+                </MapMarker>
+            </Map>
         </div>
     );
 }
