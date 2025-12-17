@@ -9,6 +9,7 @@ import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-col
 import { format } from "date-fns";
 import Image from "next/image";
 import { DataTableRowActions } from "./data-table-row-actions";
+import { AvatarImageHandler } from "@/components/shared/avatar-image-handler";
 
 export const columns: ColumnDef<Store>[] = [
     {
@@ -46,25 +47,15 @@ export const columns: ColumnDef<Store>[] = [
             const imageUrl = row.getValue("imageUrl") as string;
             const name = row.getValue("name") as string;
 
-            if (!imageUrl) {
-                return (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-                        <span className="text-xs text-muted-foreground">
-                            No Item
-                        </span>
-                    </div>
-                );
-            }
-
             return (
-                <div className="relative h-10 w-10 overflow-hidden rounded-full">
-                    <Image
-                        src={imageUrl}
-                        alt={name || "Store logo"}
-                        fill
-                        className="object-cover"
-                    />
-                </div>
+                <AvatarImageHandler
+                    src={imageUrl}
+                    alt={name}
+                    fallback={name.charAt(0).toUpperCase()}
+                    className={
+                        "relative h-10 w-10 overflow-hidden rounded-full"
+                    }
+                />
             );
         },
         enableSorting: false,
