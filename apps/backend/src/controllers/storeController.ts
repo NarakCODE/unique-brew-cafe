@@ -7,6 +7,17 @@ export const createStore = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const storeData = req.body;
 
+    // Explicitly handle file upload if present
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const file = (req as any).file;
+    if (file && file.path) {
+      storeData.imageUrl = file.path;
+      // Also add to images array if not present
+      if (!storeData.images) {
+        storeData.images = [file.path];
+      }
+    }
+
     const store = await storeService.createStore(storeData);
 
     res.status(201).json({

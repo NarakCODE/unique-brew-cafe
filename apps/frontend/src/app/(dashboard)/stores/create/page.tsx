@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -40,6 +40,8 @@ import {
 } from "@/components/ui/input-group";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Refresh01Icon } from "@hugeicons/core-free-icons";
+import { FileDropzone } from "@/components/shared/dropzone";
+import { FileList } from "@/components/shared/file-list";
 
 const formSchema = z.object({
     name: z.string().min(1, "Store name is required").max(100),
@@ -99,6 +101,10 @@ type FormValues = z.infer<typeof formSchema>;
 export default function StoreCreatePage() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [fileProgresses, setFileProgresses] = useState<
+        Record<string, number>
+    >({});
 
     const form = useForm<FormValues>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -130,68 +136,43 @@ export default function StoreCreatePage() {
     async function onSubmit(values: FormValues) {
         setIsSubmitting(true);
         try {
+            const formData = new FormData();
+            formData.append("name", values.name);
+            formData.append("slug", values.slug);
+            if (values.description)
+                formData.append("description", values.description);
+            formData.append("phone", values.phone);
+            if (values.email) formData.append("email", values.email);
+            formData.append("address", values.address);
+            formData.append("city", values.city);
+            formData.append("state", values.state);
+            formData.append("country", values.country);
+            if (values.postalCode)
+                formData.append("postalCode", values.postalCode);
+            formData.append("latitude", values.latitude);
+            formData.append("longitude", values.longitude);
+            formData.append("isActive", String(values.isActive));
+            formData.append("features", JSON.stringify(values.features));
+            formData.append(
+                "openingHours",
+                JSON.stringify({
+                    monday: { open: "08:00", close: "20:00" },
+                    tuesday: { open: "08:00", close: "20:00" },
+                    wednesday: { open: "08:00", close: "20:00" },
+                    thursday: { open: "08:00", close: "20:00" },
+                    friday: { open: "08:00", close: "20:00" },
+                    saturday: { open: "09:00", close: "21:00" },
+                    sunday: { open: "09:00", close: "21:00" },
+                })
+            );
+
             if (values.image) {
-                const formData = new FormData();
                 formData.append("image", values.image);
-                formData.append("name", values.name);
-                formData.append("slug", values.slug);
-                if (values.description)
-                    formData.append("description", values.description);
-                formData.append("phone", values.phone);
-                if (values.email) formData.append("email", values.email);
-                formData.append("address", values.address);
-                formData.append("city", values.city);
-                formData.append("state", values.state);
-                formData.append("country", values.country);
-                if (values.postalCode)
-                    formData.append("postalCode", values.postalCode);
-                formData.append("latitude", values.latitude);
-                formData.append("longitude", values.longitude);
-                formData.append("isActive", String(values.isActive));
-                formData.append("features", JSON.stringify(values.features));
-                formData.append(
-                    "openingHours",
-                    JSON.stringify({
-                        monday: { open: "08:00", close: "20:00" },
-                        tuesday: { open: "08:00", close: "20:00" },
-                        wednesday: { open: "08:00", close: "20:00" },
-                        thursday: { open: "08:00", close: "20:00" },
-                        friday: { open: "08:00", close: "20:00" },
-                        saturday: { open: "09:00", close: "21:00" },
-                        sunday: { open: "09:00", close: "21:00" },
-                    })
-                );
-
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                await api.stores.create(formData as any);
-            } else {
-                const payload = {
-                    ...values,
-                    latitude: parseFloat(values.latitude),
-                    longitude: parseFloat(values.longitude),
-                    openingHours: {
-                        monday: { open: "08:00", close: "20:00" },
-                        tuesday: { open: "08:00", close: "20:00" },
-                        wednesday: { open: "08:00", close: "20:00" },
-                        thursday: { open: "08:00", close: "20:00" },
-                        friday: { open: "08:00", close: "20:00" },
-                        saturday: { open: "09:00", close: "21:00" },
-                        sunday: { open: "09:00", close: "21:00" },
-                    },
-
-                    email: values.email === "" ? undefined : values.email,
-
-                    description: values.description,
-
-                    postalCode:
-                        values.postalCode === ""
-                            ? undefined
-                            : values.postalCode,
-
-                    images: [],
-                };
-                await api.stores.create(payload);
             }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await api.stores.create(formData as any);
+
             toast.success("Store created successfully");
             router.push("/stores");
             router.refresh();
@@ -219,6 +200,44 @@ export default function StoreCreatePage() {
 
         if (isSlugEmpty || isSlugMatchingName) {
             form.setValue("slug", slugify(nameValue), { shouldValidate: true });
+        }
+    };
+
+    const handleFileSelect = (files: FileList | null) => {
+        if (files && files.length > 0) {
+            const file = files[0];
+            form.setValue("image", file, { shouldValidate: true });
+            setFileProgresses({ [file.name]: 100 });
+        }
+    };
+
+    const handleDrop = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+            const file = e.dataTransfer.files[0];
+            form.setValue("image", file, { shouldValidate: true });
+            setFileProgresses({ [file.name]: 100 });
+            e.dataTransfer.clearData();
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+    };
+
+    const removeFile = (filename: string) => {
+        const currentFile = form.getValues("image");
+        if (currentFile && currentFile.name === filename) {
+            form.setValue("image", undefined, { shouldValidate: true });
+            setFileProgresses({});
+        }
+    };
+
+    const handleBoxClick = () => {
+        if (fileInputRef.current) {
+            fileInputRef.current.click();
         }
     };
 
@@ -344,30 +363,45 @@ export default function StoreCreatePage() {
                                 <FormField
                                     control={form.control}
                                     name="image"
-                                    render={({
-                                        field: {
-                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                                            value: _value,
-                                            onChange,
-                                            ...field
-                                        },
-                                    }) => (
+                                    render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Store Logo</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    {...field}
-                                                    type="file"
-                                                    accept="image/*"
-                                                    onChange={(event) => {
-                                                        const file =
-                                                            event.target
-                                                                .files?.[0];
-                                                        if (file) {
-                                                            onChange(file);
-                                                        }
-                                                    }}
-                                                />
+                                                <div className="w-full">
+                                                    {!field.value && (
+                                                        <FileDropzone
+                                                            fileInputRef={
+                                                                fileInputRef
+                                                            }
+                                                            handleBoxClick={
+                                                                handleBoxClick
+                                                            }
+                                                            handleDragOver={
+                                                                handleDragOver
+                                                            }
+                                                            handleDrop={
+                                                                handleDrop
+                                                            }
+                                                            handleFileSelect={
+                                                                handleFileSelect
+                                                            }
+                                                            label="Upload Store Logo"
+                                                        />
+                                                    )}
+                                                    {field.value && (
+                                                        <FileList
+                                                            uploadedFiles={[
+                                                                field.value,
+                                                            ]}
+                                                            fileProgresses={
+                                                                fileProgresses
+                                                            }
+                                                            removeFile={
+                                                                removeFile
+                                                            }
+                                                        />
+                                                    )}
+                                                </div>
                                             </FormControl>
                                             <FormDescription>
                                                 Upload a logo for the store.

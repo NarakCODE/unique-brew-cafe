@@ -58,6 +58,11 @@ class AxiosApiClient {
                     config.headers.Authorization = `Bearer ${accessToken}`;
                 }
 
+                // Let browser set Content-Type for FormData
+                if (config.data instanceof FormData && config.headers) {
+                    delete config.headers["Content-Type"];
+                }
+
                 return config;
             },
             (error) => {

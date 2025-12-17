@@ -16,7 +16,11 @@ export function AvatarImageHandler({
 }: ReusableAvatarProps) {
     return (
         <Avatar className={cn("h-10 w-10", className)}>
-            <AvatarImage src={src || ""} alt={alt} className="object-cover" />
+            <AvatarImage
+                src={src || undefined}
+                alt={alt}
+                className="object-cover"
+            />
             <AvatarFallback className="bg-muted text-xs text-muted-foreground flex items-center justify-center">
                 {fallback}
             </AvatarFallback>
