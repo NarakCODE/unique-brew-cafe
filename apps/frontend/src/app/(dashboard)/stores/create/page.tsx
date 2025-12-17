@@ -31,6 +31,15 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
+import { slugify } from "@/lib/utils";
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput,
+} from "@/components/ui/input-group";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Refresh01Icon } from "@hugeicons/core-free-icons";
 
 const formSchema = z.object({
     name: z.string().min(1, "Store name is required").max(100),
@@ -194,6 +203,25 @@ export default function StoreCreatePage() {
         }
     }
 
+    const handleNameChange = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        fieldChange: (value: string) => void
+    ) => {
+        const nameValue = e.target.value;
+        fieldChange(nameValue); // Update the name field normally
+
+        // Logic: Only auto-update the slug if it's empty OR if it matches the previous version of the name
+        // This prevents overwriting if the user manually typed a custom slug
+        const currentSlug = form.getValues("slug");
+        const isSlugEmpty = !currentSlug;
+        const isSlugMatchingName =
+            currentSlug === slugify(nameValue.slice(0, -1)); // Check against previous keystroke
+
+        if (isSlugEmpty || isSlugMatchingName) {
+            form.setValue("slug", slugify(nameValue), { shouldValidate: true });
+        }
+    };
+
     return (
         <div>
             <PageHeader
@@ -231,51 +259,19 @@ export default function StoreCreatePage() {
                                                 <Input
                                                     placeholder="Unique Brew - Central Market"
                                                     {...field}
-                                                    onChange={(e) => {
-                                                        field.onChange(e);
-                                                        // Auto-generate slug logic
-                                                        if (
-                                                            !form.getValues(
-                                                                "slug"
-                                                            ) ||
-                                                            form.getValues(
-                                                                "slug"
-                                                            ) ===
-                                                                (
-                                                                    field.value ||
-                                                                    ""
-                                                                )
-                                                                    .toLowerCase()
-                                                                    .replace(
-                                                                        /[^a-z0-9-]/g,
-                                                                        "-"
-                                                                    )
-                                                        ) {
-                                                            form.setValue(
-                                                                "slug",
-                                                                e.target.value
-                                                                    .toLowerCase()
-                                                                    .replace(
-                                                                        /[^a-z0-9-]/g,
-                                                                        "-"
-                                                                    )
-                                                                    .replace(
-                                                                        /-+/g,
-                                                                        "-"
-                                                                    )
-                                                                    .replace(
-                                                                        /^-|-$/g,
-                                                                        ""
-                                                                    )
-                                                            );
-                                                        }
-                                                    }}
+                                                    onChange={(e) =>
+                                                        handleNameChange(
+                                                            e,
+                                                            field.onChange
+                                                        )
+                                                    }
                                                 />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
                                     )}
                                 />
+
                                 <FormField
                                     control={form.control}
                                     name="slug"
@@ -283,10 +279,42 @@ export default function StoreCreatePage() {
                                         <FormItem>
                                             <FormLabel>Slug</FormLabel>
                                             <FormControl>
-                                                <Input
-                                                    placeholder="unique-brew-central-market"
-                                                    {...field}
-                                                />
+                                                <div className="relative">
+                                                    <InputGroup>
+                                                        <InputGroupInput
+                                                            {...field}
+                                                            placeholder="Slug (e.g. unique-brew-central-market)"
+                                                        />
+                                                        <InputGroupAddon align="inline-end">
+                                                            <InputGroupButton
+                                                                aria-label="Generate"
+                                                                title="Generate"
+                                                                size="icon-xs"
+                                                                onClick={() => {
+                                                                    const name =
+                                                                        form.getValues(
+                                                                            "name"
+                                                                        );
+                                                                    form.setValue(
+                                                                        "slug",
+                                                                        slugify(
+                                                                            name
+                                                                        ),
+                                                                        {
+                                                                            shouldValidate: true,
+                                                                        }
+                                                                    );
+                                                                }}
+                                                            >
+                                                                <HugeiconsIcon
+                                                                    icon={
+                                                                        Refresh01Icon
+                                                                    }
+                                                                />{" "}
+                                                            </InputGroupButton>
+                                                        </InputGroupAddon>
+                                                    </InputGroup>
+                                                </div>
                                             </FormControl>
                                             <FormDescription>
                                                 URL-friendly identifier. Must be

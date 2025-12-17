@@ -7,7 +7,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
 
 import { format } from "date-fns";
-import Image from "next/image";
 import { DataTableRowActions } from "./data-table-row-actions";
 import { AvatarImageHandler } from "@/components/shared/avatar-image-handler";
 
