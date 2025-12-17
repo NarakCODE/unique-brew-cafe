@@ -31,13 +31,6 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
-// import {
-//     Map,
-//     MapMarker,
-//     MapPopup,
-//     MapTileLayer,
-//     MapZoomControl,
-// } from "@/components/ui/map";
 
 const formSchema = z.object({
     name: z.string().min(1, "Store name is required").max(100),
@@ -89,6 +82,7 @@ const formSchema = z.object({
         outdoorSeating: z.boolean(),
         driveThrough: z.boolean(),
     }),
+    image: z.instanceof(File).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -120,47 +114,75 @@ export default function StoreCreatePage() {
                 outdoorSeating: false,
                 driveThrough: false,
             },
+            image: undefined,
         },
     });
 
     async function onSubmit(values: FormValues) {
         setIsSubmitting(true);
         try {
-            // Construct the full payload
-            const payload = {
-                ...values,
-                latitude: parseFloat(values.latitude),
-                longitude: parseFloat(values.longitude),
-                openingHours: {
-                    monday: { open: "08:00", close: "20:00" },
-                    tuesday: { open: "08:00", close: "20:00" },
-                    wednesday: { open: "08:00", close: "20:00" },
-                    thursday: { open: "08:00", close: "20:00" },
-                    friday: { open: "08:00", close: "20:00" },
-                    saturday: { open: "09:00", close: "21:00" },
-                    sunday: { open: "09:00", close: "21:00" },
-                },
-                // Remove empty strings for optional fields to match strict API expectations if needed
-                // But z.string() allows empty string, backend schema allows optional.
-                // If backend validation says `z.string().optional()`, it means string OR undefined.
-                // If I send "", it depends on backend. Backend schema says:
-                // email: emailSchema.optional(). emailSchema is z.string().email().
-                // So "" is INVALID for email. I MUST send undefined if empty.
-                email: values.email === "" ? undefined : values.email,
+            if (values.image) {
+                const formData = new FormData();
+                formData.append("image", values.image);
+                formData.append("name", values.name);
+                formData.append("slug", values.slug);
+                if (values.description)
+                    formData.append("description", values.description);
+                formData.append("phone", values.phone);
+                if (values.email) formData.append("email", values.email);
+                formData.append("address", values.address);
+                formData.append("city", values.city);
+                formData.append("state", values.state);
+                formData.append("country", values.country);
+                if (values.postalCode)
+                    formData.append("postalCode", values.postalCode);
+                formData.append("latitude", values.latitude);
+                formData.append("longitude", values.longitude);
+                formData.append("isActive", String(values.isActive));
+                formData.append("features", JSON.stringify(values.features));
+                formData.append(
+                    "openingHours",
+                    JSON.stringify({
+                        monday: { open: "08:00", close: "20:00" },
+                        tuesday: { open: "08:00", close: "20:00" },
+                        wednesday: { open: "08:00", close: "20:00" },
+                        thursday: { open: "08:00", close: "20:00" },
+                        friday: { open: "08:00", close: "20:00" },
+                        saturday: { open: "09:00", close: "21:00" },
+                        sunday: { open: "09:00", close: "21:00" },
+                    })
+                );
 
-                // description: max 1000. optional.
-                // If I send "", backend z.string().trim().max(1000).optional()
-                // "" is valid string.
-                description: values.description,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                await api.stores.create(formData as any);
+            } else {
+                const payload = {
+                    ...values,
+                    latitude: parseFloat(values.latitude),
+                    longitude: parseFloat(values.longitude),
+                    openingHours: {
+                        monday: { open: "08:00", close: "20:00" },
+                        tuesday: { open: "08:00", close: "20:00" },
+                        wednesday: { open: "08:00", close: "20:00" },
+                        thursday: { open: "08:00", close: "20:00" },
+                        friday: { open: "08:00", close: "20:00" },
+                        saturday: { open: "09:00", close: "21:00" },
+                        sunday: { open: "09:00", close: "21:00" },
+                    },
 
-                // postalCode: optional.
-                postalCode:
-                    values.postalCode === "" ? undefined : values.postalCode,
+                    email: values.email === "" ? undefined : values.email,
 
-                images: [],
-            };
+                    description: values.description,
 
-            await api.stores.create(payload);
+                    postalCode:
+                        values.postalCode === ""
+                            ? undefined
+                            : values.postalCode,
+
+                    images: [],
+                };
+                await api.stores.create(payload);
+            }
             toast.success("Store created successfully");
             router.push("/stores");
             router.refresh();
@@ -287,6 +309,41 @@ export default function StoreCreatePage() {
                                                     {...field}
                                                 />
                                             </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
+                                <FormField
+                                    control={form.control}
+                                    name="image"
+                                    render={({
+                                        field: {
+                                            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                                            value: _value,
+                                            onChange,
+                                            ...field
+                                        },
+                                    }) => (
+                                        <FormItem>
+                                            <FormLabel>Store Logo</FormLabel>
+                                            <FormControl>
+                                                <Input
+                                                    {...field}
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={(event) => {
+                                                        const file =
+                                                            event.target
+                                                                .files?.[0];
+                                                        if (file) {
+                                                            onChange(file);
+                                                        }
+                                                    }}
+                                                />
+                                            </FormControl>
+                                            <FormDescription>
+                                                Upload a logo for the store.
+                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}

@@ -171,7 +171,6 @@ function StoresContent() {
             <DataTable
                 data={stores}
                 columns={columns}
-                // Manual Control Props
                 pageCount={pageCount}
                 pagination={pagination}
                 onPaginationChange={handlePaginationChange}

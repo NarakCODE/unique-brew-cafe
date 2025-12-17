@@ -27,6 +27,7 @@ export interface Store {
     latitude: number;
     longitude: number;
     images: string[];
+    imageUrl?: string;
     openingHours: Record<string, OpeningHours>;
     isOpen: boolean;
     isActive: boolean;
@@ -56,6 +57,7 @@ export interface CreateStoreData {
     openingHours: Record<string, OpeningHours>;
     features?: StoreFeatures;
     averagePrepTime?: number;
+    image?: File;
 }
 
 export interface UpdateStoreData extends Partial<CreateStoreData> {
