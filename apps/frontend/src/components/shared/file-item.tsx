@@ -28,7 +28,7 @@ export function UploadedFileItem({
 
     return (
         <div
-            className="border border-border rounded-lg p-2 flex flex-col"
+            className="border border-border rounded-lg p-2 flex flex-col overflow-hidden w-full max-w-full"
             key={file.name}
         >
             <div className="flex items-center gap-2">

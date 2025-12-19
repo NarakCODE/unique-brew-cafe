@@ -95,9 +95,26 @@ export const columns: ColumnDef<Store>[] = [
         ),
         cell: ({ row }) => {
             const isActive = row.getValue("isActive");
+
+            if (isActive) {
+                return (
+                    <Badge className="gap-1.5 border-none bg-green-600/10 text-green-600 shadow-none hover:bg-green-600/20 focus-visible:outline-none focus-visible:ring-green-600/20 dark:bg-green-400/10 dark:text-green-400 dark:hover:bg-green-400/20 dark:focus-visible:ring-green-400/40">
+                        <span
+                            className="size-1.5 rounded-full bg-green-600 dark:bg-green-400"
+                            aria-hidden="true"
+                        />
+                        Active
+                    </Badge>
+                );
+            }
+
             return (
-                <Badge variant={isActive ? "default" : "secondary"}>
-                    {isActive ? "Active" : "Inactive"}
+                <Badge className="gap-1.5 border-none bg-destructive/10 text-destructive shadow-none hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40">
+                    <span
+                        className="size-1.5 rounded-full bg-destructive"
+                        aria-hidden="true"
+                    />
+                    Inactive
                 </Badge>
             );
         },
