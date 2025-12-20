@@ -41,6 +41,9 @@ import type {
     Store,
     CreateStoreData,
     UpdateStoreData,
+    Category,
+    CreateCategoryData,
+    UpdateCategoryData,
 } from "@/types";
 
 // ============================================================================
@@ -222,7 +225,7 @@ export const api = {
             search?: string;
         }): Promise<PaginatedResponse<User>> {
             const url = buildUrl(apiConfig.endpoints.users.list, params);
-            return apiClient.get<PaginatedResponse<User>>(url);
+            return apiClient.getPaginated<User>(url);
         },
 
         /**
@@ -365,7 +368,7 @@ export const api = {
             sortOrder?: "asc" | "desc";
         }): Promise<PaginatedResponse<Product>> {
             const url = buildUrl(apiConfig.endpoints.products.list, params);
-            return apiClient.get<PaginatedResponse<Product>>(url);
+            return apiClient.getPaginated<Product>(url);
         },
 
         /**
@@ -378,20 +381,36 @@ export const api = {
         /**
          * Create new product (admin only)
          */
-        async create(data: CreateProductData): Promise<Product> {
+        /**
+         * Create new product (admin only)
+         */
+        async create(data: FormData | CreateProductData): Promise<Product> {
+            const headers =
+                data instanceof FormData
+                    ? { "Content-Type": "multipart/form-data" }
+                    : undefined;
             return apiClient.post<Product>(
                 apiConfig.endpoints.products.create,
-                data
+                data,
+                { headers }
             );
         },
 
         /**
          * Update product (admin only)
          */
-        async update(id: string, data: UpdateProductData): Promise<Product> {
-            return apiClient.put<Product>(
+        async update(
+            id: string,
+            data: FormData | UpdateProductData
+        ): Promise<Product> {
+            const headers =
+                data instanceof FormData
+                    ? { "Content-Type": "multipart/form-data" }
+                    : undefined;
+            return apiClient.patch<Product>(
                 apiConfig.endpoints.products.update(id),
-                data
+                data,
+                { headers }
             );
         },
 
@@ -405,15 +424,21 @@ export const api = {
         },
 
         /**
-         * Toggle product availability (admin only)
+         * Update product status (admin only)
          */
-        async toggleAvailability(
-            id: string,
-            isAvailable: boolean
-        ): Promise<Product> {
+        async updateStatus(id: string, isAvailable: boolean): Promise<Product> {
             return apiClient.patch<Product>(
-                apiConfig.endpoints.products.toggleAvailability(id),
+                apiConfig.endpoints.products.updateStatus(id),
                 { isAvailable }
+            );
+        },
+        /**
+         * Duplicate product (admin only)
+         */
+        async duplicate(id: string): Promise<Product> {
+            return apiClient.post<Product>(
+                apiConfig.endpoints.products.duplicate(id),
+                {}
             );
         },
     },
@@ -433,7 +458,7 @@ export const api = {
             sortOrder?: "asc" | "desc";
         }): Promise<PaginatedResponse<Order>> {
             const url = buildUrl(apiConfig.endpoints.orders.list, params);
-            return apiClient.get<PaginatedResponse<Order>>(url);
+            return apiClient.getPaginated<Order>(url);
         },
 
         /**
@@ -488,7 +513,7 @@ export const api = {
             status?: string;
         }): Promise<PaginatedResponse<Order>> {
             const url = buildUrl(apiConfig.endpoints.orders.myOrders, params);
-            return apiClient.get<PaginatedResponse<Order>>(url);
+            return apiClient.getPaginated<Order>(url);
         },
     },
 
@@ -601,7 +626,7 @@ export const api = {
                 apiConfig.endpoints.notifications.list,
                 params
             );
-            return apiClient.get<PaginatedResponse<Notification>>(url);
+            return apiClient.getPaginated<Notification>(url);
         },
 
         /**
@@ -951,6 +976,65 @@ export const api = {
             return apiClient.delete<{ message: string }>(
                 apiConfig.endpoints.profile.delete,
                 { data }
+            );
+        },
+    },
+
+    // ========================================
+    // CATEGORIES
+    // ========================================
+    categories: {
+        /**
+         * Get list of categories
+         */
+        async list(params?: {
+            page?: number;
+            limit?: number;
+            storeId?: string;
+            isActive?: boolean;
+            search?: string;
+            sortBy?: string;
+            sortOrder?: "asc" | "desc";
+        }): Promise<PaginatedResponse<Category>> {
+            const url = buildUrl(apiConfig.endpoints.categories.list, params);
+            return apiClient.getPaginated<Category>(url);
+        },
+
+        /**
+         * Get category by ID
+         */
+        async get(id: string): Promise<Category> {
+            return apiClient.get<Category>(
+                apiConfig.endpoints.categories.get(id)
+            );
+        },
+
+        /**
+         * Create category
+         */
+        async create(data: CreateCategoryData): Promise<Category> {
+            return apiClient.post<Category>(
+                apiConfig.endpoints.categories.create,
+                data
+            );
+        },
+
+        /**
+         * Update category
+         */
+        async update(id: string, data: UpdateCategoryData): Promise<Category> {
+            return apiClient.patch<Category>(
+                apiConfig.endpoints.categories.update(id),
+                data
+            );
+        },
+
+        /**
+         * Delete category
+         */
+        async delete(id: string): Promise<void> {
+            return apiClient.delete<void>(
+                apiConfig.endpoints.categories.delete(id)
             );
         },
     },

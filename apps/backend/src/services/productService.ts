@@ -23,6 +23,7 @@ import {
 
 interface ProductFilters {
   categoryId?: string;
+  isAvailable?: boolean;
   isFeatured?: boolean;
   isBestSelling?: boolean;
   tags?: string[];
@@ -105,9 +106,15 @@ export const getProducts = async (
 ): Promise<PaginationResult<ProductResponse>> => {
   // Build query
   const query: mongoose.FilterQuery<IProduct> = {
-    isAvailable: true,
     deletedAt: null,
   };
+
+  // Availability filter (default to true if not specified)
+  if (filters?.isAvailable !== undefined) {
+    query.isAvailable = filters.isAvailable;
+  } else {
+    query.isAvailable = true;
+  }
 
   // Category filter
   if (filters?.categoryId) {

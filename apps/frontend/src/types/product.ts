@@ -1,16 +1,8 @@
-// Product Types
-export interface ProductCustomization {
-    id: string;
-    name: string;
-    options: ProductCustomizationOption[];
-    required: boolean;
-    maxSelections?: number;
-}
-
-export interface ProductCustomizationOption {
-    id: string;
-    name: string;
-    priceModifier: number;
+export interface NutritionalInfo {
+    protein?: number;
+    carbohydrates?: number;
+    fat?: number;
+    caffeine?: number;
 }
 
 export interface Product {
@@ -18,10 +10,17 @@ export interface Product {
     name: string;
     slug: string;
     description: string;
-    categoryId: string;
+    categoryId: string | { _id: string; name: string }; // Depending on population
+    category?: {
+        _id: string;
+        name: string;
+        slug: string;
+        imageUrl?: string;
+        icon?: string;
+    };
     images: string[];
     basePrice: number;
-    currency: string;
+    currency: "USD" | "KHR";
     preparationTime: number;
     calories?: number;
     rating?: number;
@@ -29,8 +28,9 @@ export interface Product {
     isAvailable: boolean;
     isFeatured: boolean;
     isBestSelling: boolean;
-    allergens?: string[];
-    tags?: string[];
+    allergens: string[];
+    tags: string[];
+    nutritionalInfo?: NutritionalInfo;
     displayOrder: number;
     createdAt: string;
     updatedAt: string;
@@ -38,15 +38,34 @@ export interface Product {
 
 export interface CreateProductData {
     name: string;
+    slug: string;
     description: string;
     categoryId: string;
+    images?: string[]; // Simplified for now, handle array of strings or FormData
     basePrice: number;
-    preparationTime: number;
-    images?: string[];
+    currency?: "USD" | "KHR";
+    preparationTime?: number;
     calories?: number;
+    isAvailable?: boolean;
+    isFeatured?: boolean;
+    isBestSelling?: boolean;
     allergens?: string[];
     tags?: string[];
-    isAvailable?: boolean;
+    nutritionalInfo?: NutritionalInfo;
+    displayOrder?: number;
 }
 
-export type UpdateProductData = Partial<CreateProductData>;
+export interface UpdateProductData extends Partial<CreateProductData> {
+    id?: string;
+}
+
+export interface ProductFilters {
+    categoryId?: string;
+    isAvailable?: boolean;
+    isFeatured?: boolean;
+    isBestSelling?: boolean;
+    minPrice?: number;
+    maxPrice?: number;
+    search?: string;
+    tags?: string[];
+}

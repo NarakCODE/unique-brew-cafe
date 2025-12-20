@@ -15,3 +15,14 @@ export function slugify(text: string): string {
         .replace(/[\s\W-]+/g, "-")
         .replace(/^-+|-+$/g, "");
 }
+
+export function formatCurrency(
+    amount: number,
+    currency: "USD" | "KHR" = "USD"
+): string {
+    return new Intl.NumberFormat(currency === "KHR" ? "km-KH" : "en-US", {
+        style: "currency",
+        currency,
+        minimumFractionDigits: currency === "KHR" ? 0 : 2,
+    }).format(amount);
+}

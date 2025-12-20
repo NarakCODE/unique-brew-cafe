@@ -9,13 +9,21 @@ export interface PaginatedResponse<T> {
     success: boolean;
     data: T[];
     pagination: {
-        currentPage: number;
-        totalPages: number;
-        totalItems: number;
-        itemsPerPage: number;
+        page: number;
+        pages: number;
+        total: number;
+        limit: number;
         hasNext: boolean;
-        hasPrevious: boolean;
+        hasPrev: boolean;
     };
+}
+
+export interface PaginationParams {
+    page?: number;
+    limit?: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+    search?: string;
 }
 
 export interface ApiValidationError {

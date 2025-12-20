@@ -52,16 +52,6 @@ export const apiConfig = {
             menu: (id: string) => `/stores/${id}/menu`,
         },
 
-        // Products
-        products: {
-            list: "/products",
-            get: (id: string) => `/products/${id}`,
-            create: "/products",
-            update: (id: string) => `/products/${id}`,
-            delete: (id: string) => `/products/${id}`,
-            toggleAvailability: (id: string) => `/products/${id}/availability`,
-        },
-
         // Orders
         orders: {
             list: "/orders",
@@ -145,6 +135,26 @@ export const apiConfig = {
             updateSettings: "/profile/settings",
             referralStats: "/profile/referral",
             delete: "/profile",
+        },
+
+        // Categories
+        categories: {
+            list: "/categories",
+            get: (id: string) => `/categories/${id}`,
+            create: "/categories",
+            update: (id: string) => `/categories/${id}`,
+            delete: (id: string) => `/categories/${id}`,
+        },
+        // Products
+        products: {
+            list: "/products",
+            get: (id: string) => `/products/${id}`,
+            getBySlug: (slug: string) => `/products/slug/${slug}`,
+            create: "/products",
+            update: (id: string) => `/products/${id}`,
+            delete: (id: string) => `/products/${id}`,
+            updateStatus: (id: string) => `/products/${id}/status`,
+            duplicate: (id: string) => `/products/${id}/duplicate`,
         },
 
         // Health
