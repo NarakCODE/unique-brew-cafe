@@ -233,7 +233,7 @@ export function useInfiniteProducts(filters?: { category?: string }) {
             api.products.list({ ...filters, page: pageParam, limit: 20 }),
         getNextPageParam: (lastPage) => {
             if (lastPage.pagination.hasNext) {
-                return lastPage.pagination.currentPage + 1;
+                return lastPage.pagination.page + 1;
             }
             return undefined;
         },
