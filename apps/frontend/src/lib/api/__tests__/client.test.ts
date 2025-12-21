@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { apiClient, fetchClient, ApiClientError } from "../client";
 
 // Mock the auth store
@@ -92,9 +92,22 @@ describe("API Client", () => {
     });
 
     describe("API Configuration", () => {
+        // 👇 ADD THIS BLOCK
+        beforeEach(() => {
+            vi.stubEnv("NEXT_PUBLIC_API_URL", "http://localhost:3000/api");
+        });
+
+        // 👇 OPTIONAL: Clean up after
+        afterEach(() => {
+            vi.unstubAllEnvs();
+        });
+
         it("should use environment variable for API URL", () => {
-            // The base URL should be defined
+            // Now this will pass because we stubbed it above
             expect(process.env.NEXT_PUBLIC_API_URL).toBeDefined();
+            expect(process.env.NEXT_PUBLIC_API_URL).toBe(
+                "http://localhost:3000/api"
+            );
         });
     });
 });
