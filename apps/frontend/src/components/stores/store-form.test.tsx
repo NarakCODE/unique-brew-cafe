@@ -4,7 +4,6 @@ import { StoreForm } from "./store-form";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 // Mock dependencies
 global.ResizeObserver = class ResizeObserver {
@@ -36,7 +35,8 @@ vi.mock("sonner", () => ({
 // Mock next/image
 vi.mock("next/image", () => ({
     default: ({ src, alt }: { src: string; alt: string }) => (
-        <Image src={src} alt={alt} width={100} height={100} />
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt={alt} width={100} height={100} />
     ),
 }));
 
@@ -89,6 +89,46 @@ vi.mock("@/components/ui/input-group", () => ({
 
 vi.mock("@/components/shared/file-list", () => ({
     FileList: () => <div data-testid="file-list" />,
+}));
+
+vi.mock("@/components/ui/button", () => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Button: ({ children, ...props }: any) => (
+        <button {...props}>{children}</button>
+    ),
+}));
+
+vi.mock("@/components/ui/input", () => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Input: (props: any) => <input {...props} />,
+}));
+
+vi.mock("@/components/ui/textarea", () => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Textarea: (props: any) => <textarea {...props} />,
+}));
+
+vi.mock("@/components/ui/switch", () => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Switch: (props: any) => <input type="checkbox" role="switch" {...props} />,
+}));
+
+vi.mock("@/components/ui/checkbox", () => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Checkbox: (props: any) => <input type="checkbox" {...props} />,
+}));
+
+vi.mock("@/components/ui/card", () => ({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Card: ({ children }: any) => <div>{children}</div>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CardHeader: ({ children }: any) => <div>{children}</div>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CardTitle: ({ children }: any) => <div>{children}</div>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CardDescription: ({ children }: any) => <div>{children}</div>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CardContent: ({ children }: any) => <div>{children}</div>,
 }));
 
 describe("StoreForm", () => {
@@ -196,7 +236,6 @@ describe("StoreForm", () => {
 
         render(<StoreForm />);
 
-        screen.debug();
         fireEvent.change(screen.getByLabelText(/Name/i), {
             target: { value: "My Store" },
         });
