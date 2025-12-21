@@ -1,8 +1,10 @@
 import express, { Router } from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import * as productController from '../controllers/productController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 import { validate } from '../middlewares/validate.js';
+import { upload } from '../middlewares/upload.js';
 import {
   searchProductsQuerySchema,
   productSlugParamSchema,
@@ -15,6 +17,58 @@ import {
 } from '../schemas/index.js';
 
 const router: Router = express.Router();
+
+/**
+ * Middleware to process uploaded images after multer
+ * Merges uploaded file URLs into req.body.images for validation
+ */
+const processUploadedImages = (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const files = (req as any).files as Express.Multer.File[] | undefined;
+
+  // Get existing images from body (may be JSON string or array)
+  let existingImages: string[] = [];
+  if (req.body.images) {
+    if (typeof req.body.images === 'string') {
+      try {
+        const parsed = JSON.parse(req.body.images);
+        existingImages = Array.isArray(parsed) ? parsed : [req.body.images];
+      } catch {
+        // If it's not JSON, treat as a single URL
+        existingImages = [req.body.images];
+      }
+    } else if (Array.isArray(req.body.images)) {
+      existingImages = req.body.images;
+    }
+  }
+
+  // Filter to only keep valid URLs
+  existingImages = existingImages.filter(
+    (img) => typeof img === 'string' && img.startsWith('http')
+  );
+
+  // Get uploaded file URLs
+  const uploadedUrls: string[] = [];
+  if (files && files.length > 0) {
+    files.forEach((file) => {
+      if (file.path) {
+        uploadedUrls.push(file.path);
+      }
+    });
+  }
+
+  // Merge all images
+  const allImages = [...existingImages, ...uploadedUrls];
+
+  // Update req.body.images with the merged array (as JSON string for preprocessing)
+  req.body.images = JSON.stringify(allImages);
+
+  next();
+};
 
 /**
  * Product Routes
@@ -82,6 +136,8 @@ router.post(
   '/',
   authenticate,
   authorize({ roles: ['admin'] }),
+  upload.array('images', 10),
+  processUploadedImages,
   validate(createProductSchema),
   productController.createProduct
 );
@@ -91,6 +147,8 @@ router.patch(
   '/:id',
   authenticate,
   authorize({ roles: ['admin'] }),
+  upload.array('images', 10),
+  processUploadedImages,
   validate(updateProductSchema),
   productController.updateProduct
 );

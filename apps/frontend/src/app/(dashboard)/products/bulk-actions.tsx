@@ -61,7 +61,7 @@ export function BulkActions({
             );
             onClearSelection();
         } catch (error) {
-            toast.error("Failed to update some products");
+            toast.error(`Failed to update some products ${error}`);
         }
     };
 

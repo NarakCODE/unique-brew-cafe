@@ -43,24 +43,31 @@ import { useCreateProduct, useUpdateProduct } from "@/hooks/use-products";
 import { useCategories } from "@/hooks/use-categories";
 import type { Product } from "@/types";
 
+const nutritionalInfoSchema = z
+    .object({
+        protein: z.coerce.number().min(0).optional(),
+        carbohydrates: z.coerce.number().min(0).optional(),
+        fat: z.coerce.number().min(0).optional(),
+        caffeine: z.coerce.number().min(0).optional(),
+    })
+    .optional();
+
 const productFormSchema = z.object({
-    name: z.string().min(2, "Name must be at least 2 characters").max(100),
-    slug: z.string().min(2, "Slug must be at least 2 characters").max(100),
-    description: z
-        .string()
-        .min(10, "Description must be at least 10 characters"),
+    name: z.string().min(1, "Name is required"),
+    description: z.string().min(1, "Description is required"),
     categoryId: z.string().min(1, "Category is required"),
     images: z.array(z.string()).default([]),
-    basePrice: z.coerce.number().min(0, "Price must be positive"),
+    basePrice: z.coerce.number().min(0, "Base price must be non-negative"),
     currency: z.enum(["USD", "KHR"]).default("USD"),
-    preparationTime: z.coerce.number().min(1).max(120).default(5),
-    calories: z.coerce.number().min(0).optional(),
+    preparationTime: z.coerce.number().min(1).default(5),
     isAvailable: z.boolean().default(true),
     isFeatured: z.boolean().default(false),
     isBestSelling: z.boolean().default(false),
-    allergens: z.array(z.string()).default([]),
-    tags: z.array(z.string()).default([]),
+    allergens: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    sizes: z.array(z.record(z.string(), z.unknown())).default([]),
     displayOrder: z.coerce.number().min(0).default(0),
+    nutritionalInfo: nutritionalInfoSchema,
 });
 
 type ProductFormValues = z.infer<typeof productFormSchema>;
@@ -92,7 +99,6 @@ export function ProductForm({ product, mode }: ProductFormProps) {
         defaultValues: product
             ? {
                   name: product.name,
-                  slug: product.slug,
                   description: product.description,
                   categoryId:
                       typeof product.categoryId === "string"
@@ -102,30 +108,31 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                   basePrice: product.basePrice,
                   currency: product.currency,
                   preparationTime: product.preparationTime,
-                  calories: product.calories,
                   isAvailable: product.isAvailable,
                   isFeatured: product.isFeatured,
                   isBestSelling: product.isBestSelling,
-                  allergens: product.allergens || [],
-                  tags: product.tags || [],
+                  allergens: product.allergens,
+                  tags: product.tags,
+                  sizes: product.sizes || [],
                   displayOrder: product.displayOrder,
+                  nutritionalInfo: product.nutritionalInfo,
               }
             : {
                   name: "",
-                  slug: "",
                   description: "",
                   categoryId: "",
                   images: [],
                   basePrice: 0,
                   currency: "USD" as const,
                   preparationTime: 5,
-                  calories: 0,
                   isAvailable: true,
                   isFeatured: false,
                   isBestSelling: false,
                   allergens: [],
                   tags: [],
+                  sizes: [],
                   displayOrder: 0,
+                  nutritionalInfo: undefined,
               },
     });
 
@@ -134,23 +141,28 @@ export function ProductForm({ product, mode }: ProductFormProps) {
             // Use FormData for image upload
             const formData = new FormData();
             formData.append("name", data.name);
-            formData.append("slug", data.slug);
             formData.append("description", data.description);
             formData.append("categoryId", data.categoryId);
             formData.append("basePrice", String(data.basePrice));
             formData.append("currency", data.currency);
             formData.append("preparationTime", String(data.preparationTime));
-            if (data.calories !== undefined) {
-                formData.append("calories", String(data.calories));
-            }
             formData.append("isAvailable", String(data.isAvailable));
             formData.append("isFeatured", String(data.isFeatured));
             formData.append("isBestSelling", String(data.isBestSelling));
             formData.append("displayOrder", String(data.displayOrder));
 
             // Add arrays as JSON
-            formData.append("allergens", JSON.stringify(data.allergens));
-            formData.append("tags", JSON.stringify(data.tags));
+            formData.append("allergens", JSON.stringify(data.allergens || []));
+            formData.append("tags", JSON.stringify(data.tags || []));
+            formData.append("sizes", JSON.stringify(data.sizes || []));
+
+            // Add nutritionalInfo if provided
+            if (data.nutritionalInfo) {
+                formData.append(
+                    "nutritionalInfo",
+                    JSON.stringify(data.nutritionalInfo)
+                );
+            }
 
             // Process images
             // 1. Append existing image URLs
@@ -223,7 +235,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
 
     const addTag = () => {
         if (tagInput.trim()) {
-            const currentTags = form.getValues("tags");
+            const currentTags = form.getValues("tags") || [];
             if (!currentTags.includes(tagInput.trim())) {
                 form.setValue("tags", [...currentTags, tagInput.trim()]);
             }
@@ -232,7 +244,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
     };
 
     const removeTag = (tagToRemove: string) => {
-        const currentTags = form.getValues("tags");
+        const currentTags = form.getValues("tags") || [];
         form.setValue(
             "tags",
             currentTags.filter((tag) => tag !== tagToRemove)
@@ -241,7 +253,7 @@ export function ProductForm({ product, mode }: ProductFormProps) {
 
     const addAllergen = () => {
         if (allergenInput.trim()) {
-            const currentAllergens = form.getValues("allergens");
+            const currentAllergens = form.getValues("allergens") || [];
             if (!currentAllergens.includes(allergenInput.trim())) {
                 form.setValue("allergens", [
                     ...currentAllergens,
@@ -253,20 +265,11 @@ export function ProductForm({ product, mode }: ProductFormProps) {
     };
 
     const removeAllergen = (allergenToRemove: string) => {
-        const currentAllergens = form.getValues("allergens");
+        const currentAllergens = form.getValues("allergens") || [];
         form.setValue(
             "allergens",
             currentAllergens.filter((allergen) => allergen !== allergenToRemove)
         );
-    };
-
-    const generateSlug = () => {
-        const name = form.getValues("name");
-        const slug = name
-            .toLowerCase()
-            .replace(/[^a-z0-9]+/g, "-")
-            .replace(/(^-|-$)/g, "");
-        form.setValue("slug", slug);
     };
 
     const isPending = createProduct.isPending || updateProduct.isPending;
@@ -296,47 +299,8 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                                                 <Input
                                                     placeholder="Caramel Latte"
                                                     {...field}
-                                                    onBlur={() => {
-                                                        field.onBlur();
-                                                        if (
-                                                            !form.getValues(
-                                                                "slug"
-                                                            )
-                                                        ) {
-                                                            generateSlug();
-                                                        }
-                                                    }}
                                                 />
                                             </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-
-                                <FormField
-                                    control={form.control}
-                                    name="slug"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Slug</FormLabel>
-                                            <div className="flex gap-2">
-                                                <FormControl>
-                                                    <Input
-                                                        placeholder="caramel-latte"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <Button
-                                                    type="button"
-                                                    variant="outline"
-                                                    onClick={generateSlug}
-                                                >
-                                                    Generate
-                                                </Button>
-                                            </div>
-                                            <FormDescription>
-                                                URL-friendly version of the name
-                                            </FormDescription>
                                             <FormMessage />
                                         </FormItem>
                                     )}
@@ -445,26 +409,6 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                                             </FormItem>
                                         )}
                                     />
-
-                                    <FormField
-                                        control={form.control}
-                                        name="calories"
-                                        render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>
-                                                    Calories (optional)
-                                                </FormLabel>
-                                                <FormControl>
-                                                    <Input
-                                                        type="number"
-                                                        placeholder="250"
-                                                        {...field}
-                                                    />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )}
-                                    />
                                 </div>
 
                                 <FormField
@@ -524,26 +468,28 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                                             <Plus className="h-4 w-4" />
                                         </Button>
                                     </div>
-                                    {form.watch("tags").length > 0 && (
+                                    {(form.watch("tags") || []).length > 0 && (
                                         <div className="flex flex-wrap gap-2 pt-2">
-                                            {form.watch("tags").map((tag) => (
-                                                <Badge
-                                                    key={tag}
-                                                    variant="secondary"
-                                                    className="gap-1"
-                                                >
-                                                    {tag}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() =>
-                                                            removeTag(tag)
-                                                        }
-                                                        className="ml-1 rounded-sm hover:bg-muted-foreground/20"
+                                            {(form.watch("tags") || []).map(
+                                                (tag) => (
+                                                    <Badge
+                                                        key={tag}
+                                                        variant="secondary"
+                                                        className="gap-1"
                                                     >
-                                                        <X className="h-3 w-3" />
-                                                    </button>
-                                                </Badge>
-                                            ))}
+                                                        {tag}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                removeTag(tag)
+                                                            }
+                                                            className="ml-1 rounded-sm hover:bg-muted-foreground/20"
+                                                        >
+                                                            <X className="h-3 w-3" />
+                                                        </button>
+                                                    </Badge>
+                                                )
+                                            )}
                                         </div>
                                     )}
                                 </div>
@@ -575,30 +521,31 @@ export function ProductForm({ product, mode }: ProductFormProps) {
                                             <Plus className="h-4 w-4" />
                                         </Button>
                                     </div>
-                                    {form.watch("allergens").length > 0 && (
+                                    {(form.watch("allergens") || []).length >
+                                        0 && (
                                         <div className="flex flex-wrap gap-2 pt-2">
-                                            {form
-                                                .watch("allergens")
-                                                .map((allergen) => (
-                                                    <Badge
-                                                        key={allergen}
-                                                        variant="outline"
-                                                        className="gap-1 border-amber-200 bg-amber-50 text-amber-700"
+                                            {(
+                                                form.watch("allergens") || []
+                                            ).map((allergen) => (
+                                                <Badge
+                                                    key={allergen}
+                                                    variant="outline"
+                                                    className="gap-1 border-amber-200 bg-amber-50 text-amber-700"
+                                                >
+                                                    {allergen}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                            removeAllergen(
+                                                                allergen
+                                                            )
+                                                        }
+                                                        className="ml-1 rounded-sm hover:bg-amber-200/50"
                                                     >
-                                                        {allergen}
-                                                        <button
-                                                            type="button"
-                                                            onClick={() =>
-                                                                removeAllergen(
-                                                                    allergen
-                                                                )
-                                                            }
-                                                            className="ml-1 rounded-sm hover:bg-amber-200/50"
-                                                        >
-                                                            <X className="h-3 w-3" />
-                                                        </button>
-                                                    </Badge>
-                                                ))}
+                                                        <X className="h-3 w-3" />
+                                                    </button>
+                                                </Badge>
+                                            ))}
                                         </div>
                                     )}
                                 </div>

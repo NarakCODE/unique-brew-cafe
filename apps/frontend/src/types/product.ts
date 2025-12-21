@@ -8,7 +8,7 @@ export interface NutritionalInfo {
 export interface Product {
     id: string;
     name: string;
-    slug: string;
+    slug?: string;
     description: string;
     categoryId: string | { _id: string; name: string }; // Depending on population
     category?: {
@@ -28,8 +28,9 @@ export interface Product {
     isAvailable: boolean;
     isFeatured: boolean;
     isBestSelling: boolean;
-    allergens: string[];
-    tags: string[];
+    allergens?: string[];
+    tags?: string[];
+    sizes?: Record<string, unknown>[];
     nutritionalInfo?: NutritionalInfo;
     displayOrder: number;
     createdAt: string;
