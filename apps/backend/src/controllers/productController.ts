@@ -448,7 +448,18 @@ export const duplicateProduct = asyncHandler(
  */
 export const createProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const product = await productService.createProduct(req.body);
+    const productData = req.body;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const file = (req as any).file;
+    if (file && file.path) {
+      productData.imageUrl = file.path;
+      if (!productData.images) {
+        productData.images = [file.path];
+      }
+    }
+
+    const product = await productService.createProduct(productData);
 
     res.status(201).json({
       success: true,

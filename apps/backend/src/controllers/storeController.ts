@@ -22,6 +22,7 @@ export const createStore = asyncHandler(
 
     res.status(201).json({
       success: true,
+      message: 'Store created successfully',
       data: store,
     });
   }

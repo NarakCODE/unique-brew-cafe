@@ -8,13 +8,16 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
+import { BulkActions } from "./bulk-actions";
 import { useProducts, useDebounce } from "@/hooks";
 import {
     PaginationState,
     SortingState,
     ColumnFiltersState,
     OnChangeFn,
+    RowSelectionState,
 } from "@tanstack/react-table";
+import { Card } from "@/components/ui/card";
 
 function ProductsContent() {
     const router = useRouter();
@@ -41,7 +44,10 @@ function ProductsContent() {
     const [searchQuery, setSearchQuery] = useState(searchParam);
     const debouncedSearch = useDebounce(searchQuery, 500);
 
-    // 3. Effect: Push Search to URL (Debounced)
+    // 3. Row Selection State
+    const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
+    // 4. Effect: Push Search to URL (Debounced)
     useEffect(() => {
         // Only push if the debounced value differs from what's in the URL
         if (debouncedSearch !== searchParam) {
@@ -57,7 +63,7 @@ function ProductsContent() {
         }
     }, [debouncedSearch, searchParam, pathname, router, searchParams]);
 
-    // 4. Data Fetching
+    // 5. Data Fetching
     const { data, isLoading } = useProducts({
         page,
         limit,
@@ -70,7 +76,7 @@ function ProductsContent() {
     const products = data?.data || [];
     const pageCount = data?.pagination?.pages || 0;
 
-    // 5. Construct Table State
+    // 6. Construct Table State
     // Pagination & Sorting come directly from URL
     const pagination: PaginationState = {
         pageIndex: page - 1,
@@ -86,7 +92,7 @@ function ProductsContent() {
             value: [isAvailable.toString()],
         });
 
-    // 6. Handlers
+    // 7. Handlers
     const handlePaginationChange: OnChangeFn<PaginationState> = (
         updaterOrValue
     ) => {
@@ -152,6 +158,14 @@ function ProductsContent() {
         }
     };
 
+    // 8. Get selected products for bulk actions
+    const selectedProducts = products.filter(
+        (_, index) => rowSelection[index.toString()]
+    );
+    const selectedIds = selectedProducts.map((p) => p.id);
+
+    const clearSelection = () => setRowSelection({});
+
     if (isLoading) {
         return (
             <div className="flex h-[50vh] items-center justify-center">
@@ -171,7 +185,17 @@ function ProductsContent() {
                     Add Product
                 </Button>
             </PageHeader>
-            <div className="space-y-4">
+
+            {/* Bulk Actions */}
+            {selectedIds.length > 0 && (
+                <BulkActions
+                    selectedIds={selectedIds}
+                    selectedProducts={selectedProducts}
+                    onClearSelection={clearSelection}
+                />
+            )}
+
+            <Card className="p-6">
                 <DataTable
                     data={products}
                     columns={columns}
@@ -197,7 +221,7 @@ function ProductsContent() {
                     manualSorting
                     manualFiltering
                 />
-            </div>
+            </Card>
         </div>
     );
 }
