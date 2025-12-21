@@ -14,6 +14,8 @@ import type {
     Product,
     CreateProductData,
     UpdateProductData,
+    ProductCustomizationsResponse,
+    ProductAddOnsResponse,
     Order,
     CreateOrderData,
     Cart,
@@ -366,8 +368,30 @@ export const api = {
             search?: string;
             sortBy?: string;
             sortOrder?: "asc" | "desc";
+            isAvailable?: boolean;
         }): Promise<PaginatedResponse<Product>> {
             const url = buildUrl(apiConfig.endpoints.products.list, params);
+            return apiClient.getPaginated<Product>(url);
+        },
+
+        /**
+         * Search products
+         * GET /api/products/search?q=query
+         */
+        async search(params: {
+            q: string;
+            page?: number;
+            limit?: number;
+            categoryId?: string;
+            isFeatured?: boolean;
+            isBestSelling?: boolean;
+            tags?: string[];
+            minPrice?: number;
+            maxPrice?: number;
+            sortBy?: string;
+            sortOrder?: "asc" | "desc";
+        }): Promise<PaginatedResponse<Product>> {
+            const url = buildUrl(apiConfig.endpoints.products.search, params);
             return apiClient.getPaginated<Product>(url);
         },
 
@@ -376,6 +400,38 @@ export const api = {
          */
         async get(id: string): Promise<Product> {
             return apiClient.get<Product>(apiConfig.endpoints.products.get(id));
+        },
+
+        /**
+         * Get product by slug
+         * GET /api/products/slug/:slug
+         */
+        async getBySlug(slug: string): Promise<Product> {
+            return apiClient.get<Product>(
+                apiConfig.endpoints.products.getBySlug(slug)
+            );
+        },
+
+        /**
+         * Get product customizations
+         * GET /api/products/:id/customizations
+         */
+        async getCustomizations(
+            id: string
+        ): Promise<ProductCustomizationsResponse> {
+            return apiClient.get<ProductCustomizationsResponse>(
+                apiConfig.endpoints.products.customizations(id)
+            );
+        },
+
+        /**
+         * Get product add-ons
+         * GET /api/products/:id/addons
+         */
+        async getAddOns(id: string): Promise<ProductAddOnsResponse> {
+            return apiClient.get<ProductAddOnsResponse>(
+                apiConfig.endpoints.products.addons(id)
+            );
         },
 
         /**

@@ -148,8 +148,11 @@ export const apiConfig = {
         // Products
         products: {
             list: "/products",
+            search: "/products/search",
             get: (id: string) => `/products/${id}`,
             getBySlug: (slug: string) => `/products/slug/${slug}`,
+            customizations: (id: string) => `/products/${id}/customizations`,
+            addons: (id: string) => `/products/${id}/addons`,
             create: "/products",
             update: (id: string) => `/products/${id}`,
             delete: (id: string) => `/products/${id}`,

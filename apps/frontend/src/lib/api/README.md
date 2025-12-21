@@ -92,6 +92,112 @@ const stores = await api.stores.list({
     city: "Phnom Penh",
     limit: 10
 });
+```
+
+### Product Management
+
+```typescript
+import { api } from "@/lib/api";
+
+// ============================================
+// PUBLIC ENDPOINTS (No Authentication)
+// ============================================
+
+// 1. Get paginated products list
+const products = await api.products.list({
+    page: 1,
+    limit: 20,
+    category: "coffee",
+    search: "latte",
+    sortBy: "createdAt",
+    sortOrder: "desc",
+    isAvailable: true
+});
+
+// 2. Search products with filters
+const searchResults = await api.products.search({
+    q: "mocha",
+    page: 1,
+    limit: 10,
+    categoryId: "drinks",
+    isFeatured: true,
+    minPrice: 5,
+    maxPrice: 15,
+    tags: ["hot", "coffee"]
+});
+
+// 3. Get single product by ID
+const product = await api.products.get("product-id-123");
+
+// 4. Get product by slug
+const productBySlug = await api.products.getBySlug("caramel-latte");
+
+// 5. Get product customizations (size, sugar level, etc.)
+const customizations = await api.products.getCustomizations("product-id-123");
+// Returns:
+// {
+//   productId: "...",
+//   customizations: [
+//     {
+//       customizationType: "size",
+//       options: [
+//         { id: "small", name: "Small", priceModifier: 0, isDefault: true },
+//         { id: "medium", name: "Medium", priceModifier: 0.5, isDefault: false },
+//         { id: "large", name: "Large", priceModifier: 1, isDefault: false }
+//       ],
+//       isRequired: true
+//     }
+//   ]
+// }
+
+// 6. Get product add-ons (extra shots, whipped cream, etc.)
+const addons = await api.products.getAddOns("product-id-123");
+// Returns:
+// {
+//   productId: "...",
+//   addOns: [
+//     { id: "...", name: "Extra Shot", price: 1, isAvailable: true },
+//     { id: "...", name: "Whipped Cream", price: 0.5, isAvailable: true }
+//   ]
+// }
+
+// ============================================
+// ADMIN ONLY ENDPOINTS (Authentication Required)
+// ============================================
+
+// 7. Create new product
+const newProduct = await api.products.create({
+    name: "Caramel Latte",
+    slug: "caramel-latte",
+    description: "Sweet and creamy caramel latte",
+    categoryId: "drinks-category-id",
+    basePrice: 6.99,
+    currency: "USD",
+    preparationTime: 5,
+    isAvailable: true,
+    isFeatured: false,
+    allergens: ["milk"],
+    tags: ["hot", "sweet", "coffee"]
+});
+
+// 8. Update existing product
+const updatedProduct = await api.products.update("product-id-123", {
+    name: "Updated Name",
+    basePrice: 7.99,
+    description: "New description"
+});
+
+// 9. Delete product
+await api.products.delete("product-id-123");
+
+// 10. Update product availability status
+const toggledProduct = await api.products.updateStatus("product-id-123", false);
+// Product is now unavailable
+
+// 11. Duplicate product
+const duplicatedProduct = await api.products.duplicate("product-id-123");
+// Creates a copy with " (Copy)" appended to name
+```
 ````
 
 ````

@@ -127,3 +127,59 @@ export function useDuplicateProduct() {
         },
     });
 }
+
+/**
+ * Search products
+ */
+export function useSearchProducts(params: {
+    q: string;
+    page?: number;
+    limit?: number;
+    categoryId?: string;
+    isFeatured?: boolean;
+    isBestSelling?: boolean;
+    tags?: string[];
+    minPrice?: number;
+    maxPrice?: number;
+    sortBy?: string;
+    sortOrder?: "asc" | "desc";
+}) {
+    return useQuery({
+        queryKey: [...productKeys.all, "search", params] as const,
+        queryFn: () => api.products.search(params),
+        enabled: !!params.q,
+    });
+}
+
+/**
+ * Get product by slug
+ */
+export function useProductBySlug(slug: string) {
+    return useQuery({
+        queryKey: [...productKeys.all, "slug", slug] as const,
+        queryFn: () => api.products.getBySlug(slug),
+        enabled: !!slug,
+    });
+}
+
+/**
+ * Get product customizations
+ */
+export function useProductCustomizations(productId: string) {
+    return useQuery({
+        queryKey: [...productKeys.all, "customizations", productId] as const,
+        queryFn: () => api.products.getCustomizations(productId),
+        enabled: !!productId,
+    });
+}
+
+/**
+ * Get product add-ons
+ */
+export function useProductAddOns(productId: string) {
+    return useQuery({
+        queryKey: [...productKeys.all, "addons", productId] as const,
+        queryFn: () => api.products.getAddOns(productId),
+        enabled: !!productId,
+    });
+}
