@@ -19,3 +19,14 @@ export interface User {
 export type UpdateUserData = Partial<
     Pick<User, "fullName" | "profileImage" | "status" | "role">
 >;
+
+export interface CreateUserData {
+    fullName: string;
+    email: string;
+    password: string;
+    role?: "user" | "admin" | "moderator";
+}
+
+export interface UpdateUserStatusData {
+    status: "active" | "suspended";
+}

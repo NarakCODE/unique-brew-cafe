@@ -11,6 +11,8 @@ import type {
 import type {
     User,
     UpdateUserData,
+    CreateUserData,
+    UpdateUserStatusData,
     Product,
     CreateProductData,
     UpdateProductData,
@@ -261,6 +263,26 @@ export const api = {
             return apiClient.patch<User>(
                 apiConfig.endpoints.users.updateRole(id),
                 { role }
+            );
+        },
+
+        /**
+         * Create new user (admin only)
+         */
+        async create(data: CreateUserData): Promise<User> {
+            return apiClient.post<User>(apiConfig.endpoints.users.list, data);
+        },
+
+        /**
+         * Update user status (admin only)
+         */
+        async updateStatus(
+            id: string,
+            status: "active" | "suspended"
+        ): Promise<User> {
+            return apiClient.patch<User>(
+                `${apiConfig.endpoints.users.get(id)}/status`,
+                { status }
             );
         },
     },

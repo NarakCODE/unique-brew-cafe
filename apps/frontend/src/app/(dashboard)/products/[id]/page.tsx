@@ -1,5 +1,6 @@
 "use client";
 
+import { use } from "react";
 import { useProduct } from "@/hooks/use-products";
 import { ProductForm } from "../product-form";
 import { PageHeader } from "@/components/layout/page-header";
@@ -9,13 +10,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 
 interface EditProductPageProps {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
 export default function EditProductPage({ params }: EditProductPageProps) {
-    const { data: product, isLoading, isError, error } = useProduct(params.id);
+    const { id } = use(params);
+    const { data: product, isLoading, isError, error } = useProduct(id);
+
+    console.log("------------->", product);
 
     if (isLoading) {
         return (

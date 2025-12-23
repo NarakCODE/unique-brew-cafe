@@ -546,7 +546,85 @@ export const updateProduct = asyncHandler(
     const { id } = req.params;
     if (!id) throw new BadRequestError('Product ID is required');
 
-    const product = await productService.updateProduct(id, req.body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productData: Record<string, any> = { ...req.body };
+
+    // Parse JSON strings from FormData for arrays and objects
+    if (typeof productData.allergens === 'string') {
+      try {
+        productData.allergens = JSON.parse(productData.allergens);
+      } catch {
+        productData.allergens = [];
+      }
+    }
+    if (typeof productData.tags === 'string') {
+      try {
+        productData.tags = JSON.parse(productData.tags);
+      } catch {
+        productData.tags = [];
+      }
+    }
+    if (typeof productData.sizes === 'string') {
+      try {
+        productData.sizes = JSON.parse(productData.sizes);
+      } catch {
+        productData.sizes = [];
+      }
+    }
+    if (typeof productData.nutritionalInfo === 'string') {
+      try {
+        productData.nutritionalInfo = JSON.parse(productData.nutritionalInfo);
+      } catch {
+        productData.nutritionalInfo = undefined;
+      }
+    }
+
+    // Parse numeric fields from FormData
+    if (typeof productData.basePrice === 'string') {
+      productData.basePrice = parseFloat(productData.basePrice);
+    }
+    if (typeof productData.preparationTime === 'string') {
+      productData.preparationTime = parseInt(productData.preparationTime, 10);
+    }
+    if (typeof productData.displayOrder === 'string') {
+      productData.displayOrder = parseInt(productData.displayOrder, 10);
+    }
+
+    // Parse boolean fields from FormData
+    if (typeof productData.isAvailable === 'string') {
+      productData.isAvailable = productData.isAvailable === 'true';
+    }
+    if (typeof productData.isFeatured === 'string') {
+      productData.isFeatured = productData.isFeatured === 'true';
+    }
+    if (typeof productData.isBestSelling === 'string') {
+      productData.isBestSelling = productData.isBestSelling === 'true';
+    }
+
+    // Handle uploaded files (multiple images)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const files = (req as any).files as Express.Multer.File[] | undefined;
+    if (files && files.length > 0) {
+      const uploadedUrls = files.map((file) => file.path);
+      // Merge with any existing image URLs from the request
+      const existingImages = Array.isArray(productData.images)
+        ? productData.images.filter(
+            (img: string) => typeof img === 'string' && img.startsWith('http')
+          )
+        : [];
+      productData.images = [...existingImages, ...uploadedUrls];
+    }
+
+    // Fallback for single file upload
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const singleFile = (req as any).file as Express.Multer.File | undefined;
+    if (singleFile && singleFile.path) {
+      if (!productData.images || productData.images.length === 0) {
+        productData.images = [singleFile.path];
+      }
+    }
+
+    const product = await productService.updateProduct(id, productData);
 
     res.status(200).json({
       success: true,

@@ -112,3 +112,46 @@ export function useUpdateUserRole() {
         },
     });
 }
+
+/**
+ * Create user (Admin only)
+ */
+export function useCreateUser() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: {
+            fullName: string;
+            email: string;
+            password: string;
+            role?: "user" | "admin" | "moderator";
+        }) => api.users.create(data),
+        onSuccess: () => {
+            // Invalidate all user lists to show new user
+            queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+        },
+    });
+}
+
+/**
+ * Update user status (Admin only)
+ */
+export function useUpdateUserStatus() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: ({
+            id,
+            status,
+        }: {
+            id: string;
+            status: "active" | "suspended";
+        }) => api.users.updateStatus(id, status),
+        onSuccess: (_, { id }) => {
+            // Invalidate user detail
+            queryClient.invalidateQueries({ queryKey: userKeys.detail(id) });
+            // Invalidate all user lists
+            queryClient.invalidateQueries({ queryKey: userKeys.lists() });
+        },
+    });
+}

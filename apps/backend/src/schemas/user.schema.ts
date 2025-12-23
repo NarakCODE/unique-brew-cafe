@@ -74,6 +74,25 @@ export const getUsersQuerySchema = z.object({
 });
 
 /**
+ * Schema for creating a new user (admin only)
+ */
+export const createUserSchema = z.object({
+  body: z.object({
+    fullName: z
+      .string()
+      .trim()
+      .min(2, 'Full name must be at least 2 characters')
+      .max(100, 'Full name must be 100 characters or less'),
+    email: emailSchema,
+    password: z
+      .string()
+      .min(6, 'Password must be at least 6 characters')
+      .max(100, 'Password must be 100 characters or less'),
+    role: z.enum(['user', 'admin', 'moderator']).default('user').optional(),
+  }),
+});
+
+/**
  * Type inference
  */
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>['body'];
@@ -82,6 +101,7 @@ export type UpdateUserStatusInput = z.infer<
   typeof updateUserStatusSchema
 >['body'];
 export type GetUsersQuery = z.infer<typeof getUsersQuerySchema>['query'];
+export type CreateUserInput = z.infer<typeof createUserSchema>['body'];
 
 /**
  * Schema for updating password

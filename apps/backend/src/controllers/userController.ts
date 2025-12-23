@@ -310,6 +310,35 @@ export const updateUserStatusAdmin = asyncHandler(
   }
 );
 
+/**
+ * Create new user (Admin only)
+ * POST /api/users
+ */
+export const createUserAdmin = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { fullName, email, password, role } = req.body;
+
+    if (!fullName || !email || !password) {
+      throw new BadRequestError('Full name, email, and password are required');
+    }
+
+    const userData = {
+      fullName,
+      email,
+      password,
+      ...(role && { role }),
+    };
+
+    const user = await userService.createUser(userData);
+
+    res.status(201).json({
+      success: true,
+      data: user,
+      message: 'User created successfully',
+    });
+  }
+);
+
 // Legacy endpoints for backward compatibility
 export const getAllUsers = asyncHandler(
   async (_req: Request, res: Response) => {
