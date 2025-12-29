@@ -1,14 +1,20 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Store } from "@/types";
-import { Badge } from "@/components/ui/badge";
+import { ArrowUpDown, MoreHorizontal } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
-import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
-
-import { format } from "date-fns";
-import { DataTableRowActions } from "./data-table-row-actions";
-import { AvatarImageHandler } from "@/components/shared/avatar-image-handler";
+import { Button } from "@/components/ui/button";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Store } from "@/types";
+import Link from "next/link";
+import { toast } from "sonner";
 
 export const columns: ColumnDef<Store>[] = [
     {
@@ -23,7 +29,6 @@ export const columns: ColumnDef<Store>[] = [
                     table.toggleAllPageRowsSelected(!!value)
                 }
                 aria-label="Select all"
-                className="translate-y-0.5"
             />
         ),
         cell: ({ row }) => (
@@ -31,128 +36,96 @@ export const columns: ColumnDef<Store>[] = [
                 checked={row.getIsSelected()}
                 onCheckedChange={(value) => row.toggleSelected(!!value)}
                 aria-label="Select row"
-                className="translate-y-0.5"
             />
         ),
         enableSorting: false,
         enableHiding: false,
     },
     {
-        accessorKey: "imageUrl",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Logo" />
-        ),
-        cell: ({ row }) => {
-            const imageUrl = row.getValue("imageUrl") as string;
-            const name = row.getValue("name") as string;
-
+        accessorKey: "name",
+        header: ({ column }) => {
             return (
-                <AvatarImageHandler
-                    src={imageUrl}
-                    alt={name}
-                    fallback={name.charAt(0).toUpperCase()}
-                    className={
-                        "relative h-10 w-10 overflow-hidden rounded-full"
+                <Button
+                    variant="ghost"
+                    onClick={() =>
+                        column.toggleSorting(column.getIsSorted() === "asc")
                     }
-                />
+                >
+                    Name
+                    <ArrowUpDown className="ml-2 h-4 w-4" />
+                </Button>
             );
         },
-        enableSorting: false,
-    },
-    {
-        accessorKey: "name",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Name" />
-        ),
-        cell: ({ row }) => (
-            <div className="flex space-x-2">
-                <span className="max-w-[500px] truncate font-medium">
-                    {row.getValue("name")}
-                </span>
-            </div>
-        ),
     },
     {
         accessorKey: "city",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="City" />
-        ),
-        cell: ({ row }) => {
-            return (
-                <div className="flex w-[100px] items-center">
-                    <span>{row.getValue("city")}</span>
-                </div>
-            );
-        },
-        filterFn: (row, id, value) => {
-            return value.includes(row.getValue(id));
-        },
+        header: "City",
+    },
+    {
+        accessorKey: "phone",
+        header: "Phone",
     },
     {
         accessorKey: "isActive",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Status" />
-        ),
+        header: "Status",
         cell: ({ row }) => {
             const isActive = row.getValue("isActive");
-
-            if (isActive) {
-                return (
-                    <Badge className="gap-1.5 border-none bg-green-600/10 text-green-600 shadow-none hover:bg-green-600/20 focus-visible:outline-none focus-visible:ring-green-600/20 dark:bg-green-400/10 dark:text-green-400 dark:hover:bg-green-400/20 dark:focus-visible:ring-green-400/40">
-                        <span
-                            className="size-1.5 rounded-full bg-green-600 dark:bg-green-400"
-                            aria-hidden="true"
-                        />
-                        Active
-                    </Badge>
-                );
-            }
-
             return (
-                <Badge className="gap-1.5 border-none bg-destructive/10 text-destructive shadow-none hover:bg-destructive/20 focus-visible:outline-none focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40">
-                    <span
-                        className="size-1.5 rounded-full bg-destructive"
-                        aria-hidden="true"
-                    />
-                    Inactive
-                </Badge>
-            );
-        },
-        filterFn: (row, id, value) => {
-            return value.includes(String(row.getValue(id)));
-        },
-    },
-    {
-        accessorKey: "isOpen",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Open" />
-        ),
-        cell: ({ row }) => {
-            const isOpen = row.getValue("isOpen");
-            return (
-                <Badge variant={isOpen ? "outline" : "destructive"}>
-                    {isOpen ? "Open" : "Closed"}
-                </Badge>
+                <div
+                    className={`font-medium ${
+                        isActive ? "text-green-600" : "text-red-600"
+                    }`}
+                >
+                    {isActive ? "Active" : "Inactive"}
+                </div>
             );
         },
     },
     {
         accessorKey: "createdAt",
-        header: ({ column }) => (
-            <DataTableColumnHeader column={column} title="Created At" />
-        ),
+        header: "Created At",
         cell: ({ row }) => {
-            return (
-                <div className="flex w-[100px] items-center">
-                    <span>
-                        {format(new Date(row.getValue("createdAt")), "PPP")}
-                    </span>
-                </div>
-            );
+            const date = new Date(row.getValue("createdAt"));
+            return <div>{date.toLocaleDateString()}</div>;
         },
     },
     {
         id: "actions",
-        cell: ({ row }) => <DataTableRowActions row={row} />,
+        cell: ({ row }) => {
+            const store = row.original;
+
+            return (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-8 w-8 p-0">
+                            <span className="sr-only">Open menu</span>
+                            <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuItem
+                            onClick={() => {
+                                navigator.clipboard.writeText(store.id);
+                                toast.success("Store ID copied to clipboard");
+                            }}
+                        >
+                            Copy Store ID
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem asChild>
+                            <Link href={`/stores/${store.id}`}>
+                                View details
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                            <Link href={`/stores/${store.id}/edit`}>
+                                Edit store
+                            </Link>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
+        },
     },
 ];

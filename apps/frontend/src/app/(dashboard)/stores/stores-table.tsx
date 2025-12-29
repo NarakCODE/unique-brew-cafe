@@ -2,26 +2,16 @@
 
 import * as React from "react";
 import {
-    ColumnDef,
     ColumnFiltersState,
+    PaginationState,
     SortingState,
     VisibilityState,
     flexRender,
     getCoreRowModel,
-    getFilteredRowModel,
-    getPaginationRowModel,
-    getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table";
+import { ChevronDown, Loader2 } from "lucide-react";
 
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -30,19 +20,20 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import { useAdminStores } from "@/hooks/use-stores";
+import { columns } from "./columns";
+import { useDebounceValue } from "@/hooks/use-debounce-value";
 
-interface DataTableProps<TData, TValue> {
-    columns: ColumnDef<TData, TValue>[];
-    data: TData[];
-    searchKey?: string;
-}
-
-export function DataTable<TData, TValue>({
-    columns,
-    data,
-    searchKey,
-}: DataTableProps<TData, TValue>) {
+export function StoresTable() {
+    // Table State
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] =
         React.useState<ColumnFiltersState>([]);
@@ -50,44 +41,83 @@ export function DataTable<TData, TValue>({
         React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
+    // Pagination State
+    const [pagination, setPagination] = React.useState<PaginationState>({
+        pageIndex: 0,
+        pageSize: 10,
+    });
+
+    // Filtering
+    const nameFilterValue =
+        (columnFilters.find((f) => f.id === "name")?.value as string) ?? "";
+
+    // We use a debounce hook to avoid spamming the API with requests on every keystroke
+    const [debouncedName] = useDebounceValue(nameFilterValue, 500);
+
+    // Reset pagination when search query changes
+    React.useEffect(() => {
+        setPagination((prev) => ({ ...prev, pageIndex: 0 }));
+    }, [debouncedName]);
+
+    // Data Fetching
+    const { data, isLoading, isError } = useAdminStores({
+        page: pagination.pageIndex + 1, // API expects 1-based page index usually, confirm with backend.
+        // Previous code used pageIndex directly which is 0-based.
+        // Standard Next.js/Prisma often uses 1-based or skip/take.
+        // Assuming 1-based for now based on standard "page" param name.
+        // If backend uses 0-based, change to pagination.pageIndex.
+        limit: pagination.pageSize,
+        sortBy: sorting.length > 0 ? sorting[0].id : "createdAt",
+        sortOrder:
+            sorting.length > 0 ? (sorting[0].desc ? "desc" : "asc") : "desc",
+        name: debouncedName || undefined,
+    });
+
+    // Table Setup
     const table = useReactTable({
-        data,
+        data: data?.data ?? [],
         columns,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
-        getCoreRowModel: getCoreRowModel(),
-        getPaginationRowModel: getPaginationRowModel(),
-        getSortedRowModel: getSortedRowModel(),
-        getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
+        pageCount: data?.pagination?.pages ?? -1, // Server-side pagination
         state: {
             sorting,
             columnFilters,
             columnVisibility,
             rowSelection,
+            pagination,
         },
+        manualPagination: true,
+        manualSorting: true,
+        manualFiltering: true,
+        onPaginationChange: setPagination,
+        onSortingChange: setSorting,
+        onColumnFiltersChange: setColumnFilters,
+        onColumnVisibilityChange: setColumnVisibility,
+        onRowSelectionChange: setRowSelection,
+        getCoreRowModel: getCoreRowModel(),
     });
 
+    if (isError) {
+        return (
+            <div className="p-10 text-center text-red-500">
+                Error loading stores. Please try again.
+            </div>
+        );
+    }
+
     return (
-        <div className="w-full">
-            <div className="flex items-center py-4">
-                {searchKey && (
-                    <Input
-                        placeholder={`Filter ${searchKey}...`}
-                        value={
-                            (table
-                                .getColumn(searchKey)
-                                ?.getFilterValue() as string) ?? ""
-                        }
-                        onChange={(event) =>
-                            table
-                                .getColumn(searchKey)
-                                ?.setFilterValue(event.target.value)
-                        }
-                        className="max-w-sm"
-                    />
-                )}
+        <div className="w-full space-y-4">
+            {/* Toolbar */}
+            <div className="flex items-center gap-2">
+                <Input
+                    placeholder="Filter names..."
+                    value={nameFilterValue}
+                    onChange={(event) =>
+                        table
+                            .getColumn("name")
+                            ?.setFilterValue(event.target.value)
+                    }
+                    className="max-w-sm"
+                />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
@@ -115,7 +145,15 @@ export function DataTable<TData, TValue>({
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <div className="rounded-md border">
+
+            {/* Table */}
+            <div className="rounded-md border relative">
+                {isLoading && (
+                    <div className="absolute inset-0 bg-white/50 z-10 flex items-center justify-center">
+                        <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
+                    </div>
+                )}
+
                 <Table>
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
@@ -161,24 +199,26 @@ export function DataTable<TData, TValue>({
                                     colSpan={columns.length}
                                     className="h-24 text-center"
                                 >
-                                    No results.
+                                    {isLoading ? "Loading..." : "No results."}
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
             </div>
+
+            {/* Pagination */}
             <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="flex-1 text-sm text-muted-foreground">
                     {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
+                    {data?.pagination?.total ?? 0} row(s) selected.
                 </div>
                 <div className="space-x-2">
                     <Button
                         variant="outline"
                         size="sm"
                         onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
+                        disabled={!table.getCanPreviousPage() || isLoading}
                     >
                         Previous
                     </Button>
@@ -186,7 +226,7 @@ export function DataTable<TData, TValue>({
                         variant="outline"
                         size="sm"
                         onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
+                        disabled={!table.getCanNextPage() || isLoading}
                     >
                         Next
                     </Button>

@@ -14,5 +14,5 @@ export * from "./addon";
 export * from "./report";
 export * from "./config";
 export * from "./support";
-export * from "./profile";
 export * from "./customization";
+export * from "./announcement";

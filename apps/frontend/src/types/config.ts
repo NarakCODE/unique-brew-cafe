@@ -27,3 +27,5 @@ export interface CreateDeliveryZoneData {
 }
 
 export type UpdateDeliveryZoneData = Partial<CreateDeliveryZoneData>;
+
+export type FormatStyleType = "percent" | "duration" | "currency" | "regular";

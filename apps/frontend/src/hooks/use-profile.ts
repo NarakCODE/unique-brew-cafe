@@ -1,18 +1,20 @@
-/**
- * Profile Hooks - Server State Management
- * Uses TanStack Query for user profile CRUD operations
- */
-
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
+
+// 1. Import the consolidated types we created
+// 1. Import the consolidated types we created
 import type {
-    UserProfile,
-    UpdateProfileData,
-    UpdateSettingsData,
+    User,
+    UpdateUserData,
+    UserPreferences,
     UpdatePasswordData,
-    ReferralStats,
     DeleteAccountData,
-} from "@/types/profile";
+    ReferralStats,
+} from "@/types/user";
+
+// 2. Define types strictly for API interactions (DTOs)
+// These specific request bodies weren't in the previous file, so we define them here
+// or import them if you move them to your types file.
 
 // ============================================================================
 // QUERY KEYS
@@ -30,9 +32,10 @@ export const profileKeys = {
 
 /**
  * Get current user's profile
+ * Returns the full User object including preferences
  */
 export function useProfile() {
-    return useQuery({
+    return useQuery<User>({
         queryKey: profileKeys.detail(),
         queryFn: () => api.profile.get(),
         staleTime: 5 * 60 * 1000, // 5 minutes
@@ -43,10 +46,10 @@ export function useProfile() {
  * Get referral statistics
  */
 export function useReferralStats() {
-    return useQuery({
+    return useQuery<ReferralStats>({
         queryKey: profileKeys.referral(),
         queryFn: () => api.profile.getReferralStats(),
-        staleTime: 10 * 60 * 1000, // 10 minutes
+        staleTime: 10 * 60 * 1000,
     });
 }
 
@@ -55,15 +58,34 @@ export function useReferralStats() {
 // ============================================================================
 
 /**
- * Update profile information
+ * Update profile information (Name, Phone, etc.)
  */
 export function useUpdateProfile() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (data: UpdateProfileData) => api.profile.update(data),
-        onSuccess: (updatedProfile) => {
-            // Update the cache with the new profile data
+        // Uses the Partial<User> type we defined earlier
+        mutationFn: (data: UpdateUserData) => api.profile.update(data),
+        onSuccess: (updatedProfile: User) => {
+            // Update the cache immediately
+            queryClient.setQueryData(profileKeys.detail(), updatedProfile);
+        },
+    });
+}
+
+/**
+ * Update settings/preferences specificially
+ * Uses Partial<UserPreferences> to allow updating just one setting
+ */
+export function useUpdateSettings() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: Partial<UserPreferences>) =>
+            api.profile.updateSettings(data),
+
+        // Optimistic update or set data on return
+        onSuccess: (updatedProfile: User) => {
             queryClient.setQueryData(profileKeys.detail(), updatedProfile);
         },
     });
@@ -71,15 +93,18 @@ export function useUpdateProfile() {
 
 /**
  * Upload profile image
+ * Assumes the API returns the full updated User object
  */
 export function useUploadProfileImage() {
     const queryClient = useQueryClient();
 
     return useMutation({
         mutationFn: (imageUrl: string) => api.profile.uploadImage(imageUrl),
-        onSuccess: () => {
-            // Invalidate profile to refetch with new image
-            queryClient.invalidateQueries({ queryKey: profileKeys.detail() });
+        onSuccess: (data: { profileImage: string }) => {
+            queryClient.setQueryData<User>(profileKeys.detail(), (oldUser) => {
+                if (!oldUser) return undefined;
+                return { ...oldUser, profileImage: data.profileImage };
+            });
         },
     });
 }
@@ -95,22 +120,6 @@ export function useUpdatePassword() {
 }
 
 /**
- * Update settings/preferences
- */
-export function useUpdateSettings() {
-    const queryClient = useQueryClient();
-
-    return useMutation({
-        mutationFn: (data: UpdateSettingsData) =>
-            api.profile.updateSettings(data),
-        onSuccess: (updatedProfile) => {
-            // Update the cache with the new profile data
-            queryClient.setQueryData(profileKeys.detail(), updatedProfile);
-        },
-    });
-}
-
-/**
  * Delete account
  */
 export function useDeleteAccount() {
@@ -120,19 +129,9 @@ export function useDeleteAccount() {
         mutationFn: (data: DeleteAccountData) =>
             api.profile.deleteAccount(data),
         onSuccess: () => {
-            // Clear all cached data
+            // Clear all data immediately upon deletion
             queryClient.clear();
+            // Optional: Redirect to login or home page here
         },
     });
 }
-
-// ============================================================================
-// TYPE EXPORTS
-// ============================================================================
-
-export type {
-    UserProfile,
-    UpdateProfileData,
-    UpdateSettingsData,
-    ReferralStats,
-};

@@ -26,6 +26,7 @@ export const storeKeys = {
 export function useAdminStores(params?: {
     page?: number;
     limit?: number;
+    name?: string;
     city?: string;
     isActive?: boolean;
     sortBy?: string;
