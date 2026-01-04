@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as productService from '../services/productService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Get all products with optional filtering
@@ -81,11 +82,15 @@ export const getProducts = asyncHandler(
 
     const result = await productService.getProducts(filters, paginationParams);
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { items: result.data, pagination: result.pagination },
+          'Products fetched successfully'
+        )
+      );
   }
 );
 
@@ -103,10 +108,9 @@ export const getProductById = asyncHandler(
 
     const product = await productService.getProductById(id);
 
-    res.status(200).json({
-      success: true,
-      data: product,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, product, 'Product fetched successfully'));
   }
 );
 
@@ -124,10 +128,9 @@ export const getProductBySlug = asyncHandler(
 
     const product = await productService.getProductBySlug(slug);
 
-    res.status(200).json({
-      success: true,
-      data: product,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, product, 'Product fetched successfully'));
   }
 );
 
@@ -212,12 +215,15 @@ export const searchProducts = asyncHandler(
       paginationParams
     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-      message: 'Products found',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { items: result.data, pagination: result.pagination },
+          'Products found'
+        )
+      );
   }
 );
 
@@ -296,11 +302,15 @@ export const getStoreMenu = asyncHandler(
       paginationParams
     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { items: result.data, pagination: result.pagination },
+          'Store menu fetched successfully'
+        )
+      );
   }
 );
 
@@ -318,13 +328,15 @@ export const getProductCustomizations = asyncHandler(
 
     const customizations = await productService.getProductCustomizations(id);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        productId: id,
-        customizations,
-      },
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { productId: id, customizations },
+          'Product customizations fetched successfully'
+        )
+      );
   }
 );
 
@@ -342,13 +354,15 @@ export const getProductAddOns = asyncHandler(
 
     const addOns = await productService.getProductAddOns(id);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        productId: id,
-        addOns,
-      },
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { productId: id, addOns },
+          'Product add-ons fetched successfully'
+        )
+      );
   }
 );
 
@@ -379,11 +393,15 @@ export const getProductsByCategory = asyncHandler(
       paginationParams
     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { items: result.data, pagination: result.pagination },
+          'Category products fetched successfully'
+        )
+      );
   }
 );
 
@@ -410,11 +428,15 @@ export const updateProductStatus = asyncHandler(
       isAvailable
     );
 
-    res.status(200).json({
-      success: true,
-      message: `Product ${isAvailable ? 'activated' : 'deactivated'} successfully`,
-      data: product,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          product,
+          `Product ${isAvailable ? 'activated' : 'deactivated'} successfully`
+        )
+      );
   }
 );
 
@@ -433,11 +455,15 @@ export const duplicateProduct = asyncHandler(
 
     const duplicatedProduct = await productService.duplicateProduct(productId);
 
-    res.status(201).json({
-      success: true,
-      message: 'Product duplicated successfully',
-      data: duplicatedProduct,
-    });
+    res
+      .status(201)
+      .json(
+        new ApiResponse(
+          201,
+          duplicatedProduct,
+          'Product duplicated successfully'
+        )
+      );
   }
 );
 
@@ -528,11 +554,9 @@ export const createProduct = asyncHandler(
 
     const product = await productService.createProduct(productData);
 
-    res.status(201).json({
-      success: true,
-      message: 'Product created successfully',
-      data: product,
-    });
+    res
+      .status(201)
+      .json(new ApiResponse(201, product, 'Product created successfully'));
   }
 );
 
@@ -626,11 +650,9 @@ export const updateProduct = asyncHandler(
 
     const product = await productService.updateProduct(id, productData);
 
-    res.status(200).json({
-      success: true,
-      message: 'Product updated successfully',
-      data: product,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, product, 'Product updated successfully'));
   }
 );
 
@@ -646,9 +668,8 @@ export const deleteProduct = asyncHandler(
 
     await productService.deleteProduct(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Product deleted successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Product deleted successfully'));
   }
 );

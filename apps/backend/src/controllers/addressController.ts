@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { addressService } from '../services/addressService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Get all addresses for authenticated user
@@ -13,10 +14,7 @@ export const getAddresses = asyncHandler(
     const userId = req.userId as string;
     const addresses = await addressService.getAddresses(userId);
 
-    res.json({
-      success: true,
-      data: addresses,
-    });
+    res.json(new ApiResponse(200, addresses, 'Addresses fetched successfully'));
   }
 );
 
@@ -66,11 +64,9 @@ export const addAddress = asyncHandler(async (req: Request, res: Response) => {
     deliveryInstructions,
   });
 
-  res.status(201).json({
-    success: true,
-    data: address,
-    message: 'Address added successfully',
-  });
+  res
+    .status(201)
+    .json(new ApiResponse(201, address, 'Address added successfully'));
 });
 
 /**
@@ -117,11 +113,7 @@ export const updateAddress = asyncHandler(
       deliveryInstructions,
     });
 
-    res.json({
-      success: true,
-      data: address,
-      message: 'Address updated successfully',
-    });
+    res.json(new ApiResponse(200, address, 'Address updated successfully'));
   }
 );
 
@@ -141,10 +133,7 @@ export const deleteAddress = asyncHandler(
 
     await addressService.deleteAddress(userId, addressId);
 
-    res.json({
-      success: true,
-      message: 'Address deleted successfully',
-    });
+    res.json(new ApiResponse(200, null, 'Address deleted successfully'));
   }
 );
 
@@ -164,10 +153,8 @@ export const setDefaultAddress = asyncHandler(
 
     const address = await addressService.setDefaultAddress(userId, addressId);
 
-    res.json({
-      success: true,
-      data: address,
-      message: 'Default address updated successfully',
-    });
+    res.json(
+      new ApiResponse(200, address, 'Default address updated successfully')
+    );
   }
 );

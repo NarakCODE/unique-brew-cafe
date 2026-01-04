@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { checkoutService } from '../services/checkoutService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 export const validateCheckout = asyncHandler(
   async (req: Request, res: Response) => {
@@ -11,10 +12,11 @@ export const validateCheckout = asyncHandler(
 
     const validation = await checkoutService.validateCheckout(req.userId);
 
-    res.status(200).json({
-      success: true,
-      data: validation,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, validation, 'Checkout validated successfully')
+      );
   }
 );
 
@@ -26,10 +28,11 @@ export const createCheckoutSession = asyncHandler(
 
     const session = await checkoutService.createCheckoutSession(req.userId);
 
-    res.status(201).json({
-      success: true,
-      data: session,
-    });
+    res
+      .status(201)
+      .json(
+        new ApiResponse(201, session, 'Checkout session created successfully')
+      );
   }
 );
 
@@ -46,10 +49,11 @@ export const getCheckoutSession = asyncHandler(
       checkoutId
     );
 
-    res.status(200).json({
-      success: true,
-      data: session,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, session, 'Checkout session fetched successfully')
+      );
   }
 );
 
@@ -57,10 +61,15 @@ export const getPaymentMethods = asyncHandler(
   async (req: Request, res: Response) => {
     const paymentMethods = await checkoutService.getPaymentMethods();
 
-    res.status(200).json({
-      success: true,
-      data: paymentMethods,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          paymentMethods,
+          'Payment methods fetched successfully'
+        )
+      );
   }
 );
 
@@ -82,11 +91,9 @@ export const applyCoupon = asyncHandler(async (req: Request, res: Response) => {
     couponCode
   );
 
-  res.status(200).json({
-    success: true,
-    data: session,
-    message: 'Coupon applied successfully',
-  });
+  res
+    .status(200)
+    .json(new ApiResponse(200, session, 'Coupon applied successfully'));
 });
 
 export const removeCoupon = asyncHandler(
@@ -99,11 +106,9 @@ export const removeCoupon = asyncHandler(
 
     const session = await checkoutService.removeCoupon(req.userId, checkoutId);
 
-    res.status(200).json({
-      success: true,
-      data: session,
-      message: 'Coupon removed successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, session, 'Coupon removed successfully'));
   }
 );
 
@@ -118,13 +123,16 @@ export const getDeliveryCharges = asyncHandler(
     const deliveryFee =
       await checkoutService.calculateDeliveryCharges(addressId);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        deliveryFee,
-        currency: 'USD',
-      },
-    });
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          deliveryFee,
+          currency: 'USD',
+        },
+        'Delivery charges calculated successfully'
+      )
+    );
   }
 );
 
@@ -147,10 +155,8 @@ export const confirmCheckout = asyncHandler(
       paymentMethod
     );
 
-    res.status(201).json({
-      success: true,
-      data: order,
-      message: 'Order created successfully',
-    });
+    res
+      .status(201)
+      .json(new ApiResponse(201, order, 'Order created successfully'));
   }
 );

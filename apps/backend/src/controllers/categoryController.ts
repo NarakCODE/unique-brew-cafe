@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import * as categoryService from '../services/categoryService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * @route   GET /api/v1/categories
@@ -12,10 +13,11 @@ export const getCategories = asyncHandler(
   async (_req: Request, res: Response) => {
     const categories = await categoryService.getAllCategories();
 
-    res.status(200).json({
-      success: true,
-      data: categories,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, categories, 'Categories fetched successfully')
+      );
   }
 );
 
@@ -34,10 +36,9 @@ export const getCategoryById = asyncHandler(
 
     const category = await categoryService.getCategoryById(id);
 
-    res.status(200).json({
-      success: true,
-      data: category,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, category, 'Category fetched successfully'));
   }
 );
 
@@ -56,10 +57,9 @@ export const getCategoryBySlug = asyncHandler(
 
     const category = await categoryService.getCategoryBySlug(slug);
 
-    res.status(200).json({
-      success: true,
-      data: category,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, category, 'Category fetched successfully'));
   }
 );
 
@@ -78,10 +78,15 @@ export const getSubcategories = asyncHandler(
 
     const subcategories = await categoryService.getSubcategories(id);
 
-    res.status(200).json({
-      success: true,
-      data: subcategories,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          subcategories,
+          'Subcategories fetched successfully'
+        )
+      );
   }
 );
 
@@ -111,9 +116,8 @@ export const reorderCategories = asyncHandler(
 
     await categoryService.reorderCategories(categories);
 
-    res.status(200).json({
-      success: true,
-      message: 'Categories reordered successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Categories reordered successfully'));
   }
 );

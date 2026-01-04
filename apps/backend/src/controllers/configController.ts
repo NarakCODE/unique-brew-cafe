@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { configService } from '../services/configService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Get public configuration
@@ -11,10 +12,9 @@ export const getPublicConfig = asyncHandler(
   async (_req: Request, res: Response) => {
     const config = await configService.getPublicConfig();
 
-    res.status(200).json({
-      success: true,
-      data: config,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, config, 'Public config fetched successfully'));
   }
 );
 
@@ -29,10 +29,9 @@ export const getDeliveryZones = asyncHandler(
     // Let's assume this is the public endpoint.
     const zones = await configService.getDeliveryZones(true);
 
-    res.status(200).json({
-      success: true,
-      data: zones,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, zones, 'Delivery zones fetched successfully'));
   }
 );
 
@@ -43,7 +42,9 @@ export const getDeliveryZones = asyncHandler(
 export const getHealth = asyncHandler(async (_req: Request, res: Response) => {
   const health = await configService.getSystemHealth();
 
-  res.status(200).json(health);
+  res
+    .status(200)
+    .json(new ApiResponse(200, health, 'System health fetched successfully'));
 });
 
 /**
@@ -66,10 +67,9 @@ export const updateAppConfig = asyncHandler(
       type
     );
 
-    res.status(200).json({
-      success: true,
-      data: config,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, config, 'App config updated successfully'));
   }
 );
 
@@ -99,10 +99,9 @@ export const createDeliveryZone = asyncHandler(
       estimatedDeliveryTime,
     });
 
-    res.status(201).json({
-      success: true,
-      data: zone,
-    });
+    res
+      .status(201)
+      .json(new ApiResponse(201, zone, 'Delivery zone created successfully'));
   }
 );
 
@@ -121,10 +120,9 @@ export const updateDeliveryZone = asyncHandler(
 
     const zone = await configService.updateDeliveryZone(id, updateData);
 
-    res.status(200).json({
-      success: true,
-      data: zone,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, zone, 'Delivery zone updated successfully'));
   }
 );
 
@@ -142,9 +140,8 @@ export const deleteDeliveryZone = asyncHandler(
 
     await configService.deleteDeliveryZone(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Delivery zone deleted successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Delivery zone deleted successfully'));
   }
 );

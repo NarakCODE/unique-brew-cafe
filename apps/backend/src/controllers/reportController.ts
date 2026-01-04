@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { reportService } from '../services/reportService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 interface ReportDateFilters {
   startDate?: Date;
@@ -32,10 +33,11 @@ export const getDashboardStats = asyncHandler(
 
     const stats = await reportService.getDashboardStats(filters);
 
-    res.status(200).json({
-      success: true,
-      data: stats,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, stats, 'Dashboard stats fetched successfully')
+      );
   }
 );
 
@@ -56,10 +58,9 @@ export const getSalesReport = asyncHandler(
       (groupBy as 'day' | 'month') || 'day'
     );
 
-    res.status(200).json({
-      success: true,
-      data: report,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, report, 'Sales report fetched successfully'));
   }
 );
 
@@ -77,10 +78,9 @@ export const getOrdersReport = asyncHandler(
 
     const report = await reportService.getOrdersReport(filters);
 
-    res.status(200).json({
-      success: true,
-      data: report,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, report, 'Orders report fetched successfully'));
   }
 );
 
@@ -98,10 +98,15 @@ export const getProductPerformance = asyncHandler(
 
     const report = await reportService.getProductPerformance(filters);
 
-    res.status(200).json({
-      success: true,
-      data: report,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          report,
+          'Product performance report fetched successfully'
+        )
+      );
   }
 );
 
@@ -119,10 +124,11 @@ export const getRevenueAnalytics = asyncHandler(
 
     const report = await reportService.getRevenueAnalytics(filters);
 
-    res.status(200).json({
-      success: true,
-      data: report,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, report, 'Revenue analytics fetched successfully')
+      );
   }
 );
 

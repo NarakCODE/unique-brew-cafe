@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { notificationService } from '../services/notificationService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Register device token for push notifications
@@ -36,10 +37,15 @@ export const registerDevice = asyncHandler(
       appVersion,
     });
 
-    res.status(200).json({
-      success: true,
-      data: deviceToken,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          deviceToken,
+          'Device token registered successfully'
+        )
+      );
   }
 );
 
@@ -58,10 +64,11 @@ export const unregisterDevice = asyncHandler(
 
     await notificationService.unregisterDevice(userId, tokenId);
 
-    res.status(200).json({
-      success: true,
-      message: 'Device token unregistered successfully',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, null, 'Device token unregistered successfully')
+      );
   }
 );
 
@@ -91,10 +98,15 @@ export const getNotifications = asyncHandler(
       filters
     );
 
-    res.status(200).json({
-      success: true,
-      data: notifications,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          notifications,
+          'Notifications fetched successfully'
+        )
+      );
   }
 );
 
@@ -108,10 +120,15 @@ export const getUnreadCount = asyncHandler(
 
     const count = await notificationService.getUnreadCount(userId);
 
-    res.status(200).json({
-      success: true,
-      data: { count },
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { count },
+          'Unread notification count fetched successfully'
+        )
+      );
   }
 );
 
@@ -129,10 +146,9 @@ export const markAsRead = asyncHandler(async (req: Request, res: Response) => {
 
   await notificationService.markAsRead(userId, id);
 
-  res.status(200).json({
-    success: true,
-    message: 'Notification marked as read',
-  });
+  res
+    .status(200)
+    .json(new ApiResponse(200, null, 'Notification marked as read'));
 });
 
 /**
@@ -145,10 +161,9 @@ export const markAllAsRead = asyncHandler(
 
     await notificationService.markAllAsRead(userId);
 
-    res.status(200).json({
-      success: true,
-      message: 'All notifications marked as read',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'All notifications marked as read'));
   }
 );
 
@@ -167,10 +182,9 @@ export const deleteNotification = asyncHandler(
 
     await notificationService.deleteNotification(userId, id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Notification deleted successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Notification deleted successfully'));
   }
 );
 
@@ -184,10 +198,11 @@ export const deleteAllNotifications = asyncHandler(
 
     await notificationService.deleteAllNotifications(userId);
 
-    res.status(200).json({
-      success: true,
-      message: 'All notifications deleted successfully',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, null, 'All notifications deleted successfully')
+      );
   }
 );
 
@@ -200,10 +215,15 @@ export const getSettings = asyncHandler(async (req: Request, res: Response) => {
 
   const settings = await notificationService.getSettings(userId);
 
-  res.status(200).json({
-    success: true,
-    data: settings,
-  });
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        settings,
+        'Notification settings fetched successfully'
+      )
+    );
 });
 
 /**
@@ -225,11 +245,15 @@ export const updateSettings = asyncHandler(
 
     await notificationService.updateSettings(userId, settings);
 
-    res.status(200).json({
-      success: true,
-      message: 'Notification settings updated successfully',
-      data: settings,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          settings,
+          'Notification settings updated successfully'
+        )
+      );
   }
 );
 
@@ -256,10 +280,11 @@ export const sendNotification = asyncHandler(
       actionValue,
     });
 
-    res.status(201).json({
-      success: true,
-      data: notification,
-    });
+    res
+      .status(201)
+      .json(
+        new ApiResponse(201, notification, 'Notification sent successfully')
+      );
   }
 );
 
@@ -286,11 +311,9 @@ export const broadcastNotification = asyncHandler(
       actionValue,
     });
 
-    res.status(200).json({
-      success: true,
-      message: 'Broadcast initiated successfully',
-      data: log,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, log, 'Broadcast initiated successfully'));
   }
 );
 
@@ -324,11 +347,11 @@ export const sendToSegment = asyncHandler(
       actionValue,
     });
 
-    res.status(200).json({
-      success: true,
-      message: 'Segment notification initiated successfully',
-      data: log,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, log, 'Segment notification initiated successfully')
+      );
   }
 );
 
@@ -340,10 +363,15 @@ export const getNotificationStats = asyncHandler(
   async (req: Request, res: Response) => {
     const stats = await notificationService.getStats();
 
-    res.status(200).json({
-      success: true,
-      data: stats,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          stats,
+          'Notification statistics fetched successfully'
+        )
+      );
   }
 );
 
@@ -360,9 +388,14 @@ export const getNotificationHistory = asyncHandler(
       skip ? parseInt(skip as string, 10) : 0
     );
 
-    res.status(200).json({
-      success: true,
-      data: history,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          history,
+          'Notification history fetched successfully'
+        )
+      );
   }
 );

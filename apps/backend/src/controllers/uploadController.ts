@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { uploadService } from '../services/uploadService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 export const uploadFile = asyncHandler(async (req: Request, res: Response) => {
   if (!req.file) {
@@ -10,11 +11,9 @@ export const uploadFile = asyncHandler(async (req: Request, res: Response) => {
 
   const result = await uploadService.uploadImage(req.file);
 
-  res.status(200).json({
-    success: true,
-    data: result,
-    message: 'File uploaded successfully',
-  });
+  res
+    .status(200)
+    .json(new ApiResponse(200, result, 'File uploaded successfully'));
 });
 
 export const deleteFile = asyncHandler(async (req: Request, res: Response) => {
@@ -24,5 +23,5 @@ export const deleteFile = asyncHandler(async (req: Request, res: Response) => {
   }
 
   await uploadService.deleteImage(public_id);
-  res.status(200).json({ message: 'File deleted successfully' });
+  res.status(200).json(new ApiResponse(200, null, 'File deleted successfully'));
 });

@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as authService from '../services/authService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Initiate registration by sending OTP
@@ -34,10 +35,9 @@ export const initiateRegistration = asyncHandler(
       password,
     });
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Registration OTP sent successfully'));
   }
 );
 
@@ -74,10 +74,11 @@ export const verifyRegistration = asyncHandler(
       deviceInfo
     );
 
-    res.status(201).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(201)
+      .json(
+        new ApiResponse(201, result, 'Registration completed successfully')
+      );
   }
 );
 
@@ -107,10 +108,9 @@ export const register = asyncHandler(
       deviceInfo
     );
 
-    res.status(201).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(201)
+      .json(new ApiResponse(201, result, 'User registered successfully'));
   }
 );
 
@@ -136,10 +136,9 @@ export const login = asyncHandler(
     // Login user
     const result = await authService.loginUser({ email, password }, deviceInfo);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'User logged in successfully'));
   }
 );
 
@@ -156,10 +155,9 @@ export const getMe = asyncHandler(
 
     const user = await authService.getUserById(req.userId);
 
-    res.status(200).json({
-      success: true,
-      data: user,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, user, 'User profile fetched successfully'));
   }
 );
 
@@ -185,10 +183,11 @@ export const forgotPassword = asyncHandler(
     // Initiate password reset
     const result = await authService.initiatePasswordReset(email);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, result, 'Password reset OTP sent successfully')
+      );
   }
 );
 
@@ -220,10 +219,9 @@ export const resetPassword = asyncHandler(
     // Reset password
     const result = await authService.resetPassword(email, otpCode, newPassword);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Password reset successfully'));
   }
 );
 
@@ -253,10 +251,9 @@ export const resendOtp = asyncHandler(
       verificationType as 'registration' | 'password_reset'
     );
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'OTP resent successfully'));
   }
 );
 
@@ -276,10 +273,9 @@ export const refreshToken = asyncHandler(
     // Refresh access token
     const result = await authService.refreshAccessToken(refreshToken);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Token refreshed successfully'));
   }
 );
 
@@ -299,9 +295,8 @@ export const logout = asyncHandler(
     // Logout user
     const result = await authService.logoutUser(refreshToken);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'User logged out successfully'));
   }
 );

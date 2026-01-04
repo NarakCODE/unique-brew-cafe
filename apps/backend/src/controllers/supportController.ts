@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { supportService } from '../services/supportService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Create a new ticket
@@ -22,10 +23,9 @@ export const createTicket = asyncHandler(
       priority,
     });
 
-    res.status(201).json({
-      success: true,
-      data: ticket,
-    });
+    res
+      .status(201)
+      .json(new ApiResponse(201, ticket, 'Ticket created successfully'));
   }
 );
 
@@ -43,10 +43,9 @@ export const getTickets = asyncHandler(async (req: Request, res: Response) => {
     limit: limit ? parseInt(limit as string) : 20,
   });
 
-  res.status(200).json({
-    success: true,
-    data: result,
-  });
+  res
+    .status(200)
+    .json(new ApiResponse(200, result, 'Tickets retrieved successfully'));
 });
 
 /**
@@ -66,10 +65,9 @@ export const getTicket = asyncHandler(async (req: Request, res: Response) => {
     req.userRole!
   );
 
-  res.status(200).json({
-    success: true,
-    data: ticket,
-  });
+  res
+    .status(200)
+    .json(new ApiResponse(200, ticket, 'Ticket retrieved successfully'));
 });
 
 /**
@@ -95,10 +93,9 @@ export const updateTicketStatus = asyncHandler(
       req.userId!
     );
 
-    res.status(200).json({
-      success: true,
-      data: ticket,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, ticket, 'Ticket status updated successfully'));
   }
 );
 
@@ -126,10 +123,9 @@ export const addMessage = asyncHandler(async (req: Request, res: Response) => {
     attachments
   );
 
-  res.status(201).json({
-    success: true,
-    data: newMessage,
-  });
+  res
+    .status(201)
+    .json(new ApiResponse(201, newMessage, 'Message added successfully'));
 });
 
 /**
@@ -149,10 +145,11 @@ export const getMessages = asyncHandler(async (req: Request, res: Response) => {
     req.userRole!
   );
 
-  res.status(200).json({
-    success: true,
-    data: messages,
-  });
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, messages, 'Ticket messages retrieved successfully')
+    );
 });
 
 /**
@@ -164,10 +161,9 @@ export const getFAQs = asyncHandler(async (req: Request, res: Response) => {
 
   const faqs = await supportService.getFAQs(category as string);
 
-  res.status(200).json({
-    success: true,
-    data: faqs,
-  });
+  res
+    .status(200)
+    .json(new ApiResponse(200, faqs, 'FAQs retrieved successfully'));
 });
 
 /**
@@ -188,8 +184,5 @@ export const createFAQ = asyncHandler(async (req: Request, res: Response) => {
     displayOrder,
   });
 
-  res.status(201).json({
-    success: true,
-    data: faq,
-  });
+  res.status(201).json(new ApiResponse(201, faq, 'FAQ created successfully'));
 });

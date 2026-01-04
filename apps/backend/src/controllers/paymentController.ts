@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { paymentService } from '../services/paymentService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Create payment intent for an order
@@ -24,11 +25,15 @@ export const createPaymentIntent = asyncHandler(
       req.userId
     );
 
-    res.status(200).json({
-      success: true,
-      data: paymentIntent,
-      message: 'Payment intent created successfully',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          paymentIntent,
+          'Payment intent created successfully'
+        )
+      );
   }
 );
 
@@ -56,12 +61,15 @@ export const confirmPayment = asyncHandler(
 
     const statusCode = result.success ? 200 : 400;
 
-    res.status(statusCode).json({
-      success: result.success,
-      data: result.order,
-      transactionId: result.transactionId,
-      message: result.message,
-    });
+    res
+      .status(statusCode)
+      .json(
+        new ApiResponse(
+          statusCode,
+          { order: result.order, transactionId: result.transactionId },
+          result.message
+        )
+      );
   }
 );
 
@@ -80,9 +88,8 @@ export const mockPaymentComplete = asyncHandler(
 
     await paymentService.mockPaymentComplete(orderId);
 
-    res.status(200).json({
-      success: true,
-      message: 'Mock payment completed successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Mock payment completed successfully'));
   }
 );
