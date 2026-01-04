@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -19,27 +18,21 @@ import { Input } from "@/components/ui/input";
 import { useLogin } from "@/hooks/use-auth";
 import { toast } from "sonner";
 import { sanitizeErrorMessage } from "@/lib/utils/error-sanitizer";
-
-const loginSchema = z.object({
-    email: z.email({ message: "Please enter a valid email address" }),
-    password: z.string().min(1, { message: "Password is required" }),
-});
-
-type LoginFormValues = z.infer<typeof loginSchema>;
+import { LoginSchema, type LoginSchemaType } from "@/schemas/auth-schema";
 
 export function LoginForm() {
     const { mutate: login, isPending } = useLogin();
     const [showPassword, setShowPassword] = useState(false);
 
-    const form = useForm<LoginFormValues>({
-        resolver: zodResolver(loginSchema),
+    const form = useForm<LoginSchemaType>({
+        resolver: zodResolver(LoginSchema),
         defaultValues: {
             email: "",
             password: "",
         },
     });
 
-    function onSubmit(data: LoginFormValues) {
+    function onSubmit(data: LoginSchemaType) {
         login(data, {
             onSuccess: () => {
                 toast.success("Logged in successfully");

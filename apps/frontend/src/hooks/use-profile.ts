@@ -1,3 +1,5 @@
+"use client";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 
@@ -5,12 +7,12 @@ import { api } from "@/lib/api";
 // 1. Import the consolidated types we created
 import type {
     User,
-    UpdateUserData,
     UserPreferences,
     UpdatePasswordData,
     DeleteAccountData,
     ReferralStats,
 } from "@/types/user";
+import type { UpdateProfileSchemaType } from "@/schemas/profile-schema";
 
 // 2. Define types strictly for API interactions (DTOs)
 // These specific request bodies weren't in the previous file, so we define them here
@@ -65,7 +67,7 @@ export function useUpdateProfile() {
 
     return useMutation({
         // Uses the Partial<User> type we defined earlier
-        mutationFn: (data: UpdateUserData) => api.profile.update(data),
+        mutationFn: (data: UpdateProfileSchemaType) => api.profile.update(data),
         onSuccess: (updatedProfile: User) => {
             // Update the cache immediately
             queryClient.setQueryData(profileKeys.detail(), updatedProfile);
@@ -84,8 +86,7 @@ export function useUpdateSettings() {
         mutationFn: (data: Partial<UserPreferences>) =>
             api.profile.updateSettings(data),
 
-        // Optimistic update or set data on return
-        onSuccess: (updatedProfile: User) => {
+        onSuccess: (updatedProfile) => {
             queryClient.setQueryData(profileKeys.detail(), updatedProfile);
         },
     });

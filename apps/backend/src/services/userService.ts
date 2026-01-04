@@ -10,29 +10,10 @@ import {
   type PaginationParams,
   type PaginationResult,
 } from '../utils/pagination.js';
-
-interface UpdateProfileData {
-  fullName?: string;
-  email?: string;
-  phoneNumber?: string;
-  dateOfBirth?: Date;
-  gender?: 'male' | 'female' | 'other';
-}
-
-interface UpdateSettingsData {
-  notificationsEnabled?: boolean;
-  emailNotifications?: boolean;
-  smsNotifications?: boolean;
-  pushNotifications?: boolean;
-  language?: 'en' | 'km';
-  currency?: 'USD' | 'KHR';
-}
-
-import {
-  validateEmail,
-  validatePhoneNumber,
-  sanitizeString,
-} from '../utils/validators.js';
+import type {
+  UpdateProfileInput,
+  UpdateSettingsInput,
+} from '../schemas/user.schema.js';
 
 export class UserService {
   /**
@@ -68,79 +49,8 @@ export class UserService {
    * @throws {UnauthorizedError} If account is not active
    * @throws {BadRequestError} If validation fails or email/phone already exists
    */
-  async updateProfile(userId: string, profileData: UpdateProfileData) {
-    // Validate and sanitize inputs before database operations
-    const validationErrors: string[] = [];
-    const sanitizedData: UpdateProfileData = {};
-
-    // Validate and sanitize email
-    if (profileData.email !== undefined) {
-      const sanitizedEmail = sanitizeString(profileData.email.toLowerCase());
-      if (!validateEmail(sanitizedEmail)) {
-        validationErrors.push('Invalid email format');
-      } else {
-        sanitizedData.email = sanitizedEmail;
-      }
-    }
-
-    // Validate and sanitize phone number
-    if (profileData.phoneNumber !== undefined) {
-      const sanitizedPhone = sanitizeString(profileData.phoneNumber);
-      if (!validatePhoneNumber(sanitizedPhone)) {
-        validationErrors.push(
-          'Invalid phone number format. Use international format (e.g., +1234567890)'
-        );
-      } else {
-        sanitizedData.phoneNumber = sanitizedPhone;
-      }
-    }
-
-    // Sanitize full name
-    if (profileData.fullName !== undefined) {
-      const sanitizedName = sanitizeString(profileData.fullName);
-      if (sanitizedName.length < 2) {
-        validationErrors.push('Full name must be at least 2 characters long');
-      } else if (sanitizedName.length > 100) {
-        validationErrors.push('Full name must not exceed 100 characters');
-      } else {
-        sanitizedData.fullName = sanitizedName;
-      }
-    }
-
-    // Validate date of birth
-    if (profileData.dateOfBirth !== undefined) {
-      const dob = new Date(profileData.dateOfBirth);
-      const now = new Date();
-      const age = now.getFullYear() - dob.getFullYear();
-
-      if (isNaN(dob.getTime())) {
-        validationErrors.push('Invalid date of birth');
-      } else if (dob > now) {
-        validationErrors.push('Date of birth cannot be in the future');
-      } else if (age < 13) {
-        validationErrors.push('You must be at least 13 years old');
-      } else if (age > 120) {
-        validationErrors.push('Invalid date of birth');
-      } else {
-        sanitizedData.dateOfBirth = dob;
-      }
-    }
-
-    // Validate gender
-    if (profileData.gender !== undefined) {
-      if (!['male', 'female', 'other'].includes(profileData.gender)) {
-        validationErrors.push('Invalid gender value');
-      } else {
-        sanitizedData.gender = profileData.gender;
-      }
-    }
-
-    // Throw all validation errors at once
-    if (validationErrors.length > 0) {
-      throw new BadRequestError(validationErrors.join('; '));
-    }
-
-    // Fetch user from database
+  async updateProfile(userId: string, profileData: UpdateProfileInput) {
+    // 1. Fetch user from database first
     const user = await User.findById(userId);
 
     if (!user) {
@@ -151,42 +61,82 @@ export class UserService {
       throw new UnauthorizedError('Cannot update inactive account');
     }
 
-    // Check if email is already taken by another user
-    if (sanitizedData.email && sanitizedData.email !== user.email) {
+    // 2. Handle Email Uniqueness
+    // Zod validates the format, but only the DB knows if it's taken
+    if (profileData.email && profileData.email !== user.email) {
       const existingUser = await User.findOne({
-        email: sanitizedData.email,
+        email: profileData.email,
         _id: { $ne: userId },
       });
       if (existingUser) {
         throw new BadRequestError('Email is already in use');
       }
-      user.email = sanitizedData.email;
+      user.email = profileData.email;
     }
 
-    // Check if phone number is already taken by another user
+    // 3. Handle Phone Uniqueness
     if (
-      sanitizedData.phoneNumber &&
-      sanitizedData.phoneNumber !== user.phoneNumber
+      profileData.phoneNumber &&
+      profileData.phoneNumber !== user.phoneNumber
     ) {
       const existingUser = await User.findOne({
-        phoneNumber: sanitizedData.phoneNumber,
+        phoneNumber: profileData.phoneNumber,
         _id: { $ne: userId },
       });
       if (existingUser) {
         throw new BadRequestError('Phone number is already in use');
       }
-      user.phoneNumber = sanitizedData.phoneNumber;
+      user.phoneNumber = profileData.phoneNumber;
     }
 
-    // Update allowed fields
-    if (sanitizedData.fullName !== undefined) {
-      user.fullName = sanitizedData.fullName;
+    // 4. Update Simple Fields
+    // We trust these values because Zod already validated min/max/trim
+    if (profileData.fullName) {
+      user.fullName = profileData.fullName;
     }
-    if (sanitizedData.dateOfBirth !== undefined) {
-      user.dateOfBirth = sanitizedData.dateOfBirth;
+
+    // Zod's z.coerce.date() ensures this is a valid Date object
+    if (profileData.dateOfBirth) {
+      user.dateOfBirth = profileData.dateOfBirth;
     }
-    if (sanitizedData.gender !== undefined) {
-      user.gender = sanitizedData.gender;
+
+    if (profileData.gender) {
+      user.gender = profileData.gender;
+    }
+
+    // 5. Update Preferences (Deep Merge)
+    // Important: We merge with existing preferences so we don't wipe settings
+    // 5. Update Preferences (Deep Merge)
+    if (profileData.preferences) {
+      const p = profileData.preferences;
+      if (p.notificationsEnabled !== undefined)
+        user.preferences.notificationsEnabled = p.notificationsEnabled;
+      if (p.emailNotifications !== undefined)
+        user.preferences.emailNotifications = p.emailNotifications;
+      if (p.smsNotifications !== undefined)
+        user.preferences.smsNotifications = p.smsNotifications;
+      if (p.pushNotifications !== undefined)
+        user.preferences.pushNotifications = p.pushNotifications;
+      if (p.language !== undefined) user.preferences.language = p.language;
+      if (p.currency !== undefined) user.preferences.currency = p.currency;
+
+      // Handle nested notifications object
+      if (p.notifications) {
+        // Initialize if missing (though schema defines defaults, safeguard for partial updates)
+        if (!user.preferences.notifications) {
+          user.preferences.notifications = {};
+        }
+        const n = p.notifications;
+        if (n.orderUpdates !== undefined)
+          user.preferences.notifications.orderUpdates = n.orderUpdates;
+        if (n.promotions !== undefined)
+          user.preferences.notifications.promotions = n.promotions;
+        if (n.announcements !== undefined)
+          user.preferences.notifications.announcements = n.announcements;
+        if (n.systemNotifications !== undefined)
+          user.preferences.notifications.systemNotifications =
+            n.systemNotifications;
+      }
     }
 
     await user.save();
@@ -282,7 +232,7 @@ export class UserService {
    * Update user preferences/settings
    * Requirements: 3.5
    */
-  async updateSettings(userId: string, settingsData: UpdateSettingsData) {
+  async updateSettings(userId: string, settingsData: UpdateSettingsInput) {
     const user = await User.findById(userId);
 
     if (!user) {
@@ -311,6 +261,22 @@ export class UserService {
     }
     if (settingsData.currency !== undefined) {
       user.preferences.currency = settingsData.currency;
+    }
+
+    if (settingsData.notifications) {
+      if (!user.preferences.notifications) {
+        user.preferences.notifications = {};
+      }
+      const n = settingsData.notifications;
+      if (n.orderUpdates !== undefined)
+        user.preferences.notifications.orderUpdates = n.orderUpdates;
+      if (n.promotions !== undefined)
+        user.preferences.notifications.promotions = n.promotions;
+      if (n.announcements !== undefined)
+        user.preferences.notifications.announcements = n.announcements;
+      if (n.systemNotifications !== undefined)
+        user.preferences.notifications.systemNotifications =
+          n.systemNotifications;
     }
 
     await user.save();

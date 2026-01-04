@@ -24,6 +24,15 @@ const userPreferencesSchema = z.object({
   pushNotifications: z.boolean().default(true),
   language: z.enum(['en', 'km']).default('en'),
   currency: z.enum(['USD', 'KHR']).default('USD'),
+  notifications: z
+    .object({
+      orderUpdates: z.boolean().default(true),
+      promotions: z.boolean().default(true),
+      announcements: z.boolean().default(true),
+      systemNotifications: z.boolean().default(true),
+    })
+    .partial()
+    .optional(),
 });
 
 /**

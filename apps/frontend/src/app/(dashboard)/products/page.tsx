@@ -8,7 +8,6 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
-import { BulkActions } from "./bulk-actions";
 import { useProducts, useDebounce } from "@/hooks";
 import {
     PaginationState,
@@ -187,19 +186,12 @@ function ProductsContent() {
             </PageHeader>
 
             {/* Bulk Actions */}
-            {selectedIds.length > 0 && (
-                <BulkActions
-                    selectedIds={selectedIds}
-                    selectedProducts={selectedProducts}
-                    onClearSelection={clearSelection}
-                />
-            )}
 
             <Card className="p-6">
-                <DataTable
+                {/* <DataTable
                     data={products}
                     columns={columns}
-                    pageCount={pageCount}
+                    // pageCount={pageCount}
                     searchKey="name"
                     filters={[
                         {
@@ -220,7 +212,7 @@ function ProductsContent() {
                     manualPagination
                     manualSorting
                     manualFiltering
-                />
+                /> */}
             </Card>
         </div>
     );

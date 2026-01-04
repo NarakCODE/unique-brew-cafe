@@ -1,3 +1,4 @@
+"use client";
 /**
  * Authentication Hooks - Server State Management
  * Uses TanStack Query for API calls and Zustand for token storage

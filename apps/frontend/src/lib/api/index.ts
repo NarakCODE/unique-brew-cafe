@@ -12,7 +12,6 @@ import type {
     User,
     UpdateUserData,
     CreateUserData,
-    UpdateUserStatusData,
     Product,
     CreateProductData,
     UpdateProductData,
@@ -36,9 +35,6 @@ import type {
     CreateDeliveryZoneData,
     UpdateDeliveryZoneData,
     SupportTicket,
-    UserProfile,
-    UpdateProfileData,
-    UpdateSettingsData,
     UpdatePasswordData,
     ReferralStats,
     DeleteAccountData,
@@ -48,7 +44,9 @@ import type {
     Category,
     CreateCategoryData,
     UpdateCategoryData,
+    UserPreferences,
 } from "@/types";
+import type { UpdateProfileSchemaType } from "@/schemas/profile-schema";
 
 // ============================================================================
 // REQUEST HELPERS
@@ -990,15 +988,15 @@ export const api = {
         /**
          * Get current user's profile
          */
-        async get(): Promise<UserProfile> {
-            return apiClient.get<UserProfile>(apiConfig.endpoints.profile.get);
+        async get(): Promise<User> {
+            return apiClient.get<User>(apiConfig.endpoints.profile.get);
         },
 
         /**
          * Update current user's profile
          */
-        async update(data: UpdateProfileData): Promise<UserProfile> {
-            return apiClient.put<UserProfile>(
+        async update(data: UpdateProfileSchemaType): Promise<User> {
+            return apiClient.put<User>(
                 apiConfig.endpoints.profile.update,
                 data
             );
@@ -1029,8 +1027,9 @@ export const api = {
         /**
          * Update settings/preferences
          */
-        async updateSettings(data: UpdateSettingsData): Promise<UserProfile> {
-            return apiClient.put<UserProfile>(
+        async updateSettings(data: Partial<UserPreferences>): Promise<User> {
+            return apiClient.put<User>(
+                // Ensure this endpoint matches your backend route
                 apiConfig.endpoints.profile.updateSettings,
                 data
             );

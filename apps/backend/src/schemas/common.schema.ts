@@ -19,11 +19,7 @@ export const objectIdSchema = z
 /**
  * Validates email format
  */
-export const emailSchema = z
-  .string()
-  .email('Invalid email format')
-  .toLowerCase()
-  .trim();
+export const emailSchema = z.email('Invalid email format').toLowerCase().trim();
 
 /**
  * Validates phone number (E.164 format)

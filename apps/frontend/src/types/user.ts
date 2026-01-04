@@ -18,9 +18,9 @@ export interface NotificationDetailSettings {
 }
 
 export interface UserPreferences {
-    notifications: NotificationDetailSettings;
     notificationsEnabled: boolean;
     emailNotifications: boolean;
+    notifications?: NotificationDetailSettings;
     smsNotifications: boolean;
     pushNotifications: boolean;
     language: string;
@@ -32,15 +32,19 @@ export interface UserPreferences {
  * This is the full database document structure
  */
 export interface User {
-    _id: string; // Matches MongoDB format
+    _id: string;
     fullName: string;
     email: string;
+    phoneNumber: string;
 
     // Verification flags
     emailVerified: boolean;
     phoneVerified: boolean;
 
-    profileImage?: string; // Optional as it wasn't in the JSON, but was in your old type
+    profileImage?: string;
+
+    dateOfBirth: string;
+    gender: string;
 
     // Enums
     role: UserRole;
@@ -78,7 +82,7 @@ export interface CreateUserData {
 // 2. Data allowed when updating a profile
 // We use Partial to allow updating just one field (e.g., just the phone number)
 export type UpdateUserData = Partial<
-    Pick<User, "fullName" | "profileImage" | "status" | "role" | "preferences">
+    Pick<User, "fullName" | "status" | "role" | "preferences">
 >;
 
 // 3. Specific wrapper for updating status (useful for admin dashboards)

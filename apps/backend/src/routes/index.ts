@@ -19,6 +19,7 @@ import supportRoutes from './supportRoutes.js';
 import configRoutes from './configRoutes.js';
 
 import addonRoutes from './addonRoutes.js';
+import uploadRoutes from './uploadRoutes.js';
 
 const router: Router = express.Router();
 
@@ -55,5 +56,6 @@ router.use('/announcements', announcementRoutes);
 router.use('/reports', reportRoutes);
 router.use('/support', supportRoutes);
 router.use('/config', configRoutes);
+router.use('/upload', uploadRoutes);
 
 export default router;

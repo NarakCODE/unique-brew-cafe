@@ -41,7 +41,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
     const deleteUser = useDeleteUser();
 
     const handleViewOrders = () => {
-        router.push(`/orders?userId=${user.id}`);
+        router.push(`/orders?userId=${user._id}`);
     };
 
     const handleToggleStatus = async () => {
@@ -49,7 +49,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
 
         try {
             await updateStatus.mutateAsync({
-                id: user.id,
+                id: user._id,
                 status: newStatus,
             });
             toast.success(
@@ -65,7 +65,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
 
     const handleDelete = async () => {
         try {
-            await deleteUser.mutateAsync(user.id);
+            await deleteUser.mutateAsync(user._id);
             toast.success("User deleted successfully");
             setShowDeleteDialog(false);
         } catch {

@@ -5,7 +5,7 @@ import { Product } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
-import { DataTableRowActions } from "./data-table-row-actions";
+// import { DataTableRowActions } from "./data-table-row-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatCurrency } from "@/lib/utils";
 
@@ -175,6 +175,6 @@ export const columns: ColumnDef<Product>[] = [
     },
     {
         id: "actions",
-        cell: ({ row }) => <DataTableRowActions row={row} />,
+        // cell: ({ row }) => <DataTableRowActions row={row} />,
     },
 ];
