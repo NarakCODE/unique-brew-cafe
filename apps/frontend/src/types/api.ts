@@ -1,13 +1,13 @@
 // API Response Types
 export interface ApiResponse<T> {
     success: boolean;
+    statusCode: number;
     data: T;
-    message?: string;
+    message: string;
 }
 
-export interface PaginatedResponse<T> {
-    success: boolean;
-    data: T[];
+export interface PaginatedData<T> {
+    items: T[];
     pagination: {
         page: number;
         pages: number;
@@ -17,6 +17,8 @@ export interface PaginatedResponse<T> {
         hasPrev: boolean;
     };
 }
+
+export type PaginatedResponse<T> = ApiResponse<PaginatedData<T>>;
 
 export interface PaginationParams {
     page?: number;

@@ -1,6 +1,6 @@
 import { apiClient, fetchClient, ApiClientError } from "./client";
 import { apiConfig } from "./config";
-import type { PaginatedResponse } from "@/types/api";
+import type { PaginatedData } from "@/types/api";
 import type {
     LoginCredentials,
     AuthResponse,
@@ -225,7 +225,7 @@ export const api = {
             limit?: number;
             role?: string;
             search?: string;
-        }): Promise<PaginatedResponse<User>> {
+        }): Promise<PaginatedData<User>> {
             const url = buildUrl(apiConfig.endpoints.users.list, params);
             return apiClient.getPaginated<User>(url);
         },
@@ -299,7 +299,7 @@ export const api = {
             city?: string;
             page?: number;
             limit?: number;
-        }): Promise<PaginatedResponse<Store>> {
+        }): Promise<PaginatedData<Store>> {
             const url = buildUrl(apiConfig.endpoints.stores.list, params);
             return apiClient.getPaginated<Store>(url);
         },
@@ -314,7 +314,7 @@ export const api = {
             isActive?: boolean;
             sortBy?: string;
             sortOrder?: "asc" | "desc";
-        }): Promise<PaginatedResponse<Store>> {
+        }): Promise<PaginatedData<Store>> {
             const url = buildUrl(apiConfig.endpoints.stores.adminList, params);
             return apiClient.getPaginated<Store>(url);
         },
@@ -389,7 +389,7 @@ export const api = {
             sortBy?: string;
             sortOrder?: "asc" | "desc";
             isAvailable?: boolean;
-        }): Promise<PaginatedResponse<Product>> {
+        }): Promise<PaginatedData<Product>> {
             const url = buildUrl(apiConfig.endpoints.products.list, params);
             return apiClient.getPaginated<Product>(url);
         },
@@ -410,7 +410,7 @@ export const api = {
             maxPrice?: number;
             sortBy?: string;
             sortOrder?: "asc" | "desc";
-        }): Promise<PaginatedResponse<Product>> {
+        }): Promise<PaginatedData<Product>> {
             const url = buildUrl(apiConfig.endpoints.products.search, params);
             return apiClient.getPaginated<Product>(url);
         },
@@ -532,7 +532,7 @@ export const api = {
             status?: string;
             sortBy?: string;
             sortOrder?: "asc" | "desc";
-        }): Promise<PaginatedResponse<Order>> {
+        }): Promise<PaginatedData<Order>> {
             const url = buildUrl(apiConfig.endpoints.orders.list, params);
             return apiClient.getPaginated<Order>(url);
         },
@@ -587,7 +587,7 @@ export const api = {
             page?: number;
             limit?: number;
             status?: string;
-        }): Promise<PaginatedResponse<Order>> {
+        }): Promise<PaginatedData<Order>> {
             const url = buildUrl(apiConfig.endpoints.orders.myOrders, params);
             return apiClient.getPaginated<Order>(url);
         },
@@ -697,7 +697,7 @@ export const api = {
             page?: number;
             limit?: number;
             unreadOnly?: boolean;
-        }): Promise<PaginatedResponse<Notification>> {
+        }): Promise<PaginatedData<Notification>> {
             const url = buildUrl(
                 apiConfig.endpoints.notifications.list,
                 params
@@ -928,9 +928,9 @@ export const api = {
             page?: number;
             limit?: number;
             status?: string;
-        }): Promise<PaginatedResponse<SupportTicket>> {
+        }): Promise<PaginatedData<SupportTicket>> {
             const url = buildUrl(apiConfig.endpoints.support.tickets, params);
-            return apiClient.get<PaginatedResponse<SupportTicket>>(url);
+            return apiClient.getPaginated<SupportTicket>(url);
         },
 
         /**
@@ -1072,7 +1072,7 @@ export const api = {
             search?: string;
             sortBy?: string;
             sortOrder?: "asc" | "desc";
-        }): Promise<PaginatedResponse<Category>> {
+        }): Promise<PaginatedData<Category>> {
             const url = buildUrl(apiConfig.endpoints.categories.list, params);
             return apiClient.getPaginated<Category>(url);
         },

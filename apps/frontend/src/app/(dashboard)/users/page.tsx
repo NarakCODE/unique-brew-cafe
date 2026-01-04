@@ -62,7 +62,7 @@ function UsersContent() {
         search: debouncedSearch,
     });
 
-    const users = data?.data || [];
+    const users = data?.items || [];
     const pageCount = data?.pagination?.pages || 0;
 
     // 7. Construct Table State

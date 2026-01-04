@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table/data-table";
 import { columns } from "./columns";
 import { useProducts, useDebounce } from "@/hooks";
+import { Product } from "@/types";
 import {
     PaginationState,
     SortingState,
@@ -72,7 +73,7 @@ function ProductsContent() {
         isAvailable,
     });
 
-    const products = data?.data || [];
+    const products = data?.items || [];
     const pageCount = data?.pagination?.pages || 0;
 
     // 6. Construct Table State
@@ -159,9 +160,9 @@ function ProductsContent() {
 
     // 8. Get selected products for bulk actions
     const selectedProducts = products.filter(
-        (_, index) => rowSelection[index.toString()]
+        (_, index: number) => rowSelection[index.toString()]
     );
-    const selectedIds = selectedProducts.map((p) => p.id);
+    const selectedIds = selectedProducts.map((p: Product) => p.id);
 
     const clearSelection = () => setRowSelection({});
 
@@ -177,21 +178,46 @@ function ProductsContent() {
         <div className="space-y-6">
             <PageHeader
                 title="Products"
-                description="Manage your product inventory."
+                description="Manage your store's products and inventory."
             >
-                <Button onClick={() => router.push("/products/create")}>
+                <Button onClick={() => router.push("/products/new")}>
                     <Plus className="mr-2 h-4 w-4" />
                     Add Product
                 </Button>
             </PageHeader>
 
-            {/* Bulk Actions */}
+            {selectedIds.length > 0 && (
+                <div className="flex items-center justify-between rounded-lg border bg-muted/50 p-4">
+                    <div className="text-sm font-medium">
+                        {selectedIds.length} items selected
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                                // TODO: Implement bulk delete
+                                console.log("Bulk delete", selectedIds);
+                            }}
+                        >
+                            Delete Selected
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={clearSelection}
+                        >
+                            Clear Selection
+                        </Button>
+                    </div>
+                </div>
+            )}
 
             <Card className="p-6">
-                {/* <DataTable
+                <DataTable
                     data={products}
                     columns={columns}
-                    // pageCount={pageCount}
+                    pageCount={pageCount}
                     searchKey="name"
                     filters={[
                         {
@@ -212,7 +238,7 @@ function ProductsContent() {
                     manualPagination
                     manualSorting
                     manualFiltering
-                /> */}
+                />
             </Card>
         </div>
     );

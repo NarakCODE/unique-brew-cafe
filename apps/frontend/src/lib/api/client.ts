@@ -3,6 +3,7 @@ import {
     ApiResponse,
     ApiError,
     PaginatedResponse,
+    PaginatedData,
     ApiValidationError,
 } from "@/types/api";
 import { useAuthStore } from "@/store/auth.store";
@@ -203,12 +204,12 @@ class AxiosApiClient {
     async getPaginated<T>(
         url: string,
         config?: AxiosRequestConfig
-    ): Promise<PaginatedResponse<T>> {
+    ): Promise<PaginatedData<T>> {
         const response = await this.client.get<PaginatedResponse<T>>(
             url,
             config
         );
-        return response.data;
+        return response.data.data;
     }
 
     async post<T>(

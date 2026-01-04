@@ -12,6 +12,9 @@ import {
     getPaginationRowModel,
     getSortedRowModel,
     useReactTable,
+    OnChangeFn,
+    PaginationState,
+    RowSelectionState,
 } from "@tanstack/react-table";
 
 import {
@@ -22,99 +25,113 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-    DropdownMenu,
-    DropdownMenuCheckboxItem,
-    DropdownMenuContent,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { DataTablePagination } from "./data-table-pagination";
+import { DataTableToolbar } from "./data-table-toolbar";
 
 interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     searchKey?: string;
+    filters?: {
+        columnId: string;
+        title: string;
+        options: {
+            label: string;
+            value: string;
+            icon?: React.ComponentType<{ className?: string }>;
+        }[];
+    }[];
+    pageCount?: number;
+    pagination?: PaginationState;
+    onPaginationChange?: OnChangeFn<PaginationState>;
+    sorting?: SortingState;
+    onSortingChange?: OnChangeFn<SortingState>;
+    columnFilters?: ColumnFiltersState;
+    onColumnFiltersChange?: OnChangeFn<ColumnFiltersState>;
+    columnVisibility?: VisibilityState;
+    onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
+    rowSelection?: RowSelectionState;
+    onRowSelectionChange?: OnChangeFn<RowSelectionState>;
+    manualPagination?: boolean;
+    manualSorting?: boolean;
+    manualFiltering?: boolean;
 }
 
 export function DataTable<TData, TValue>({
     columns,
     data,
     searchKey,
+    filters = [],
+    pageCount,
+    pagination,
+    onPaginationChange,
+    sorting: externalSorting,
+    onSortingChange: externalOnSortingChange,
+    columnFilters: externalColumnFilters,
+    onColumnFiltersChange: externalOnColumnFiltersChange,
+    columnVisibility: externalColumnVisibility,
+    onColumnVisibilityChange: externalOnColumnVisibilityChange,
+    rowSelection: externalRowSelection,
+    onRowSelectionChange: externalOnRowSelectionChange,
+    manualPagination = false,
+    manualSorting = false,
+    manualFiltering = false,
 }: DataTableProps<TData, TValue>) {
-    const [sorting, setSorting] = React.useState<SortingState>([]);
-    const [columnFilters, setColumnFilters] =
+    const [internalSorting, setInternalSorting] = React.useState<SortingState>(
+        []
+    );
+    const [internalColumnFilters, setInternalColumnFilters] =
         React.useState<ColumnFiltersState>([]);
-    const [columnVisibility, setColumnVisibility] =
+    const [internalColumnVisibility, setInternalColumnVisibility] =
         React.useState<VisibilityState>({});
-    const [rowSelection, setRowSelection] = React.useState({});
+    const [internalRowSelection, setInternalRowSelection] =
+        React.useState<RowSelectionState>({});
+
+    const sorting = externalSorting ?? internalSorting;
+    const onSortingChange = externalOnSortingChange ?? setInternalSorting;
+    const columnFilters = externalColumnFilters ?? internalColumnFilters;
+    const onColumnFiltersChange =
+        externalOnColumnFiltersChange ?? setInternalColumnFilters;
+    const columnVisibility =
+        externalColumnVisibility ?? internalColumnVisibility;
+    const onColumnVisibilityChange =
+        externalOnColumnVisibilityChange ?? setInternalColumnVisibility;
+    const rowSelection = externalRowSelection ?? internalRowSelection;
+    const onRowSelectionChange =
+        externalOnRowSelectionChange ?? setInternalRowSelection;
 
     const table = useReactTable({
         data,
         columns,
-        onSortingChange: setSorting,
-        onColumnFiltersChange: setColumnFilters,
+        pageCount: pageCount,
         getCoreRowModel: getCoreRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
+        onSortingChange,
         getSortedRowModel: getSortedRowModel(),
+        onColumnFiltersChange,
         getFilteredRowModel: getFilteredRowModel(),
-        onColumnVisibilityChange: setColumnVisibility,
-        onRowSelectionChange: setRowSelection,
+        onColumnVisibilityChange,
+        onRowSelectionChange,
+        manualPagination,
+        manualSorting,
+        manualFiltering,
+        onPaginationChange,
         state: {
             sorting,
             columnFilters,
             columnVisibility,
             rowSelection,
+            pagination,
         },
     });
 
     return (
-        <div className="w-full">
-            <div className="flex items-center py-4">
-                {searchKey && (
-                    <Input
-                        placeholder={`Filter ${searchKey}...`}
-                        value={
-                            (table
-                                .getColumn(searchKey)
-                                ?.getFilterValue() as string) ?? ""
-                        }
-                        onChange={(event) =>
-                            table
-                                .getColumn(searchKey)
-                                ?.setFilterValue(event.target.value)
-                        }
-                        className="max-w-sm"
-                    />
-                )}
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="ml-auto">
-                            Columns <ChevronDown className="ml-2 h-4 w-4" />
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        {table
-                            .getAllColumns()
-                            .filter((column) => column.getCanHide())
-                            .map((column) => {
-                                return (
-                                    <DropdownMenuCheckboxItem
-                                        key={column.id}
-                                        className="capitalize"
-                                        checked={column.getIsVisible()}
-                                        onCheckedChange={(value) =>
-                                            column.toggleVisibility(!!value)
-                                        }
-                                    >
-                                        {column.id}
-                                    </DropdownMenuCheckboxItem>
-                                );
-                            })}
-                    </DropdownMenuContent>
-                </DropdownMenu>
-            </div>
+        <div className="space-y-4">
+            <DataTableToolbar
+                table={table}
+                searchKey={searchKey}
+                filters={filters}
+            />
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -168,30 +185,7 @@ export function DataTable<TData, TValue>({
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of{" "}
-                    {table.getFilteredRowModel().rows.length} row(s) selected.
-                </div>
-                <div className="space-x-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.previousPage()}
-                        disabled={!table.getCanPreviousPage()}
-                    >
-                        Previous
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => table.nextPage()}
-                        disabled={!table.getCanNextPage()}
-                    >
-                        Next
-                    </Button>
-                </div>
-            </div>
+            <DataTablePagination table={table} />
         </div>
     );
 }

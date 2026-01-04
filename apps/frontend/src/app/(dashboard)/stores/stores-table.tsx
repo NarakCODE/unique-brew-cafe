@@ -75,7 +75,7 @@ export function StoresTable() {
 
     // Table Setup
     const table = useReactTable({
-        data: data?.data ?? [],
+        data: data?.items ?? [],
         columns,
         pageCount: data?.pagination?.pages ?? -1, // Server-side pagination
         state: {

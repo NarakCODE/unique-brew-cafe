@@ -44,7 +44,7 @@ function CategoriesContent() {
         sortOrder,
     });
 
-    const categories = response?.data || [];
+    const categories = response?.items || [];
     const meta = response?.pagination;
     const pageCount = meta?.pages || 0;
 
