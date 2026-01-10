@@ -87,7 +87,7 @@ export const getProducts = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          { items: result.data, pagination: result.pagination },
+          { data: result.data, pagination: result.pagination },
           'Products fetched successfully'
         )
       );
@@ -220,7 +220,7 @@ export const searchProducts = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          { items: result.data, pagination: result.pagination },
+          { data: result.data, pagination: result.pagination },
           'Products found'
         )
       );
@@ -307,7 +307,7 @@ export const getStoreMenu = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          { items: result.data, pagination: result.pagination },
+          { data: result.data, pagination: result.pagination },
           'Store menu fetched successfully'
         )
       );
@@ -398,7 +398,7 @@ export const getProductsByCategory = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          { items: result.data, pagination: result.pagination },
+          { data: result.data, pagination: result.pagination },
           'Category products fetched successfully'
         )
       );
