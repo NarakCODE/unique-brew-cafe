@@ -110,6 +110,7 @@ export default function UserSettingsPage() {
       fullName: "",
       email: "",
       phoneNumber: "",
+      gender: undefined,
       preferences: {
         language: "en",
         currency: "USD",
@@ -137,7 +138,7 @@ export default function UserSettingsPage() {
         email: user.email || "",
         phoneNumber: user.phoneNumber || "",
         // Cast the string "male" to the specific union type
-        gender: (user.gender || undefined) as
+        gender: (user.gender ? user.gender.toLowerCase() : undefined) as
           | "male"
           | "female"
           | "other"
@@ -345,13 +346,18 @@ export default function UserSettingsPage() {
                       <Select
                         onValueChange={field.onChange}
                         value={field.value}
+                        // 1. ADD THIS KEY PROP
+                        // This forces the component to re-render when the value changes
+                        key={field.value || "gender-empty"}
                       >
                         <FormControl>
                           <SelectTrigger>
+                            {/* 2. Ensure SelectValue has no children */}
                             <SelectValue placeholder="Select gender" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
+                          {/* Ensure these values match your API data exactly (lowercase) */}
                           <SelectItem value="male">Male</SelectItem>
                           <SelectItem value="female">Female</SelectItem>
                           <SelectItem value="other">Other</SelectItem>

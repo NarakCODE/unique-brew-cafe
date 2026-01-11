@@ -1,11 +1,17 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
+  changePassword,
+  deleteAccount,
   getProfile,
   updateProfileImage,
   updateProfileSettingsFn,
 } from "@/api/profile";
 import { ApiErrorResponse, ApiResponse } from "@/types/api";
-import { UpdateProfileSettingsRequest } from "@/types/profile";
+import {
+  ChangePasswordRequest,
+  DeleteAccountRequest,
+  UpdateProfileSettingsRequest,
+} from "@/types/profile";
 import { toast } from "sonner";
 
 export function useProfile() {
@@ -75,6 +81,47 @@ export function useUpdateProfileSettingsMutate() {
   return {
     updateProfile: mutation.mutate,
     isUpdating: mutation.isPending,
+    error: mutation.error,
+  };
+}
+
+export function useChangePassword() {
+  const mutation = useMutation({
+    mutationFn: (request: ChangePasswordRequest) => changePassword(request),
+    onSuccess: () => {
+      toast.success("Password changed successfully");
+    },
+    onError: (error: ApiErrorResponse) => {
+      toast.error(error.message || "Failed to change password");
+    },
+  });
+
+  return {
+    changePassword: mutation.mutate,
+    isChanging: mutation.isPending,
+    error: mutation.error,
+  };
+}
+
+export function useDeleteAccount() {
+  const queryClient = useQueryClient();
+
+  const mutation = useMutation({
+    mutationFn: (request: DeleteAccountRequest) => deleteAccount(request),
+    onSuccess: () => {
+      toast.success("Account deleted successfully");
+      // Optionally logout or redirect
+      queryClient.clear();
+      window.location.href = "/auth/login";
+    },
+    onError: (error: ApiErrorResponse) => {
+      toast.error(error.message || "Failed to delete account");
+    },
+  });
+
+  return {
+    deleteAccount: mutation.mutate,
+    isDeleting: mutation.isPending,
     error: mutation.error,
   };
 }

@@ -58,3 +58,13 @@ export interface UpdateProfileSettingsRequest {
   gender: "male" | "female" | "other" | string;
   preferences: UserPreferences;
 }
+
+export interface ChangePasswordRequest {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface DeleteAccountRequest {
+  password: string;
+  reason?: string;
+}
