@@ -1,4 +1,5 @@
 "use client"
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -104,14 +105,8 @@ function SidebarProvider({
       }
     }
 
-    if (typeof window !== "undefined") {
-      window.addEventListener("keydown", handleKeyDown)
-    }
-    return () => {
-      if (typeof window !== "undefined") {
-        window.removeEventListener("keydown", handleKeyDown)
-      }
-    }
+    window.addEventListener("keydown", handleKeyDown)
+    return () => window.removeEventListener("keydown", handleKeyDown)
   }, [toggleSidebar])
 
   // We add a state so that we can do data-state="expanded" or "collapsed".
@@ -353,11 +348,7 @@ function SidebarFooter({ className, ...props }: React.ComponentProps<"div">) {
     <div
       data-slot="sidebar-footer"
       data-sidebar="footer"
-      className={cn(
-        "flex flex-col gap-2 p-2",
-        "[&>[data-slot=card]]:group-data-[collapsible=icon]:hidden",
-        className
-      )}
+      className={cn("flex flex-col gap-2 p-2", className)}
       {...props}
     />
   )

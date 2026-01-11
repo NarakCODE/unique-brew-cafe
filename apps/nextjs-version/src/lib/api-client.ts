@@ -1,28 +1,28 @@
-import axios, { AxiosError, InternalAxiosRequestConfig } from "axios"
-import { ApiErrorResponse } from "@/types/api"
+import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { ApiErrorResponse } from "@/types/api";
 
-const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
 export const apiClient = axios.create({
   baseURL,
   headers: {
     "Content-Type": "application/json",
   },
-})
+});
 
 // Request interceptor to add Authorization header
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem("accessToken")
+    const accessToken = localStorage.getItem("accessToken");
     if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`
+      config.headers.Authorization = `Bearer ${accessToken}`;
     }
-    return config
+    return config;
   },
   (error) => {
-    return Promise.reject(error)
+    return Promise.reject(error);
   }
-)
+);
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
@@ -30,7 +30,7 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     // If we have a structured API error response from the backend
     if (error.response?.data && typeof error.response.data === "object") {
-      const apiError = error.response.data as ApiErrorResponse
+      const apiError = error.response.data as ApiErrorResponse;
 
       // Handle unauthorized errors (optional: could emit an event or redirect)
       if (
@@ -47,7 +47,7 @@ apiClient.interceptors.response.use(
         }
       }
 
-      return Promise.reject(apiError)
+      return Promise.reject(apiError);
     }
 
     // Fallback error object
@@ -57,8 +57,8 @@ apiClient.interceptors.response.use(
       errorCode: error.code || "UNKNOWN_ERROR",
       errors: [],
       stack: error.stack,
-    }
+    };
 
-    return Promise.reject(fallbackError)
+    return Promise.reject(fallbackError);
   }
-)
+);

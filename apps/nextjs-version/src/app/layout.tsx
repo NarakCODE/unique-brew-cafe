@@ -1,30 +1,37 @@
-import type { Metadata } from "next"
-import "./globals.css"
+import type { Metadata } from "next";
+import "./globals.css";
 
-import { ThemeProvider } from "@/components/theme-provider"
-import { SidebarConfigProvider } from "@/contexts/sidebar-context"
-import { QueryProvider } from "@/components/providers/query-provider"
-import { inter } from "@/lib/fonts"
+import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarConfigProvider } from "@/contexts/sidebar-context";
+import { QueryProvider } from "@/components/providers/query-provider";
+import { Toaster } from "@/components/ui/sonner";
+import { inter } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-  title: "Shadcn Dashboard",
-  description: "A dashboard built with Next.js and shadcn/ui",
-}
+    title: "Shadcn Dashboard",
+    description: "A dashboard built with Next.js and shadcn/ui",
+};
 
 export default function RootLayout({
-  children,
+    children,
 }: {
-  children: React.ReactNode
+    children: React.ReactNode;
 }) {
-  return (
-    <html lang="en" className={`${inter.variable} antialiased`}>
-      <body className={inter.className}>
-        <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
-          <QueryProvider>
-            <SidebarConfigProvider>{children}</SidebarConfigProvider>
-          </QueryProvider>
-        </ThemeProvider>
-      </body>
-    </html>
-  )
+    return (
+        <html lang="en" className={`${inter.variable} antialiased`}>
+            <body className={inter.className}>
+                <ThemeProvider
+                    defaultTheme="system"
+                    storageKey="nextjs-ui-theme"
+                >
+                    <QueryProvider>
+                        <SidebarConfigProvider>
+                            {children}
+                        </SidebarConfigProvider>
+                        <Toaster />
+                    </QueryProvider>
+                </ThemeProvider>
+            </body>
+        </html>
+    );
 }
