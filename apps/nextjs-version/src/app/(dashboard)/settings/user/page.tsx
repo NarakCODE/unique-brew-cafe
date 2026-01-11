@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { format } from "date-fns";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -37,7 +37,19 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { Switch } from "@/components/ui/switch";
-import { Upload, Loader2, CalendarIcon } from "lucide-react";
+import {
+  Upload,
+  Loader2,
+  ChevronDownIcon,
+  Bell,
+  Mail,
+  Smartphone,
+  Megaphone,
+  ShoppingBag,
+  Tag,
+  Cpu,
+  Globe,
+} from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import {
   useProfile,
@@ -49,6 +61,7 @@ import { Logo } from "@/components/logo";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
+import { format } from "date-fns";
 
 // --- SCHEMA DEFINITIONS ---
 // Defining these here based on your prompt, assuming email/phone logic
@@ -406,30 +419,36 @@ export default function UserSettingsPage() {
                         <PopoverTrigger asChild>
                           <FormControl>
                             <Button
-                              variant={"outline"}
+                              variant="outline"
                               className={cn(
-                                "w-full pl-3 text-left font-normal",
+                                "w-full justify-between font-normal",
                                 !field.value && "text-muted-foreground"
                               )}
                             >
+                              {/* Check if field.value exists before formatting */}
                               {field.value ? (
                                 format(field.value, "PPP")
                               ) : (
                                 <span>Pick a date</span>
                               )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                              <ChevronDownIcon className="h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
                         </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
+                        <PopoverContent
+                          className="w-auto overflow-hidden p-0"
+                          align="start"
+                        >
                           <Calendar
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
+                            captionLayout="dropdown" // Allows jumping between years
+                            fromYear={1900} // Safer alternative to startMonth
+                            toYear={new Date().getFullYear()} // Limits calendar to current year
                             disabled={(date) =>
                               date > new Date() || date < new Date("1900-01-01")
                             }
-                            initialFocus
                           />
                         </PopoverContent>
                       </Popover>
@@ -499,72 +518,96 @@ export default function UserSettingsPage() {
           {/* 3. Notifications Card */}
           <Card>
             <CardHeader>
-              <CardTitle>Notifications</CardTitle>
+              <div className="flex items-center gap-2">
+                <Bell className="h-5 w-5" />
+                <CardTitle>Notifications</CardTitle>
+              </div>
               <CardDescription>
-                Control how you receive updates.
+                Manage how and when we communicate with you.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-6">
-              {/* Global Toggles */}
-              <div className="grid gap-4 border p-4 rounded-lg">
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">
-                  Channels
+            <CardContent className="space-y-8">
+              {/* SECTION 1: CHANNELS */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Globe className="h-4 w-4" /> Communication Channels
                 </h3>
-                <FormField
-                  control={form.control}
-                  name="preferences.emailNotifications"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 ">
-                      <div className="space-y-0.5">
-                        <FormLabel>Email Notifications</FormLabel>
-                        <FormDescription>
-                          Receive updates via email
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="preferences.pushNotifications"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 ">
-                      <div className="space-y-0.5">
-                        <FormLabel>Push Notifications</FormLabel>
-                        <FormDescription>
-                          Receive updates on your device
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <div className="grid gap-4">
+                  <FormField
+                    control={form.control}
+                    name="preferences.emailNotifications"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                          <Mail className="h-5 w-5 text-muted-foreground" />
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">Email</FormLabel>
+                            <FormDescription>
+                              Receive daily summaries and invoices.
+                            </FormDescription>
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="preferences.pushNotifications"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                          <Smartphone className="h-5 w-5 text-muted-foreground" />
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-base">
+                              Push Notifications
+                            </FormLabel>
+                            <FormDescription>
+                              Real-time alerts on your mobile device.
+                            </FormDescription>
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
-              {/* Specific Types */}
-              <div className="grid gap-4 border p-4 rounded-lg">
-                <h3 className="font-medium text-sm text-muted-foreground mb-2">
-                  Notification Types
+              <Separator />
+
+              {/* SECTION 2: TOPICS / TYPES */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                  <Bell className="h-4 w-4" /> Notification Topics
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Order Updates */}
                   <FormField
                     control={form.control}
                     name="preferences.notifications.orderUpdates"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 ">
-                        <div className="space-y-0.5">
-                          <FormLabel>Order Updates</FormLabel>
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                          <ShoppingBag className="h-5 w-5 text-muted-foreground" />
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">
+                              Order Updates
+                            </FormLabel>
+                            <FormDescription>
+                              Status changes for your orders.
+                            </FormDescription>
+                          </div>
                         </div>
                         <FormControl>
                           <Switch
@@ -575,13 +618,23 @@ export default function UserSettingsPage() {
                       </FormItem>
                     )}
                   />
+
+                  {/* Promotions */}
                   <FormField
                     control={form.control}
                     name="preferences.notifications.promotions"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 ">
-                        <div className="space-y-0.5">
-                          <FormLabel>Promotions</FormLabel>
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                          <Tag className="h-5 w-5 text-muted-foreground" />
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">
+                              Promotions
+                            </FormLabel>
+                            <FormDescription>
+                              Discounts and special offers.
+                            </FormDescription>
+                          </div>
                         </div>
                         <FormControl>
                           <Switch
@@ -592,13 +645,50 @@ export default function UserSettingsPage() {
                       </FormItem>
                     )}
                   />
+
+                  {/* System */}
                   <FormField
                     control={form.control}
                     name="preferences.notifications.systemNotifications"
                     render={({ field }) => (
-                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 ">
-                        <div className="space-y-0.5">
-                          <FormLabel>System</FormLabel>
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                          <Cpu className="h-5 w-5 text-muted-foreground" />
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">
+                              System Alerts
+                            </FormLabel>
+                            <FormDescription>
+                              Security and maintenance updates.
+                            </FormDescription>
+                          </div>
+                        </div>
+                        <FormControl>
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Announcements */}
+                  <FormField
+                    control={form.control}
+                    name="preferences.notifications.announcements"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                        <div className="flex items-center gap-4">
+                          <Megaphone className="h-5 w-5 text-muted-foreground" />
+                          <div className="space-y-0.5">
+                            <FormLabel className="text-sm font-medium">
+                              Announcements
+                            </FormLabel>
+                            <FormDescription>
+                              New features and platform news.
+                            </FormDescription>
+                          </div>
                         </div>
                         <FormControl>
                           <Switch
