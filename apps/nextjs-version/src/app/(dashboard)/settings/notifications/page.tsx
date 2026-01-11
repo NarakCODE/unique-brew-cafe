@@ -21,13 +21,10 @@ import {
 } from "@/components/ui/form";
 import { Switch } from "@/components/ui/switch";
 import { PageHeader } from "@/components/page-header";
-import {
-  useProfile,
-  useUpdateProfileSettingsMutate,
-} from "@/hooks/use-profile";
+import { useProfile, useUpdateProfile } from "@/hooks/use-profile";
 import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
-import { UpdateProfileSettingsRequest, UserPreferences } from "@/types/profile";
+import { UpdateProfileSettingsRequest } from "@/types/profile";
 
 const notificationsFormSchema = z.object({
   notificationsEnabled: z.boolean(),
@@ -46,7 +43,7 @@ type NotificationsFormValues = z.infer<typeof notificationsFormSchema>;
 
 export default function NotificationSettings() {
   const { user, isLoading } = useProfile();
-  const { updateProfile, isUpdating } = useUpdateProfileSettingsMutate();
+  const { updateProfile, isUpdating } = useUpdateProfile();
 
   const form = useForm<NotificationsFormValues>({
     resolver: zodResolver(notificationsFormSchema),

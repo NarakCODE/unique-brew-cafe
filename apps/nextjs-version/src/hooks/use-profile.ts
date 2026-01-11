@@ -13,6 +13,7 @@ import {
   UpdateProfileSettingsRequest,
 } from "@/types/profile";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 export function useProfile() {
   const query = useQuery({
@@ -61,7 +62,7 @@ export function useUpdateProfileImage(options?: UseUpdateProfileImageOptions) {
   };
 }
 
-export function useUpdateProfileSettingsMutate() {
+export function useUpdateProfile() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
@@ -105,6 +106,7 @@ export function useChangePassword() {
 
 export function useDeleteAccount() {
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const mutation = useMutation({
     mutationFn: (request: DeleteAccountRequest) => deleteAccount(request),
@@ -112,7 +114,7 @@ export function useDeleteAccount() {
       toast.success("Account deleted successfully");
       // Optionally logout or redirect
       queryClient.clear();
-      window.location.href = "/auth/login";
+      router.push("/auth/login");
     },
     onError: (error: ApiErrorResponse) => {
       toast.error(error.message || "Failed to delete account");

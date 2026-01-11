@@ -54,7 +54,7 @@ import { useRef, useState, useEffect } from "react";
 import {
   useProfile,
   useUpdateProfileImage,
-  useUpdateProfileSettingsMutate,
+  useUpdateProfile,
 } from "@/hooks/use-profile";
 import { Separator } from "@/components/ui/separator";
 import { Logo } from "@/components/logo";
@@ -115,7 +115,7 @@ export default function UserSettingsPage() {
     useUpdateProfileImage();
 
   // NOTE: You'll need a hook to update general profile info
-  const { updateProfile, isUpdating } = useUpdateProfileSettingsMutate();
+  const { updateProfile, isUpdating } = useUpdateProfile();
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(formSchema),
