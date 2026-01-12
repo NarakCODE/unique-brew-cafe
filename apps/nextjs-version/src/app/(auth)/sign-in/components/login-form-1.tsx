@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { useRouter } from "next/navigation"
-import { useLogin } from "@/hooks/use-login"
-import { z } from "zod"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { useLogin } from "@/hooks/use-login";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -22,28 +22,28 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
+} from "@/components/ui/form";
 
 const loginFormSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-})
+});
 
-type LoginFormValues = z.infer<typeof loginFormSchema>
+type LoginFormValues = z.infer<typeof loginFormSchema>;
 
 export function LoginForm1({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const router = useRouter()
+  const router = useRouter();
   const { login, isLoading } = useLogin({
     onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.data.accessToken)
-      localStorage.setItem("refreshToken", data.data.refreshToken)
-      localStorage.setItem("user", JSON.stringify(data.data.user))
-      router.push("/dashboard")
+      localStorage.setItem("accessToken", data.data.accessToken);
+      localStorage.setItem("refreshToken", data.data.refreshToken);
+      localStorage.setItem("user", JSON.stringify(data.data.user));
+      router.push("/dashboard");
     },
-  })
+  });
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
@@ -51,10 +51,10 @@ export function LoginForm1({
       email: "",
       password: "",
     },
-  })
+  });
 
   function onSubmit(data: LoginFormValues) {
-    login(data)
+    login(data);
   }
 
   return (
@@ -147,5 +147,5 @@ export function LoginForm1({
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>
-  )
+  );
 }

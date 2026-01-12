@@ -331,7 +331,7 @@ export class UserService {
     // Anonymize user data
     const timestamp = Date.now();
     user.fullName = `Deleted User ${timestamp}`;
-    user.email = `deleted_${timestamp}@deleted.local`;
+    user.email = `deleted_${timestamp}@deleted.com`;
     delete user.phoneNumber;
     delete user.profileImage;
     delete user.dateOfBirth;

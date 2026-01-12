@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { zodResolver } from "@hookform/resolvers/zod"
-import { useForm } from "react-hook-form"
-import { useRegister } from "@/hooks/use-register"
-import { z } from "zod"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { useRegister } from "@/hooks/use-register";
+import { z } from "zod";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Form,
   FormControl,
@@ -21,8 +21,8 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@/components/ui/form";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const signupFormSchema = z
   .object({
@@ -38,15 +38,15 @@ const signupFormSchema = z
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
-  })
+  });
 
-type SignupFormValues = z.infer<typeof signupFormSchema>
+type SignupFormValues = z.infer<typeof signupFormSchema>;
 
 export function SignupForm1({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const { register, isLoading } = useRegister()
+  const { register, isLoading } = useRegister();
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
@@ -57,14 +57,14 @@ export function SignupForm1({
       confirmPassword: "",
       terms: false,
     },
-  })
+  });
 
   function onSubmit(data: SignupFormValues) {
     register({
       email: data.email,
       password: data.password,
       fullName: `${data.firstName} ${data.lastName}`.trim(),
-    })
+    });
   }
 
   return (
@@ -194,10 +194,7 @@ export function SignupForm1({
                 </div>
                 <div className="text-center text-sm">
                   Already have an account?{" "}
-                  <a
-                    href="/auth/sign-in"
-                    className="underline underline-offset-4"
-                  >
+                  <a href="/sign-in" className="underline underline-offset-4">
                     Sign in
                   </a>
                 </div>
@@ -211,5 +208,5 @@ export function SignupForm1({
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>
-  )
+  );
 }

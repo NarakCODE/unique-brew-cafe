@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Logo } from "@/components/logo"
-import Link from "next/link"
-import Image from "next/image"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Logo } from "@/components/logo";
+import Link from "next/link";
+import Image from "next/image";
 
 export function ForgotPasswordForm3({
   className,
@@ -47,7 +47,7 @@ export function ForgotPasswordForm3({
               </Button>
               <div className="text-center text-sm">
                 Remember your password?{" "}
-                <a href="/auth/sign-in-3" className="underline underline-offset-4">
+                <a href="/sign-in-3" className="underline underline-offset-4">
                   Back to sign in
                 </a>
               </div>
@@ -68,5 +68,5 @@ export function ForgotPasswordForm3({
         and <a href="#">Privacy Policy</a>.
       </div>
     </div>
-  )
+  );
 }

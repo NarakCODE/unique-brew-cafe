@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   LayoutPanelLeft,
   Mail,
@@ -14,13 +14,14 @@ import {
   CreditCard,
   LayoutTemplate,
   Users,
-} from "lucide-react"
-import Link from "next/link"
-import { Logo } from "@/components/logo"
-import { SidebarNotification } from "@/components/sidebar-notification"
+  Megaphone,
+} from "lucide-react";
+import Link from "next/link";
+import { Logo } from "@/components/logo";
+import { SidebarNotification } from "@/components/sidebar-notification";
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -29,9 +30,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
-import { LayoutDashboard } from "./animate-ui/icons/layout-dashboard"
-import { useProfile } from "@/hooks/use-profile"
+} from "@/components/ui/sidebar";
+import { LayoutDashboard } from "./animate-ui/icons/layout-dashboard";
+import { useProfile } from "@/hooks/use-profile";
 
 const data = {
   user: {
@@ -82,6 +83,11 @@ const data = {
           title: "Users",
           url: "/users",
           icon: Users,
+        },
+        {
+          title: "Announcements",
+          url: "/announcements",
+          icon: Megaphone,
         },
       ],
     },
@@ -185,10 +191,10 @@ const data = {
               title: "Appearance",
               url: "/settings/appearance",
             },
-            {
-              title: "Notifications",
-              url: "/settings/notifications",
-            },
+            // {
+            //   title: "Notifications",
+            //   url: "/settings/notifications",
+            // },
             {
               title: "Connections",
               url: "/settings/connections",
@@ -208,10 +214,10 @@ const data = {
       ],
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { user } = useProfile()
+  const { user } = useProfile();
 
   const displayUser = user
     ? {
@@ -219,7 +225,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         email: user.email,
         avatar: "",
       }
-    : data.user
+    : data.user;
 
   return (
     <Sidebar {...props}>
@@ -250,5 +256,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={displayUser} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

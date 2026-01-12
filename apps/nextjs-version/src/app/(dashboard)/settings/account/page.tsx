@@ -23,7 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/page-header";
 import { useChangePassword, useDeleteAccount } from "@/hooks/use-profile";
-import { Loader2, Trash2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import {
   Dialog,
@@ -34,6 +34,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { Trash2 } from "@/components/animate-ui/icons/trash-2";
+import { AnimateIcon } from "@/components/animate-ui/icons/icon";
 
 // Schema for Change Password
 const changePasswordSchema = z
@@ -57,9 +59,18 @@ type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
 const deleteAccountSchema = z.object({
   password: z.string().min(1, "Password is required to delete account"),
   reason: z.string().optional(),
+  // Keep the schema as is, checking for "confirm"
+  confirmation: z.string().refine((val) => val === "confirm", {
+    message: "Please type 'confirm' to proceed",
+  }),
 });
 
-type DeleteAccountFormValues = z.infer<typeof deleteAccountSchema>;
+type DeleteAccountFormValues = Omit<
+  z.infer<typeof deleteAccountSchema>,
+  "confirmation"
+> & {
+  confirmation: string;
+};
 
 export default function AccountSettings() {
   const { changePassword, isChanging } = useChangePassword();
@@ -82,6 +93,7 @@ export default function AccountSettings() {
     defaultValues: {
       password: "",
       reason: "",
+      confirmation: "", // Now compatible with type string
     },
   });
 
@@ -100,9 +112,11 @@ export default function AccountSettings() {
   }
 
   function onDeleteSubmit(data: DeleteAccountFormValues) {
-    deleteAccount(data, {
+    const { confirmation, ...payload } = data;
+    deleteAccount(payload, {
       onSuccess: () => {
         setIsDeleteDialogOpen(false);
+        deleteForm.reset();
       },
     });
   }
@@ -212,11 +226,14 @@ export default function AccountSettings() {
 
             <Dialog
               open={isDeleteDialogOpen}
-              onOpenChange={setIsDeleteDialogOpen}
+              onOpenChange={(open) => {
+                if (!open) deleteForm.reset();
+                setIsDeleteDialogOpen(open);
+              }}
             >
               <DialogTrigger asChild>
                 <Button variant="destructive">
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 />
                   Delete Account
                 </Button>
               </DialogTrigger>
@@ -234,6 +251,10 @@ export default function AccountSettings() {
                     onSubmit={deleteForm.handleSubmit(onDeleteSubmit)}
                     className="space-y-4 py-4"
                   >
+                    <div className="p-4 bg-destructive/10 text-destructive rounded-md text-sm mb-4">
+                      Warning: This action is permanent. Please type{" "}
+                      <span className="font-bold">confirm</span> to verify.
+                    </div>
                     <FormField
                       control={deleteForm.control}
                       name="password"
@@ -267,6 +288,24 @@ export default function AccountSettings() {
                         </FormItem>
                       )}
                     />
+
+                    <FormField
+                      control={deleteForm.control}
+                      name="confirmation"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Confirmation</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder='Type "confirm" to proceed'
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
                     <DialogFooter>
                       <Button
                         type="button"
@@ -278,7 +317,11 @@ export default function AccountSettings() {
                       <Button
                         type="submit"
                         variant="destructive"
-                        disabled={isDeleting}
+                        disabled={
+                          isDeleting ||
+                          deleteForm.watch("confirmation") !== "confirm" ||
+                          !deleteForm.formState.isValid
+                        }
                       >
                         {isDeleting && (
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />

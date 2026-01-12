@@ -37,13 +37,11 @@ apiClient.interceptors.response.use(
         apiError.errorCode === "AUTH_UNAUTHORIZED" ||
         error.response.status === 401
       ) {
-        // We could handle auto-logout here if desired,
-        // strictly speaking this might be a side-effect better handled in a hook,
-        // but clearing token here ensures subsequent requests don't retry with bad token
         if (typeof window !== "undefined") {
-          // localStorage.removeItem("accessToken")
-          // localStorage.removeItem("refreshToken")
-          // localStorage.removeItem("user")
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+          window.location.href = "/login";
         }
       }
 

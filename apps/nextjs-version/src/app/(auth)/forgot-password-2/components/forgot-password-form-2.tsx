@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function ForgotPasswordForm2({
   className,
@@ -14,7 +14,8 @@ export function ForgotPasswordForm2({
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">Forgot your password?</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your email address and we&apos;ll send you a link to reset your password
+          Enter your email address and we&apos;ll send you a link to reset your
+          password
         </p>
       </div>
       <div className="grid gap-6">
@@ -28,10 +29,10 @@ export function ForgotPasswordForm2({
       </div>
       <div className="text-center text-sm">
         Remember your password?{" "}
-        <a href="/auth/sign-in-2" className="underline underline-offset-4">
+        <a href="/sign-in-2" className="underline underline-offset-4">
           Back to sign in
         </a>
       </div>
     </form>
-  )
+  );
 }

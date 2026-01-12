@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export function SignupForm2({
   className,
@@ -45,11 +45,17 @@ export function SignupForm2({
           <Checkbox id="terms" required />
           <Label htmlFor="terms" className="text-sm">
             I agree to the{" "}
-            <a href="#" className="underline underline-offset-4 hover:text-primary">
+            <a
+              href="#"
+              className="underline underline-offset-4 hover:text-primary"
+            >
               Terms of Service
             </a>{" "}
             and{" "}
-            <a href="#" className="underline underline-offset-4 hover:text-primary">
+            <a
+              href="#"
+              className="underline underline-offset-4 hover:text-primary"
+            >
               Privacy Policy
             </a>
           </Label>
@@ -74,10 +80,10 @@ export function SignupForm2({
       </div>
       <div className="text-center text-sm">
         Already have an account?{" "}
-        <a href="/auth/sign-in-2" className="underline underline-offset-4">
+        <a href="/sign-in-2" className="underline underline-offset-4">
           Sign in
         </a>
       </div>
     </form>
-  )
+  );
 }
