@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Announcement } from "@/types/announcement";
 import { AnnouncementDetailsDialog } from "./announcement-details-dialog";
+import { UpdateAnnouncementDialog } from "./update-announcement-dialog";
+import { DeleteAnnouncementDialog } from "./delete-announcement-dialog";
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>;
@@ -23,6 +25,8 @@ export function DataTableRowActions({
   row,
 }: DataTableRowActionsProps<Announcement>) {
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showUpdateDialog, setShowUpdateDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const announcement = row.original;
 
   return (
@@ -31,6 +35,16 @@ export function DataTableRowActions({
         id={announcement.id}
         open={showDetailsDialog}
         onOpenChange={setShowDetailsDialog}
+      />
+      <UpdateAnnouncementDialog
+        id={announcement.id}
+        open={showUpdateDialog}
+        onOpenChange={setShowUpdateDialog}
+      />
+      <DeleteAnnouncementDialog
+        id={announcement.id}
+        open={showDeleteDialog}
+        onOpenChange={setShowDeleteDialog}
       />
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -47,10 +61,12 @@ export function DataTableRowActions({
           <DropdownMenuItem onSelect={() => setShowDetailsDialog(true)}>
             View details
           </DropdownMenuItem>
-          <DropdownMenuItem>Edit</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setShowUpdateDialog(true)}>
+            Edit details
+          </DropdownMenuItem>
           <DropdownMenuItem>Make a copy</DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => setShowDeleteDialog(true)}>
             Delete
             <span className="ml-auto text-xs tracking-widest opacity-60">
               ⌘⌫

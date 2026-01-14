@@ -1,84 +1,67 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { StatCards } from "./components/stat-cards"
-import { DataTable } from "./components/data-table"
-
-import initialUsersData from "./data.json"
-
-interface User {
-  id: number
-  name: string
-  email: string
-  avatar: string
-  role: string
-  plan: string
-  billing: string
-  status: string
-  joinedDate: string
-  lastLogin: string
-}
-
-interface UserFormValues {
-  name: string
-  email: string
-  role: string
-  plan: string
-  billing: string
-  status: string
-}
+import { useSearchParams } from "next/navigation";
+import { useUsers } from "@/hooks/use-users";
+import { DataTable } from "./components/data-table";
+import { columns } from "./components/columns";
+import { Loader2, UsersIcon } from "lucide-react";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/page-header";
 
 export default function UsersPage() {
-  const [users, setUsers] = useState<User[]>(initialUsersData)
+  const searchParams = useSearchParams();
+  const page = Number(searchParams.get("page")) || 1;
+  const limit = Number(searchParams.get("limit")) || 20;
+  const search = searchParams.get("search") || undefined;
+  const status = searchParams.get("status") || undefined;
+  const role = searchParams.get("role") || undefined;
 
-  const generateAvatar = (name: string) => {
-    const names = name.split(" ")
-    if (names.length >= 2) {
-      return `${names[0][0]}${names[1][0]}`.toUpperCase()
-    }
-    return name.substring(0, 2).toUpperCase()
-  }
-
-  const handleAddUser = (userData: UserFormValues) => {
-    const newUser: User = {
-      id: Math.max(...users.map(u => u.id)) + 1,
-      name: userData.name,
-      email: userData.email,
-      avatar: generateAvatar(userData.name),
-      role: userData.role,
-      plan: userData.plan,
-      billing: userData.billing,
-      status: userData.status,
-      joinedDate: new Date().toISOString().split('T')[0],
-      lastLogin: new Date().toISOString().split('T')[0],
-    }
-    setUsers(prev => [newUser, ...prev])
-  }
-
-  const handleDeleteUser = (id: number) => {
-    setUsers(prev => prev.filter(user => user.id !== id))
-  }
-
-  const handleEditUser = (user: User) => {
-    // For now, just log the user to edit
-    // In a real app, you'd open an edit dialog
-    console.log("Edit user:", user)
-  }
+  const { users, isLoading } = useUsers({
+    page,
+    limit,
+    search,
+    status,
+    role,
+  });
 
   return (
-    <div className="flex flex-col gap-4">
-      <div className="@container/main px-4 lg:px-6">
-        <StatCards />
-      </div>
-      
-      <div className="@container/main px-4 lg:px-6 mt-8 lg:mt-12">
-        <DataTable 
-          users={users}
-          onDeleteUser={handleDeleteUser}
-          onEditUser={handleEditUser}
-          onAddUser={handleAddUser}
+    <div className="flex h-full flex-1 flex-col space-y-8 p-8 md:flex">
+      <div className="flex items-center justify-between space-y-2">
+        <PageHeader
+          title="Users"
+          description="Manage your users and view their details."
         />
       </div>
+      {isLoading ? (
+        <div className="flex h-full items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+      ) : users?.length === 0 ? (
+        <Empty className="min-h-[50vh]">
+          <EmptyHeader>
+            <EmptyMedia variant="icon">
+              <UsersIcon className="h-6 w-6" />
+            </EmptyMedia>
+            <EmptyTitle>No users found</EmptyTitle>
+            <EmptyDescription>
+              There are no users registered in the system yet.
+            </EmptyDescription>
+          </EmptyHeader>
+          <EmptyContent>
+            <Button>Invite User</Button>
+          </EmptyContent>
+        </Empty>
+      ) : (
+        <DataTable data={users} columns={columns} />
+      )}
     </div>
-  )
+  );
 }

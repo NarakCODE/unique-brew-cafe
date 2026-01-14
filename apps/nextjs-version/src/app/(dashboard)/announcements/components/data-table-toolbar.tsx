@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import type { Table } from "@tanstack/react-table";
-import { X, CheckCircle2, XCircle } from "lucide-react";
+import { X, CheckCircle2, XCircle, Plus } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
+import { CreateAnnouncementDialog } from "./create-announcement-dialog";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -16,6 +18,7 @@ export function DataTableToolbar<TData>({
   table,
 }: DataTableToolbarProps<TData>) {
   const isFiltered = table.getState().columnFilters.length > 0;
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   return (
     <div className="flex items-center justify-between">
@@ -51,7 +54,22 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <DataTableViewOptions table={table} />
+      <div className="flex items-center gap-2">
+        <Button
+          variant="default"
+          size="sm"
+          className="h-8 cursor-pointer"
+          onClick={() => setShowCreateDialog(true)}
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Create
+        </Button>
+        <DataTableViewOptions table={table} />
+      </div>
+      <CreateAnnouncementDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { BadRequestError } from '../utils/AppError.js';
 
 // Configure storage
@@ -7,7 +8,11 @@ const storage = multer.diskStorage({
   destination: function (_req, _file, cb) {
     // In production, you would upload to cloud storage (S3, Cloudinary, etc.)
     // For now, store in uploads directory
-    cb(null, 'uploads/avatars');
+    const uploadPath = 'uploads/avatars';
+    if (!fs.existsSync(uploadPath)) {
+      fs.mkdirSync(uploadPath, { recursive: true });
+    }
+    cb(null, uploadPath);
   },
   filename: function (_req, file, cb) {
     // Generate unique filename

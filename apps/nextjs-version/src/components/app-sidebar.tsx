@@ -15,6 +15,7 @@ import {
   LayoutTemplate,
   Users,
   Megaphone,
+  Store,
 } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
@@ -78,6 +79,11 @@ const data = {
           title: "Calendar",
           url: "/calendar",
           icon: Calendar,
+        },
+        {
+          title: "Stores",
+          url: "/stores",
+          icon: Store,
         },
         {
           title: "Users",

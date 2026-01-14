@@ -8,6 +8,7 @@ import { format } from "date-fns";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { Announcement } from "@/types/announcement";
 import { DataTableRowActions } from "./data-table-row-actions";
+import { AnnouncementStatusToggle } from "./announcement-status-toggle";
 
 export const columns: ColumnDef<Announcement>[] = [
   {
@@ -20,7 +21,7 @@ export const columns: ColumnDef<Announcement>[] = [
         }
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
-        className="translate-y-[2px]"
+        className="translate-y-0.5"
       />
     ),
     cell: ({ row }) => (
@@ -28,7 +29,7 @@ export const columns: ColumnDef<Announcement>[] = [
         checked={row.getIsSelected()}
         onCheckedChange={(value) => row.toggleSelected(!!value)}
         aria-label="Select row"
-        className="translate-y-[2px]"
+        className="translate-y-0.5"
       />
     ),
     enableSorting: false,
@@ -42,7 +43,7 @@ export const columns: ColumnDef<Announcement>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="max-w-[500px] truncate font-medium">
+          <span className="max-w-125 truncate font-medium">
             {row.getValue("title")}
           </span>
         </div>
@@ -57,7 +58,7 @@ export const columns: ColumnDef<Announcement>[] = [
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2">
-          <span className="max-w-[300px] truncate text-muted-foreground">
+          <span className="max-w-75 truncate text-muted-foreground">
             {row.getValue("description")}
           </span>
         </div>
@@ -71,12 +72,7 @@ export const columns: ColumnDef<Announcement>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => {
-      const isActive = row.original.isActive;
-      return (
-        <Badge variant={isActive ? "default" : "secondary"}>
-          {isActive ? "Active" : "Inactive"}
-        </Badge>
-      );
+      return <AnnouncementStatusToggle announcement={row.original} />;
     },
     filterFn: (row, id, value) => {
       return value.includes(row.getValue(id));

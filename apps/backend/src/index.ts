@@ -65,6 +65,9 @@ try {
   console.warn('⚠️  Could not load OpenAPI specification:', error);
 }
 
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
+
 // Routes
 app.get('/', (_req, res) => {
   res.json({

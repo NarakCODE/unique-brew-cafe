@@ -15,6 +15,14 @@ export interface Announcement {
   updatedAt: string;
 }
 
+export interface CreateAnnouncementDTO {
+  title: string;
+  description: string;
+  endDate: string; // ISO Date string
+}
+
+export type UpdateAnnouncementDTO = Partial<CreateAnnouncementDTO>;
+
 export interface GetAnnouncementsResponse {
   statusCode: number;
   data: Announcement[];
@@ -23,6 +31,34 @@ export interface GetAnnouncementsResponse {
 }
 
 export interface GetAnnouncementResponse {
+  statusCode: number;
+  data: Announcement;
+  message: string;
+  success: boolean;
+}
+
+export interface CreateAnnouncementResponse {
+  statusCode: number;
+  data: Announcement;
+  message: string;
+  success: boolean;
+}
+
+export interface UpdateAnnouncementResponse {
+  statusCode: number;
+  data: Announcement;
+  message: string;
+  success: boolean;
+}
+
+export interface DeleteAnnouncementResponse {
+  statusCode: number;
+  data: null;
+  message: string;
+  success: boolean;
+}
+
+export interface TogglePublishAnnouncementResponse {
   statusCode: number;
   data: Announcement;
   message: string;

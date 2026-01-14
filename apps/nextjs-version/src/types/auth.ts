@@ -83,3 +83,32 @@ export interface ResendOtpResponse {
   message: string;
   success: boolean;
 }
+
+export interface ForgotPasswordPayload {
+  email: string;
+}
+
+export interface ForgotPasswordResponse {
+  statusCode: number;
+  data: {
+    message: string;
+    otpExpiresAt: string;
+  };
+  message: string;
+  success: boolean;
+}
+
+export interface ResetPasswordPayload {
+  email: string;
+  otpCode: string;
+  newPassword: string;
+}
+
+export interface ResetPasswordResponse {
+  statusCode: number;
+  data: {
+    message: string;
+  };
+  message: string;
+  success: boolean;
+}

@@ -111,6 +111,19 @@ export const resendOtpSchema = z.object({
 });
 
 /**
+ * Verify OTP Schema
+ */
+export const verifyOtpSchema = z.object({
+  body: z
+    .object({
+      email: emailValidation,
+      otpCode: otpCodeValidation,
+      verificationType: z.enum(['registration', 'password_reset']).optional(),
+    })
+    .strict(),
+});
+
+/**
  * Refresh Token Schema
  */
 export const refreshTokenSchema = z.object({
@@ -146,5 +159,6 @@ export type RegisterInput = z.infer<typeof registerSchema>['body'];
 export type ForgotPasswordInput = z.infer<typeof forgotPasswordSchema>['body'];
 export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>['body'];
 export type ResendOtpInput = z.infer<typeof resendOtpSchema>['body'];
+export type VerifyOtpInput = z.infer<typeof verifyOtpSchema>['body'];
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>['body'];
 export type LogoutInput = z.infer<typeof logoutSchema>['body'];

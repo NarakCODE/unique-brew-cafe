@@ -226,6 +226,46 @@ export const resetPassword = asyncHandler(
 );
 
 /**
+ * Verify OTP
+ * POST /api/auth/verify-otp
+ */
+export const verifyOtp = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const { email, otpCode, verificationType } = req.body;
+
+    // Validate required fields
+    if (!email || !otpCode) {
+      throw new BadRequestError('Email and OTP code are required');
+    }
+
+    // Validate OTP format (6 digits)
+    if (!/^\d{6}$/.test(otpCode)) {
+      throw new BadRequestError('OTP code must be 6 digits');
+    }
+
+    if (
+      verificationType &&
+      !['registration', 'password_reset'].includes(verificationType)
+    ) {
+      throw new BadRequestError(
+        'Verification type must be "registration" or "password_reset"'
+      );
+    }
+
+    // Verify OTP
+    const result = await authService.verifyOtpCode(
+      email,
+      otpCode,
+      verificationType
+    );
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'OTP verified successfully'));
+  }
+);
+
+/**
  * Resend OTP code
  * POST /api/auth/resend-otp
  */

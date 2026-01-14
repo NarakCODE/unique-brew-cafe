@@ -2,7 +2,8 @@ import Announcement, { type IAnnouncement } from '../models/Announcement.js';
 import { NotFoundError } from '../utils/AppError.js';
 import { User } from '../models/User.js';
 
-interface CreateAnnouncementDTO {
+// Base DTO for shared fields
+interface BaseAnnouncementDTO {
   title: string;
   description: string;
   imageUrl?: string;
@@ -16,19 +17,12 @@ interface CreateAnnouncementDTO {
   isActive?: boolean;
 }
 
-interface UpdateAnnouncementDTO {
-  title?: string;
-  description?: string;
-  imageUrl?: string;
-  actionType?: 'promo_code' | 'deep_link' | 'external_url' | 'none';
-  actionValue?: string;
-  priority?: number;
-  targetAudience?: 'all' | 'new_users' | 'loyal_users' | 'specific_tier';
-  userTierFilter?: string[];
-  startDate?: Date;
-  endDate?: Date;
-  isActive?: boolean;
-}
+// Create needs specific required fields (title, description, endDate implied by Base)
+// We redefine specific 'optional' vs 'required' nuances if needed, but Base matches the previous Create DTO structure exactly.
+export type CreateAnnouncementDTO = BaseAnnouncementDTO;
+
+// Update is strictly partial of the base
+export type UpdateAnnouncementDTO = Partial<BaseAnnouncementDTO>;
 
 export const announcementService = {
   /**
