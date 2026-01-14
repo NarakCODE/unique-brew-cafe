@@ -26,6 +26,16 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
+import { Store } from "lucide-react";
+
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
 
@@ -244,7 +254,20 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  No results.
+                  <Empty className="py-14 border-0">
+                    <EmptyMedia>
+                      <Store className="text-muted-foreground size-10" />
+                    </EmptyMedia>
+                    <EmptyContent>
+                      <EmptyHeader>
+                        <EmptyTitle>No stores found</EmptyTitle>
+                        <EmptyDescription>
+                          Try adjusting your search or filters to find what
+                          you&apos;re looking for.
+                        </EmptyDescription>
+                      </EmptyHeader>
+                    </EmptyContent>
+                  </Empty>
                 </TableCell>
               </TableRow>
             )}

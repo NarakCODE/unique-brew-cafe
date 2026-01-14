@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import { CommandSearch, SearchTrigger } from "@/components/command-search"
-import { ModeToggle } from "@/components/mode-toggle"
+import * as React from "react";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { CommandSearch, SearchTrigger } from "@/components/command-search";
+import { ModeToggle } from "@/components/mode-toggle";
 
 export function SiteHeader() {
-  const [searchOpen, setSearchOpen] = React.useState(false)
+  const [searchOpen, setSearchOpen] = React.useState(false);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault()
-        setSearchOpen((open) => !open)
+        e.preventDefault();
+        setSearchOpen((open) => !open);
       }
-    }
+    };
 
-    document.addEventListener("keydown", down)
-    return () => document.removeEventListener("keydown", down)
-  }, [])
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   return (
     <>
-      <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height)">
+      <header className="flex h-(--header-height) shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-(--header-height) sticky top-0 z-1000 bg-background/50 backdrop-blur-lg ">
         <div className="flex w-full items-center gap-1 px-4 py-3 lg:gap-2 lg:px-6">
           <SidebarTrigger className="-ml-1" />
           <Separator
@@ -35,7 +35,12 @@ export function SiteHeader() {
             <SearchTrigger onClick={() => setSearchOpen(true)} />
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+            <Button
+              variant="ghost"
+              asChild
+              size="sm"
+              className="hidden sm:flex"
+            >
               <a
                 href="https://shadcnstore.com/blocks"
                 rel="noopener noreferrer"
@@ -45,7 +50,12 @@ export function SiteHeader() {
                 Blocks
               </a>
             </Button>
-            <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+            <Button
+              variant="ghost"
+              asChild
+              size="sm"
+              className="hidden sm:flex"
+            >
               <a
                 href="/landing"
                 rel="noopener noreferrer"
@@ -55,7 +65,12 @@ export function SiteHeader() {
                 Landing Page
               </a>
             </Button>
-            <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+            <Button
+              variant="ghost"
+              asChild
+              size="sm"
+              className="hidden sm:flex"
+            >
               <a
                 href="https://github.com/silicondeck/shadcn-dashboard-landing-template"
                 rel="noopener noreferrer"
@@ -71,5 +86,5 @@ export function SiteHeader() {
       </header>
       <CommandSearch open={searchOpen} onOpenChange={setSearchOpen} />
     </>
-  )
+  );
 }

@@ -1,11 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import {
-  useFileUpload,
-  type FileMetadata,
-  type FileWithPreview,
-} from "../hooks/use-file-upload";
+import { useState, useEffect } from "react";
+import { useFileUpload } from "@/hooks/use-file-upload"; // Adjust path if needed
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
@@ -39,12 +35,12 @@ export default function CoverUpload({
 }: CoverUploadProps) {
   const [imageLoading, setImageLoading] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadError, setUploadError] = useState<string | null>(null);
   const [internalPreview, setInternalPreview] = useState<string | null>(null);
 
+  // Combine internal and external states
   const hasImage = !!(internalPreview || initialImageUrl);
   const currentImage = internalPreview || initialImageUrl;
+  const isProcessing = externalIsUploading;
 
   const [
     { isDragging, errors },
@@ -61,12 +57,10 @@ export default function CoverUpload({
     maxSize,
     accept,
     multiple: false,
-    onFilesChange: (files: { file: File; id: string; preview: string }[]) => {
+    onFilesChange: (files) => {
       if (files.length > 0) {
         setImageLoading(true);
-        setIsUploading(true);
         setUploadProgress(0);
-        setUploadError(null);
 
         try {
           const file = files[0].file;
@@ -74,121 +68,97 @@ export default function CoverUpload({
             const previewUrl = URL.createObjectURL(file);
             setInternalPreview(previewUrl);
             onImageChange?.(file);
-
-            // Simulate upload progress for UX if not controlled externally
-            if (!externalIsUploading) {
-              simulateUpload();
-            }
           }
         } catch (err) {
           console.error("Error handling file selection:", err);
-          setUploadError("Failed to process selected file.");
-          setIsUploading(false);
         }
       }
     },
   });
 
-  // Effect to sync external uploading state
-  useState(() => {
-    if (externalIsUploading) {
-      setIsUploading(true);
-    } else if (!externalIsUploading && uploadProgress >= 100) {
-      // keep it 100 or reset? usually reset when done.
-      // Let's rely on component logic largely.
+  // Simulate upload progress when external loading starts
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (isProcessing) {
+      setUploadProgress(0);
+      interval = setInterval(() => {
+        setUploadProgress((prev) => {
+          if (prev >= 95) return 95; // Wait for actual completion
+          const increment = Math.random() * 10 + 5;
+          return Math.min(prev + increment, 95);
+        });
+      }, 500);
+    } else {
+      setUploadProgress(100);
     }
-  });
+    return () => clearInterval(interval);
+  }, [isProcessing]);
 
-  // Simulate upload progress - strictly for visual feedback if not provided
-  const simulateUpload = () => {
-    const interval = setInterval(() => {
-      setUploadProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsUploading(false);
-          return 100;
-        }
-        const increment = Math.random() * 20 + 10;
-        return Math.min(prev + increment, 100);
-      });
-    }, 200);
-  };
-
-  const removeCoverImage = () => {
+  const removeCoverImage = (e?: React.MouseEvent) => {
+    e?.stopPropagation(); // Prevent triggering upload click
     setInternalPreview(null);
     setImageLoading(false);
-    setIsUploading(false);
     setUploadProgress(0);
-    setUploadError(null);
-    onRemoveImage?.(); // Trigger parent removal logic
+    onRemoveImage?.();
   };
 
-  const retryUpload = () => {
-    setUploadError(null);
+  const handleRetry = (e: React.MouseEvent) => {
+    e.stopPropagation();
     openFileDialog();
   };
 
   return (
-    <div className={cn("w-full space-y-4", className)}>
-      {/* Cover Upload Area */}
+    <div className={cn("flex flex-col gap-4 h-full", className)}>
+      {/* Upload Dropzone */}
       <div
         className={cn(
-          "group relative overflow-hidden rounded-xl transition-all duration-200 border border-border aspect-square",
+          "group relative flex-1 overflow-hidden rounded-xl border transition-all duration-200 min-h-50",
           isDragging
-            ? "border-dashed border-primary bg-primary/5"
+            ? "border-dashed border-primary bg-primary/5 scale-[0.99]"
             : hasImage
-              ? "border-border bg-background hover:border-primary/50"
-              : "border-dashed border-muted-foreground/25 bg-muted/30 hover:border-primary hover:bg-primary/5"
+              ? "border-border bg-background"
+              : "border-dashed border-muted-foreground/25 bg-muted/30 hover:border-primary/50 hover:bg-muted/50"
         )}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
         onDrop={handleDrop}
+        onClick={!hasImage ? openFileDialog : undefined}
       >
-        {/* Hidden file input */}
         <input {...getInputProps()} className="sr-only" />
 
         {hasImage && currentImage ? (
           <>
-            {/* Cover Image Display */}
-            <div className="relative w-full h-full">
-              {/* Loading placeholder */}
-              {imageLoading && (
-                <div className="absolute inset-0 animate-pulse bg-muted flex items-center justify-center z-10">
-                  <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                    <ImageIcon className="size-5" />
-                    <span className="text-sm">Loading image...</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Actual image */}
+            {/* Image Preview */}
+            <div className="relative h-full w-full">
               <Image
                 src={currentImage}
                 alt="Cover"
                 fill
                 className={cn(
-                  "object-cover transition-opacity duration-300",
-                  imageLoading ? "opacity-0" : "opacity-100"
+                  "object-cover transition-all duration-300",
+                  imageLoading ? "opacity-0 scale-105" : "opacity-100 scale-100"
                 )}
                 onLoad={() => setImageLoading(false)}
-                onError={() => setImageLoading(false)}
               />
 
-              {/* Overlay on hover */}
-              <div className="absolute inset-0 bg-black/0 transition-all duration-200 group-hover:bg-black/40" />
+              {/* Hover Overlay */}
+              <div className="absolute inset-0 bg-black/0 transition-colors duration-200 group-hover:bg-black/40" />
 
-              {/* Action buttons overlay */}
+              {/* Action Buttons */}
               <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-200 group-hover:opacity-100 z-20">
-                <div className="flex gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <Button
                     type="button"
-                    onClick={openFileDialog}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openFileDialog();
+                    }}
                     variant="secondary"
                     size="sm"
-                    className="bg-white/90 text-gray-900 hover:bg-white"
+                    className="h-8 bg-background/80 backdrop-blur-sm hover:bg-background"
                   >
-                    <Upload className="mr-2 h-4 w-4" />
+                    <Upload className="mr-2 h-3.5 w-3.5" />
                     Change
                   </Button>
                   <Button
@@ -196,18 +166,19 @@ export default function CoverUpload({
                     onClick={removeCoverImage}
                     variant="destructive"
                     size="sm"
+                    className="h-8 shadow-sm"
                   >
-                    <XIcon className="mr-2 h-4 w-4" />
+                    <XIcon className="mr-2 h-3.5 w-3.5" />
                     Remove
                   </Button>
                 </div>
               </div>
 
-              {/* Upload progress */}
-              {(isUploading || externalIsUploading) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/40 z-30">
-                  <div className="relative">
-                    <svg className="size-16 -rotate-90" viewBox="0 0 64 64">
+              {/* Uploading State Overlay */}
+              {isProcessing && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-[2px] z-30 animate-in fade-in duration-300">
+                  <div className="relative size-12">
+                    <svg className="size-full -rotate-90" viewBox="0 0 64 64">
                       <circle
                         cx="32"
                         cy="32"
@@ -225,93 +196,79 @@ export default function CoverUpload({
                         stroke="currentColor"
                         strokeWidth="4"
                         strokeDasharray={`${2 * Math.PI * 28}`}
-                        strokeDashoffset={`${2 * Math.PI * 28 * (1 - uploadProgress / 100)}`}
-                        className="text-white transition-all duration-300"
+                        strokeDashoffset={`${
+                          2 * Math.PI * 28 * (1 - uploadProgress / 100)
+                        }`}
+                        className="text-primary transition-all duration-300"
                         strokeLinecap="round"
                       />
                     </svg>
                     <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-sm font-medium text-white">
+                      <span className="text-[10px] font-bold text-white">
                         {Math.round(uploadProgress)}%
                       </span>
                     </div>
                   </div>
+                  <p className="mt-2 text-xs font-medium text-white/90 animate-pulse">
+                    Uploading...
+                  </p>
                 </div>
               )}
             </div>
           </>
         ) : (
           /* Empty State */
-          <div
-            className="flex w-full h-full cursor-pointer flex-col items-center justify-center gap-4 p-8 text-center"
-            onClick={openFileDialog}
-          >
-            <div className="rounded-full bg-primary/10 p-4">
-              <CloudUpload className="size-8 text-primary" />
+          <div className="flex h-full w-full cursor-pointer flex-col items-center justify-center gap-2 p-6 text-center">
+            <div className="flex size-12 items-center justify-center rounded-full bg-background shadow-sm ring-1 ring-border transition-transform duration-200 group-hover:scale-110">
+              <CloudUpload className="size-6 text-muted-foreground transition-colors group-hover:text-primary" />
             </div>
-
-            <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Upload Store Image</h3>
-              <p className="text-sm text-muted-foreground">
-                Drag and drop an image here, or click to browse
-              </p>
+            <div className="space-y-1">
+              <h3 className="text-sm font-medium leading-none text-foreground">
+                Upload Image
+              </h3>
               <p className="text-xs text-muted-foreground">
-                Square aspect ratio recommended • Max 5MB
+                Drag & drop or click to browse
               </p>
             </div>
-
-            <Button variant="outline" size="sm" type="button">
-              <ImageIcon className="mr-2 h-4 w-4" />
-              Browse Files
-            </Button>
           </div>
         )}
       </div>
 
       {/* Error Messages */}
       {errors.length > 0 && (
-        <Alert variant="destructive" className="mt-5">
+        <Alert
+          variant="destructive"
+          className="animate-in fade-in-50 slide-in-from-top-2"
+        >
           <TriangleAlert className="h-4 w-4" />
-          <AlertTitle>File upload error(s)</AlertTitle>
-          <AlertDescription>
-            {errors.map((error: string, index: number) => (
-              <p key={index} className="last:mb-0">
-                {error}
-              </p>
+          <AlertTitle>Upload Failed</AlertTitle>
+          <AlertDescription className="flex flex-col gap-2">
+            {errors.map((error, i) => (
+              <span key={i}>{error}</span>
             ))}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Upload Error */}
-      {uploadError && (
-        <Alert variant="destructive" className="mt-5">
-          <TriangleAlert className="h-4 w-4" />
-          <AlertTitle>Upload failed</AlertTitle>
-          <AlertDescription>
-            <p>{uploadError}</p>
             <Button
-              type="button"
-              onClick={retryUpload}
               variant="outline"
               size="sm"
-              className="mt-2 text-destructive-foreground border-destructive-foreground/50 hover:bg-destructive/10"
+              onClick={handleRetry}
+              className="w-fit h-7 text-xs border-destructive/50 hover:bg-destructive/10"
             >
-              Retry Upload
+              Try Again
             </Button>
           </AlertDescription>
         </Alert>
       )}
 
-      {/* Upload Tips */}
-      <div className="rounded-lg bg-muted/50 p-4">
-        <h4 className="mb-2 text-sm font-medium">Image Guidelines</h4>
-        <ul className="space-y-1 text-xs text-muted-foreground">
-          <li>• Use high-quality images with good lighting</li>
-          <li>• Recommended ratio: 1:1 (Square)</li>
-          <li>• Supported formats: JPG, PNG, WebP</li>
-        </ul>
-      </div>
+      {/* Helper Text (Only show if not in a tight space or if needed) */}
+      {!hasImage && (
+        <div className="grid grid-cols-2 gap-2 text-[10px] text-muted-foreground">
+          <div className="rounded border bg-muted/30 px-2 py-1.5 text-center">
+            Max Size: 5MB
+          </div>
+          <div className="rounded border bg-muted/30 px-2 py-1.5 text-center">
+            Format: JPG/PNG
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -12,6 +12,7 @@ import {
 import { UpgradeToProButton } from "@/components/upgrade-to-pro-button";
 import { useSidebarConfig } from "@/hooks/use-sidebar-config";
 import { AuthGuard } from "@/components/auth-guard";
+import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 
 export default function DashboardLayout({
   children,
@@ -42,6 +43,7 @@ export default function DashboardLayout({
             />
             <SidebarInset>
               <SiteHeader />
+              <DashboardBreadcrumb />
               <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-2">
                   <div className="flex flex-col gap-4 md:gap-6">{children}</div>

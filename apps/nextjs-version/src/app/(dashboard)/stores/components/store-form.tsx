@@ -20,12 +20,46 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Upload, X } from "lucide-react";
-import Image from "next/image";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import {
+  Loader2,
+  Link2,
+  Link2Off,
+  RefreshCw,
+  Wifi,
+  ParkingMeter,
+  Armchair,
+  CarFront,
+} from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Store } from "@/types/store";
 import CoverUpload from "@/components/cover-upload";
+import { UploadResponse } from "@/api/upload";
+import { CountryDropdown } from "@/components/country-dropdown";
+import { StateDropdown } from "@/components/state-dropdown";
+import { CityDropdown } from "@/components/city-dropdown";
+import { State } from "country-state-city";
+import { countries } from "country-data-list";
+
+const slugify = (text: string) => {
+  return text
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/[^\w-]+/g, "")
+    .replace(/--+/g, "-")
+    .replace(/^-+/, "")
+    .replace(/-+$/, "");
+};
 
 const DAYS = [
   "monday",
@@ -50,11 +84,40 @@ export function StoreForm({ initialData }: StoreFormProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(
     initialData?.imageUrl ?? null
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [imageError, setImageError] = useState(false);
+  const [isSlugAuto, setIsSlugAuto] = useState(!initialData);
+  const [selectedCountryCode, setSelectedCountryCode] = useState("");
+  const [selectedStateCode, setSelectedStateCode] = useState("");
 
   useEffect(() => {
     setImageError(false);
   }, [imageUrl]);
+
+  useEffect(() => {
+    // Hydrate country code from initial data or default
+    const countryName = initialData?.country || "Cambodia";
+    if (countryName) {
+      const country = countries.all.find(
+        (c) => c.name.toLowerCase() === countryName.toLowerCase()
+      );
+      if (country) {
+        setSelectedCountryCode(country.alpha2);
+
+        // Hydrate state code if country matched
+        const stateName = initialData?.state;
+        if (stateName) {
+          const states = State.getStatesOfCountry(country.alpha2);
+          const state = states.find(
+            (s) => s.name.toLowerCase() === stateName.toLowerCase()
+          );
+          if (state) {
+            setSelectedStateCode(state.isoCode);
+          }
+        }
+      }
+    }
+  }, [initialData]);
 
   const defaultValues: Partial<StoreFormValues> = initialData
     ? {
@@ -100,7 +163,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
         city: "",
         state: "",
         postalCode: "",
-        country: "",
+        country: "Cambodia",
         phone: "",
         email: "",
         latitude: 0,
@@ -128,6 +191,17 @@ export function StoreForm({ initialData }: StoreFormProps) {
     defaultValues,
   });
 
+  const watchName = form.watch("name");
+
+  useEffect(() => {
+    if (isSlugAuto && watchName) {
+      const generatedSlug = slugify(watchName);
+      if (generatedSlug) {
+        form.setValue("slug", generatedSlug, { shouldValidate: true });
+      }
+    }
+  }, [watchName, isSlugAuto, form]);
+
   function onSubmit(data: StoreFormValues) {
     if (imageUrl) {
       data.imageUrl = imageUrl;
@@ -142,7 +216,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
   const handleImageUpload = (file: File) => {
     if (file) {
       uploadImage(file, {
-        onSuccess: (response) => {
+        onSuccess: (response: UploadResponse) => {
           setImageUrl(response.data.url);
           form.setValue("imageUrl", response.data.url);
         },
@@ -154,61 +228,28 @@ export function StoreForm({ initialData }: StoreFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit as any)} className="space-y-8">
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="col-span-2">
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control as any}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Store Name" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control as any}
-                name="slug"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Slug</FormLabel>
-                    <FormControl>
-                      <Input placeholder="store-slug" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control as any}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea placeholder="Store description" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
+      <form onSubmit={form.handleSubmit(onSubmit as any)}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* LEFT COLUMN - Main Content */}
+          <div className="lg:col-span-2 space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Basic Information</CardTitle>
+                <CardDescription>
+                  General details about your store establishment.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control as any}
-                  name="phone"
+                  name="name"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Phone</FormLabel>
+                      <FormLabel>
+                        Name <span className="text-destructive">*</span>
+                      </FormLabel>
                       <FormControl>
-                        <Input placeholder="Phone number" {...field} />
+                        <Input placeholder="Store Name" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -216,192 +257,377 @@ export function StoreForm({ initialData }: StoreFormProps) {
                 />
                 <FormField
                   control={form.control as any}
-                  name="email"
+                  name="slug"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <div className="flex items-center justify-between">
+                        <FormLabel>
+                          Slug <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-xs"
+                          onClick={() => {
+                            if (!isSlugAuto) {
+                              setIsSlugAuto(true);
+                              form.setValue(
+                                "slug",
+                                slugify(form.getValues("name")),
+                                {
+                                  shouldValidate: true,
+                                }
+                              );
+                            } else {
+                              setIsSlugAuto(false);
+                            }
+                          }}
+                        >
+                          {isSlugAuto ? (
+                            <>
+                              <Link2 className="mr-1 h-3 w-3" />
+                              Syncing
+                            </>
+                          ) : (
+                            <>
+                              <Link2Off className="mr-1 h-3 w-3" />
+                              Manual
+                            </>
+                          )}
+                        </Button>
+                      </div>
                       <FormControl>
-                        <Input placeholder="Email address" {...field} />
+                        <div className="relative">
+                          <Input
+                            placeholder="store-slug"
+                            {...field}
+                            onChange={(e) => {
+                              field.onChange(e);
+                              if (isSlugAuto) setIsSlugAuto(false);
+                            }}
+                          />
+                          {!isSlugAuto && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                              onClick={() => {
+                                const newSlug = slugify(form.getValues("name"));
+                                form.setValue("slug", newSlug, {
+                                  shouldValidate: true,
+                                });
+                              }}
+                              title="Re-generate from name"
+                            >
+                              <RefreshCw className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Location</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <FormField
-                control={form.control as any}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Street address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control as any}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>City</FormLabel>
-                      <FormControl>
-                        <Input placeholder="City" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control as any}
-                  name="state"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>State</FormLabel>
-                      <FormControl>
-                        <Input placeholder="State" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control as any}
-                  name="postalCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Postal Code</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Postal Code" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control as any}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Country</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Country" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control as any}
-                  name="latitude"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Latitude</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="number"
-                          step="any"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
-                      </FormControl>
+                      <FormDescription>
+                        The slug is used for the store&apos;s public URL.
+                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
                 <FormField
                   control={form.control as any}
-                  name="longitude"
+                  name="description"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Longitude</FormLabel>
+                      <FormLabel>
+                        Description{" "}
+                        <span className="text-xs font-normal text-muted-foreground">
+                          (Optional)
+                        </span>
+                      </FormLabel>
                       <FormControl>
-                        <Input
-                          type="number"
-                          step="any"
-                          {...field}
-                          onChange={(e) =>
-                            field.onChange(Number(e.target.value))
-                          }
-                        />
+                        <Textarea placeholder="Store description" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Media</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FormItem>
-                <FormLabel>Store Image</FormLabel>
-                <FormControl>
-                  <CoverUpload
-                    initialImageUrl={imageUrl}
-                    onImageChange={(file) => {
-                      if (file) {
-                        handleImageUpload(file);
-                      }
-                    }}
-                    onRemoveImage={() => {
-                      setImageUrl(null);
-                      form.setValue("imageUrl", "");
-                    }}
-                    isUploading={isUploading}
-                    className="h-full"
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control as any}
+                    name="phone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Phone <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="098765432" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            </CardContent>
-          </Card>
+                  <FormField
+                    control={form.control as any}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Email{" "}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            (Optional)
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Email address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Settings & Features</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center space-x-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>Location</CardTitle>
+                <CardDescription>
+                  Address and geographical coordinates.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control as any}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Address <span className="text-destructive">*</span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input placeholder="Street address" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control as any}
+                    name="postalCode"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Postal Code{" "}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            (Optional)
+                          </span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="Postal Code" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control as any}
+                    name="country"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Country <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <CountryDropdown
+                            placeholder="Select country"
+                            value={field.value}
+                            onChange={(country) => {
+                              field.onChange(country.name);
+                              setSelectedCountryCode(country.alpha2);
+                              form.setValue("state", "");
+                              form.setValue("city", "");
+                              setSelectedStateCode("");
+                            }}
+                            disabled={field.disabled}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control as any}
+                    name="state"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          State <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <StateDropdown
+                            countryCode={selectedCountryCode}
+                            value={field.value}
+                            onChange={(name, code) => {
+                              field.onChange(name);
+                              setSelectedStateCode(code);
+                              form.setValue("city", "");
+                            }}
+                            disabled={!selectedCountryCode || field.disabled}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control as any}
+                    name="city"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          City <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <CityDropdown
+                            countryCode={selectedCountryCode}
+                            stateCode={selectedStateCode}
+                            value={field.value}
+                            onChange={(name) => field.onChange(name)}
+                            disabled={!selectedStateCode || field.disabled}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control as any}
+                    name="latitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Latitude <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="any"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control as any}
+                    name="longitude"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>
+                          Longitude <span className="text-destructive">*</span>
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            type="number"
+                            step="any"
+                            {...field}
+                            onChange={(e) =>
+                              field.onChange(Number(e.target.value))
+                            }
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Opening Hours</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+                  {DAYS.map((day) => (
+                    <div key={day} className="space-y-2 rounded-md border p-3">
+                      <FormLabel className="capitalize">{day}</FormLabel>
+                      <div className="flex items-center gap-2">
+                        <FormField
+                          control={form.control as any}
+                          name={`openingHours.${day}.open`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1 space-y-0">
+                              <FormControl>
+                                <Input type="time" {...field} className="h-8" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                        <span className="text-xs text-muted-foreground">
+                          to
+                        </span>
+                        <FormField
+                          control={form.control as any}
+                          name={`openingHours.${day}.close`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1 space-y-0">
+                              <FormControl>
+                                <Input type="time" {...field} className="h-8" />
+                              </FormControl>
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end w-full ">
+              <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {initialData ? "Update Store" : "Create Store"}
+              </Button>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN - Sidebar */}
+          <div className="space-y-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Store Status</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
                 <FormField
                   control={form.control as any}
                   name="isOpen"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm relative cursor-pointer hover:bg-accent/50 transition-colors">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          className="z-10"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Open</FormLabel>
-                        <FormDescription>
-                          Is the store currently open for business?
-                        </FormDescription>
+                        <FormLabel className="cursor-pointer after:absolute after:inset-0 font-normal pb-2">
+                          Open for Business
+                        </FormLabel>
+                        <FormDescription>Accepting new orders?</FormDescription>
                       </div>
                     </FormItem>
                   )}
@@ -410,160 +636,171 @@ export function StoreForm({ initialData }: StoreFormProps) {
                   control={form.control as any}
                   name="isActive"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                    <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 shadow-sm relative cursor-pointer hover:bg-accent/50 transition-colors">
                       <FormControl>
                         <Checkbox
                           checked={field.value}
                           onCheckedChange={field.onChange}
+                          className="z-10"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
-                        <FormLabel>Active</FormLabel>
+                        <FormLabel className="cursor-pointer after:absolute after:inset-0 font-normal pb-2">
+                          Platform Active
+                        </FormLabel>
                         <FormDescription>
-                          Is the store active on the platform?
+                          Visible on the platform?
                         </FormDescription>
                       </div>
                     </FormItem>
                   )}
                 />
-              </div>
+              </CardContent>
+            </Card>
 
-              <Separator />
-              <h4 className="text-sm font-medium">Features</h4>
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control as any}
-                  name="features.parking"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">Parking</FormLabel>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control as any}
-                  name="features.wifi"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">Wifi</FormLabel>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control as any}
-                  name="features.outdoorSeating"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Outdoor Seating
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control as any}
-                  name="features.driveThrough"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Drive Through
-                      </FormLabel>
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <Separator />
-              <FormField
-                control={form.control as any}
-                name="averagePrepTime"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Avg Prep Time (mins)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        {...field}
-                        onChange={(e) => field.onChange(Number(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CardContent>
-          </Card>
-        </div>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Opening Hours</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {DAYS.map((day) => (
-                <div key={day} className="space-y-2 rounded-md border p-3">
-                  <FormLabel className="capitalize">{day}</FormLabel>
-                  <div className="flex items-center gap-2">
-                    <FormField
-                      control={form.control as any}
-                      name={`openingHours.${day}.open`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1 space-y-0">
-                          <FormControl>
-                            <Input type="time" {...field} className="h-8" />
-                          </FormControl>
-                        </FormItem>
-                      )}
+            <Card>
+              <CardHeader>
+                <CardTitle>Media</CardTitle>
+                <CardDescription>Upload store cover image.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FormItem>
+                  <FormControl>
+                    <CoverUpload
+                      initialImageUrl={imageUrl}
+                      onImageChange={(file) => {
+                        if (file) {
+                          handleImageUpload(file);
+                        }
+                      }}
+                      onRemoveImage={() => {
+                        setImageUrl(null);
+                        form.setValue("imageUrl", "");
+                      }}
+                      isUploading={isUploading}
+                      // Use aspect-video to maintain height in sidebar
+                      className="w-full rounded-md overflow-hidden object-cover h-full"
                     />
-                    <span className="text-xs text-muted-foreground">to</span>
-                    <FormField
-                      control={form.control as any}
-                      name={`openingHours.${day}.close`}
-                      render={({ field }) => (
-                        <FormItem className="flex-1 space-y-0">
-                          <FormControl>
-                            <Input type="time" {...field} className="h-8" />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Features</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-3">
+                  <FormField
+                    control={form.control as any}
+                    name="features.parking"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>
+                            <ParkingMeter className="h-4 w-4" />
+                            Parking
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control as any}
+                    name="features.wifi"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>
+                            <Wifi className="h-4 w-4" /> Wifi
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control as any}
+                    name="features.outdoorSeating"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>
+                            <Armchair className="h-4 w-4" /> Outdoor
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control as any}
+                    name="features.driveThrough"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                        <div className="space-y-0.5">
+                          <FormLabel>
+                            <CarFront className="h-4 w-4" />
+                            Drive Thru
+                          </FormLabel>
+                        </div>
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
                 </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
 
-        <div className="flex justify-end">
-          <Button type="submit" disabled={isLoading}>
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {initialData ? "Update Store" : "Create Store"}
-          </Button>
+                <Separator />
+                <FormField
+                  control={form.control as any}
+                  name="averagePrepTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>
+                        Avg Prep Time{" "}
+                        <span className="text-xs text-muted-foreground">
+                          (mins)
+                        </span>
+                      </FormLabel>
+                      <FormControl>
+                        <Input
+                          type="number"
+                          {...field}
+                          onChange={(e) =>
+                            field.onChange(Number(e.target.value))
+                          }
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
+          </div>
         </div>
       </form>
     </Form>
