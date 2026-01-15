@@ -24,7 +24,7 @@ export const createStoreSchema = z.object({
     phone: phoneSchema,
     email: emailSchema.optional(),
     imageUrl: z.string().optional(),
-    images: z.array(z.string().url()).optional(),
+    images: z.array(z.url()).optional(),
     openingHours: z.object({
       monday: z.object({ open: z.string(), close: z.string() }).optional(),
       tuesday: z.object({ open: z.string(), close: z.string() }).optional(),

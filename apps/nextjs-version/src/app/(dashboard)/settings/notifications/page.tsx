@@ -110,7 +110,7 @@ export default function NotificationSettings() {
   }
 
   return (
-    <div className="space-y-6 px-4 lg:px-6">
+    <div className="space-y-6 ">
       <PageHeader
         title="Notifications"
         description="Configure how you receive notifications."

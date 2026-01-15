@@ -44,8 +44,13 @@ import { UploadResponse } from "@/api/upload";
 import { CountryDropdown } from "@/components/country-dropdown";
 import { StateDropdown } from "@/components/state-dropdown";
 import { CityDropdown } from "@/components/city-dropdown";
-import { State } from "country-state-city";
+import { State, Country, City } from "country-state-city";
 import { countries } from "country-data-list";
+import { StoreMap } from "@/components/store-map";
+import { usePickupTimes } from "@/hooks/use-pickup-times";
+import { useStoreHours } from "@/hooks/use-store-hours";
+import { useUpdateStoreStatus } from "@/hooks/use-update-store-status";
+import { Badge } from "@/components/ui/badge";
 
 const slugify = (text: string) => {
   return text
@@ -80,6 +85,8 @@ export function StoreForm({ initialData }: StoreFormProps) {
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore(
     initialData?._id ?? ""
   );
+  const { mutate: updateStatus, isPending: isUpdatingStatus } =
+    useUpdateStoreStatus();
   const { mutate: uploadImage, isPending: isUploading } = useUpload();
   const [imageUrl, setImageUrl] = useState<string | null>(
     initialData?.imageUrl ?? null
@@ -89,6 +96,14 @@ export function StoreForm({ initialData }: StoreFormProps) {
   const [isSlugAuto, setIsSlugAuto] = useState(!initialData);
   const [selectedCountryCode, setSelectedCountryCode] = useState("");
   const [selectedStateCode, setSelectedStateCode] = useState("");
+  const [mapCenter, setMapCenter] = useState<[number, number]>([
+    11.5564, 104.9282,
+  ]); // Default: Phnom Penh
+
+  const { data: pickupTimesData, isLoading: isLoadingPickupTimes } =
+    usePickupTimes(initialData?._id);
+
+  const { data: storeHoursData } = useStoreHours(initialData?._id);
 
   useEffect(() => {
     setImageError(false);
@@ -113,8 +128,28 @@ export function StoreForm({ initialData }: StoreFormProps) {
           );
           if (state) {
             setSelectedStateCode(state.isoCode);
+            // Set map center to state
+            if (state.latitude && state.longitude) {
+              setMapCenter([
+                parseFloat(state.latitude),
+                parseFloat(state.longitude),
+              ]);
+            }
+          }
+        } else {
+          // If only country is known
+          const countryData = Country.getCountryByCode(country.alpha2);
+          if (countryData && countryData.latitude && countryData.longitude) {
+            setMapCenter([
+              parseFloat(countryData.latitude),
+              parseFloat(countryData.longitude),
+            ]);
           }
         }
+      }
+
+      if (initialData?.latitude && initialData?.longitude) {
+        setMapCenter([initialData.latitude, initialData.longitude]);
       }
     }
   }, [initialData]);
@@ -224,7 +259,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
     }
   };
 
-  const isLoading = isCreating || isUpdating || isUploading;
+  const isLoading = isCreating || isUpdating || isUploading || isUpdatingStatus;
 
   return (
     <Form {...form}>
@@ -449,6 +484,20 @@ export function StoreForm({ initialData }: StoreFormProps) {
                               form.setValue("state", "");
                               form.setValue("city", "");
                               setSelectedStateCode("");
+
+                              const countryData = Country.getCountryByCode(
+                                country.alpha2
+                              );
+                              if (
+                                countryData &&
+                                countryData.latitude &&
+                                countryData.longitude
+                              ) {
+                                setMapCenter([
+                                  parseFloat(countryData.latitude),
+                                  parseFloat(countryData.longitude),
+                                ]);
+                              }
                             }}
                             disabled={field.disabled}
                           />
@@ -475,6 +524,17 @@ export function StoreForm({ initialData }: StoreFormProps) {
                               field.onChange(name);
                               setSelectedStateCode(code);
                               form.setValue("city", "");
+
+                              const state = State.getStateByCodeAndCountry(
+                                code,
+                                selectedCountryCode
+                              );
+                              if (state && state.latitude && state.longitude) {
+                                setMapCenter([
+                                  parseFloat(state.latitude),
+                                  parseFloat(state.longitude),
+                                ]);
+                              }
                             }}
                             disabled={!selectedCountryCode || field.disabled}
                           />
@@ -496,7 +556,20 @@ export function StoreForm({ initialData }: StoreFormProps) {
                             countryCode={selectedCountryCode}
                             stateCode={selectedStateCode}
                             value={field.value}
-                            onChange={(name) => field.onChange(name)}
+                            onChange={(name) => {
+                              field.onChange(name);
+                              const cities = City.getCitiesOfState(
+                                selectedCountryCode,
+                                selectedStateCode
+                              );
+                              const city = cities.find((c) => c.name === name);
+                              if (city && city.latitude && city.longitude) {
+                                setMapCenter([
+                                  parseFloat(city.latitude),
+                                  parseFloat(city.longitude),
+                                ]);
+                              }
+                            }}
                             disabled={!selectedStateCode || field.disabled}
                           />
                         </FormControl>
@@ -551,6 +624,18 @@ export function StoreForm({ initialData }: StoreFormProps) {
                     )}
                   />
                 </div>
+                <StoreMap
+                  center={mapCenter}
+                  markerPosition={
+                    form.watch("latitude") && form.watch("longitude")
+                      ? [form.watch("latitude"), form.watch("longitude")]
+                      : null
+                  }
+                  onLocationSelect={(lat, lng) => {
+                    form.setValue("latitude", lat, { shouldValidate: true });
+                    form.setValue("longitude", lng, { shouldValidate: true });
+                  }}
+                />
               </CardContent>
             </Card>
 
@@ -596,6 +681,40 @@ export function StoreForm({ initialData }: StoreFormProps) {
               </CardContent>
             </Card>
 
+            {initialData && (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Pickup Times Preview</CardTitle>
+                  <CardDescription>
+                    Generated pickup times for today (
+                    {pickupTimesData?.data?.date
+                      ? new Date(pickupTimesData.data.date).toLocaleDateString()
+                      : "Today"}
+                    ) based on current operation settings.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {isLoadingPickupTimes ? (
+                    <div className="flex justify-center p-4">
+                      <Loader2 className="h-6 w-6 animate-spin" />
+                    </div>
+                  ) : pickupTimesData?.data?.pickupTimes?.length ? (
+                    <div className="flex flex-wrap gap-2">
+                      {pickupTimesData.data.pickupTimes.map((time) => (
+                        <Badge key={time} variant="secondary">
+                          {time}
+                        </Badge>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">
+                      No pickup times available for today.
+                    </p>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             <div className="flex justify-end w-full ">
               <Button type="submit" disabled={isLoading}>
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -626,6 +745,20 @@ export function StoreForm({ initialData }: StoreFormProps) {
                       <div className="space-y-1 leading-none">
                         <FormLabel className="cursor-pointer after:absolute after:inset-0 font-normal pb-2">
                           Open for Business
+                          {storeHoursData?.data?.isOpenNow !== undefined && (
+                            <Badge
+                              variant={
+                                storeHoursData.data.isOpenNow
+                                  ? "default"
+                                  : "destructive"
+                              }
+                              className="ml-2"
+                            >
+                              {storeHoursData.data.isOpenNow
+                                ? "Open Now"
+                                : "Closed"}
+                            </Badge>
+                          )}
                         </FormLabel>
                         <FormDescription>Accepting new orders?</FormDescription>
                       </div>
@@ -640,13 +773,28 @@ export function StoreForm({ initialData }: StoreFormProps) {
                       <FormControl>
                         <Checkbox
                           checked={field.value}
-                          onCheckedChange={field.onChange}
+                          onCheckedChange={(checked) => {
+                            const newValue = checked === true;
+                            field.onChange(newValue);
+
+                            // If in edit mode, trigger immediate update
+                            if (initialData?._id) {
+                              updateStatus({
+                                id: initialData._id,
+                                isActive: newValue,
+                              });
+                            }
+                          }}
+                          disabled={isUpdatingStatus}
                           className="z-10"
                         />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel className="cursor-pointer after:absolute after:inset-0 font-normal pb-2">
                           Platform Active
+                          {isUpdatingStatus && (
+                            <Loader2 className="ml-2 h-3 w-3 animate-spin inline" />
+                          )}
                         </FormLabel>
                         <FormDescription>
                           Visible on the platform?

@@ -43,7 +43,7 @@ export default function AppearanceSettings() {
   }
 
   return (
-    <div className="space-y-6 px-4 lg:px-6">
+    <div className="space-y-6 ">
         <div>
           <h1 className="text-3xl font-bold">Appearance</h1>
           <p className="text-muted-foreground">

@@ -42,7 +42,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="px-4 md:px-6">
+    <div className="">
       <Chat conversations={conversations} messages={messages} users={users} />
     </div>
   )

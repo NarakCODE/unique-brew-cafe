@@ -127,3 +127,32 @@ export interface StoreFilters {
   isActive?: boolean;
   city?: string;
 }
+
+export interface PickupTimesData {
+  storeId: string;
+  storeName: string;
+  date: string;
+  pickupTimes: string[];
+}
+
+export interface GetPickupTimesResponse {
+  statusCode: number;
+  data: PickupTimesData;
+  message: string;
+  success: boolean;
+}
+
+export interface StoreHoursData {
+  storeId: string;
+  storeName: string;
+  openingHours: OpeningHours;
+  specialHours: SpecialHour[];
+  isOpenNow: boolean;
+}
+
+export interface GetStoreHoursResponse {
+  statusCode: number;
+  data: StoreHoursData;
+  message: string;
+  success: boolean;
+}

@@ -260,7 +260,7 @@ export default function UserSettingsPage() {
   }
 
   return (
-    <div className="space-y-6 px-4 lg:px-6">
+    <div className="space-y-6 ">
       <PageHeader
         title="Profile Settings"
         description="Update your profile information and preferences."

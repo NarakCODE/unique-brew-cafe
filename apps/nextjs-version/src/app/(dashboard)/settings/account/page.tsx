@@ -122,7 +122,7 @@ export default function AccountSettings() {
   }
 
   return (
-    <div className="space-y-6 px-4 lg:px-6">
+    <div className="space-y-6 ">
       <PageHeader
         title="Account Settings"
         description="Manage your account security and danger zone."
