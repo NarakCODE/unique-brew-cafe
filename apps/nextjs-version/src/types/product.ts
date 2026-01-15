@@ -28,6 +28,8 @@ export interface Product {
   category: Category;
   calories?: number;
   rating?: number;
+  customizations?: unknown[];
+  addOns?: unknown[];
 }
 
 export interface ProductFilters {
@@ -54,6 +56,13 @@ export interface GetProductsResponse {
     data: Product[];
     pagination: Pagination;
   };
+  message: string;
+  success: boolean;
+}
+
+export interface GetProductResponse {
+  statusCode: number;
+  data: Product;
   message: string;
   success: boolean;
 }

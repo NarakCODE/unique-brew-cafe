@@ -1,5 +1,9 @@
 import { apiClient } from "@/lib/api-client";
-import { GetProductsResponse, ProductFilters } from "@/types/product";
+import {
+  GetProductResponse,
+  GetProductsResponse,
+  ProductFilters,
+} from "@/types/product";
 
 export const getProducts = async (
   filters?: ProductFilters
@@ -15,4 +19,10 @@ export const getProducts = async (
     params.append("isFeatured", filters.isFeatured.toString());
 
   return apiClient.get(`/products?${params.toString()}`);
+};
+
+export const getProduct = async (
+  productId: string
+): Promise<GetProductResponse> => {
+  return apiClient.get(`/products/${productId}`);
 };

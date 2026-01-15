@@ -7,7 +7,7 @@ import { format } from "date-fns";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { Product } from "@/types/product";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-
+import { DataTableRowActions } from "./data-table-row-actions";
 /** Extract a usable first image URL from API shapes:
  * - ["https://..."]
  * - ["[\"https://...\"]"]  (your case)
@@ -333,5 +333,10 @@ export const columns: ColumnDef<Product>[] = [
         {format(new Date(row.getValue("updatedAt")), "MMM d, yyyy")}
       </span>
     ),
+  },
+  {
+    id: "actions",
+    enableHiding: false,
+    cell: ({ row }) => <DataTableRowActions row={row} />,
   },
 ];
