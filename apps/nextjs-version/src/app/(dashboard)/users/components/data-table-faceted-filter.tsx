@@ -105,7 +105,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                       }
                       const filterValues = Array.from(selectedValues);
                       column?.setFilterValue(
-                        filterValues.length ? filterValues : undefined
+                        filterValues?.length ? filterValues : undefined
                       );
                     }}
                     className="cursor-pointer [&_svg:not([class*='text-'])]:text-primary-foreground"
@@ -120,7 +120,7 @@ export function DataTableFacetedFilter<TData, TValue>({
                         }
                         const filterValues = Array.from(selectedValues);
                         column?.setFilterValue(
-                          filterValues.length ? filterValues : undefined
+                          filterValues?.length ? filterValues : undefined
                         );
                       }}
                       className="mr-2"

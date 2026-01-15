@@ -1,14 +1,12 @@
 "use client";
 
-import { useState } from "react";
-import type { Table } from "@tanstack/react-table";
-import { X, CheckCircle2, XCircle, Plus } from "lucide-react";
+import { Table } from "@tanstack/react-table";
+import { X, CheckCircle2, XCircle, Star, Package } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableViewOptions } from "./data-table-view-options";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
-import { CreateAnnouncementDialog } from "./create-announcement-dialog";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
@@ -23,25 +21,33 @@ export function DataTableToolbar<TData>({
     <div className="flex items-center justify-between">
       <div className="flex flex-1 items-center space-x-2">
         <Input
-          placeholder="Filter announcements..."
-          value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
+          placeholder="Filter products..."
+          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("title")?.setFilterValue(event.target.value)
+            table.getColumn("name")?.setFilterValue(event.target.value)
           }
           className="h-8 w-[150px] lg:w-[250px]"
         />
-
-        {table.getColumn("status") && (
+        {table.getColumn("isAvailable") && (
           <DataTableFacetedFilter
-            column={table.getColumn("status")}
+            column={table.getColumn("isAvailable")}
             title="Status"
             options={[
-              { label: "Active", value: "active", icon: CheckCircle2 },
-              { label: "Inactive", value: "inactive", icon: XCircle },
+              { label: "Available", value: "available", icon: CheckCircle2 },
+              { label: "Unavailable", value: "unavailable", icon: XCircle },
             ]}
           />
         )}
-
+        {table.getColumn("flags") && (
+          <DataTableFacetedFilter
+            column={table.getColumn("flags")}
+            title="Type"
+            options={[
+              { label: "Featured", value: "featured", icon: Star },
+              { label: "Best Selling", value: "best-selling", icon: Package },
+            ]}
+          />
+        )}
         {isFiltered && (
           <Button
             variant="ghost"
@@ -53,9 +59,7 @@ export function DataTableToolbar<TData>({
           </Button>
         )}
       </div>
-      <div className="flex items-center gap-2">
-        <DataTableViewOptions table={table} />
-      </div>
+      <DataTableViewOptions table={table} />
     </div>
   );
 }

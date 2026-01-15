@@ -40,15 +40,15 @@ export default function StoresPage() {
 
   return (
     <div className="flex h-full flex-1 flex-col space-y-8 md:flex">
-      <div className="flex items-center justify-between space-y-2">
+      <div className="flex items-center justify-between">
         <PageHeader
           title="Stores"
           description="Manage your stores and view their details."
         />
         <Button asChild>
           <Link href="/stores/new">
-            <Plus className="mr-2 h-4 w-4" />
-            Add Store
+            <Plus />
+            Add New
           </Link>
         </Button>
       </div>

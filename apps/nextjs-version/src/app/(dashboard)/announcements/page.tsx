@@ -3,7 +3,7 @@
 import { useAnnouncements } from "@/hooks/use-announcement";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
-import { MegaphoneIcon, Loader2 } from "lucide-react";
+import { MegaphoneIcon, Loader2, Plus } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -14,9 +14,12 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
+import { useState } from "react";
+import { CreateAnnouncementDialog } from "./components/create-announcement-dialog";
 
 export default function AnnouncementsPage() {
   const { announcements, isLoading, isError } = useAnnouncements();
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   if (isError) {
     return (
@@ -35,37 +38,48 @@ export default function AnnouncementsPage() {
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col space-y-8 md:flex">
-      <div className="flex items-center justify-between space-y-2">
-        <PageHeader
-          title="Announcements"
-          description="View and manage your announcements."
-        />
-      </div>
+    <>
+      <div className="flex h-full flex-1 flex-col space-y-8 md:flex">
+        <div className="flex items-center justify-between">
+          <PageHeader
+            title="Announcements"
+            description="View and manage your announcements."
+          />
 
-      {isLoading ? (
-        <div className="flex h-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <Button onClick={() => setShowCreateDialog(true)}>
+            <Plus />
+            Add New
+          </Button>
         </div>
-      ) : announcements?.length === 0 ? (
-        <Empty className="min-h-[50vh]">
-          <EmptyHeader>
-            <EmptyMedia variant="icon">
-              <MegaphoneIcon className="h-6 w-6" />
-            </EmptyMedia>
-            <EmptyTitle>No announcements found</EmptyTitle>
-            <EmptyDescription>
-              It looks like there are no announcements content using the current
-              filters.
-            </EmptyDescription>
-          </EmptyHeader>
-          <EmptyContent>
-            <Button>Create Announcement</Button>
-          </EmptyContent>
-        </Empty>
-      ) : (
-        <DataTable columns={columns} data={announcements} />
-      )}
-    </div>
+
+        {isLoading ? (
+          <div className="flex h-full items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        ) : announcements?.length === 0 ? (
+          <Empty className="min-h-[50vh]">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <MegaphoneIcon className="h-6 w-6" />
+              </EmptyMedia>
+              <EmptyTitle>No announcements found</EmptyTitle>
+              <EmptyDescription>
+                It looks like there are no announcements content using the
+                current filters.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button>Create Announcement</Button>
+            </EmptyContent>
+          </Empty>
+        ) : (
+          <DataTable columns={columns} data={announcements} />
+        )}
+      </div>
+      <CreateAnnouncementDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+      />
+    </>
   );
 }

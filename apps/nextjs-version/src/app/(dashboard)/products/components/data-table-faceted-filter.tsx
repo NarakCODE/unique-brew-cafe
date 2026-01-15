@@ -38,8 +38,22 @@ export function DataTableFacetedFilter<TData, TValue>({
   title,
   options,
 }: DataTableFacetedFilterProps<TData, TValue>) {
-  const facets = column?.getFacetedUniqueValues();
-  const selectedValues = new Set(column?.getFilterValue() as string[]);
+  // Don't render if column doesn't exist
+  if (!column) {
+    return null;
+  }
+
+  // Safely get facets - may throw for computed columns without accessorKey
+  let facets: Map<unknown, number> | undefined;
+  try {
+    facets = column.getFacetedUniqueValues();
+  } catch {
+    facets = undefined;
+  }
+
+  const selectedValues = new Set(
+    column.getFilterValue() as string[] | undefined
+  );
 
   return (
     <Popover>

@@ -16,6 +16,8 @@ import {
   Users,
   Megaphone,
   Store,
+  ChartBarStacked,
+  Package,
 } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
@@ -81,9 +83,19 @@ const data = {
           icon: Calendar,
         },
         {
+          title: "Products",
+          url: "/products",
+          icon: Package,
+        },
+        {
           title: "Stores",
           url: "/stores",
           icon: Store,
+        },
+        {
+          title: "Categories",
+          url: "/categories",
+          icon: ChartBarStacked,
         },
         {
           title: "Users",
@@ -258,7 +270,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <SidebarNotification />
+        {/* <SidebarNotification /> */}
         <NavUser user={displayUser} />
       </SidebarFooter>
     </Sidebar>
