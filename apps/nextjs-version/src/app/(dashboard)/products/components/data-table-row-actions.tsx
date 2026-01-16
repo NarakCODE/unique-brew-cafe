@@ -75,16 +75,16 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           <DropdownMenuItem
             onClick={() => navigator.clipboard.writeText(product.id)}
           >
-            <Copy className="mr-2 h-4 w-4" />
-            Copy product ID
+            <Copy />
+            Copy ID
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => setShowDetailsDialog(true)}>
-            <Eye className="mr-2 h-4 w-4" />
+            <Eye />
             View details
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
-            <Pencil className="mr-2 h-4 w-4" />
+            <Pencil />
             Edit product
           </DropdownMenuItem>
           <DropdownMenuItem
@@ -93,12 +93,12 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           >
             {product.isAvailable ? (
               <>
-                <Ban className="mr-2 h-4 w-4" />
+                <Ban />
                 Deactivate
               </>
             ) : (
               <>
-                <CheckCircle className="mr-2 h-4 w-4" />
+                <CheckCircle />
                 Activate
               </>
             )}
@@ -108,7 +108,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             onSelect={() => setShowDeleteDialog(true)}
             className="text-destructive focus:text-destructive"
           >
-            <Trash2 className="mr-2 h-4 w-4" />
+            <Trash2 />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
