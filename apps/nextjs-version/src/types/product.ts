@@ -66,3 +66,27 @@ export interface GetProductResponse {
   message: string;
   success: boolean;
 }
+
+export interface ProductSize {
+  name: string;
+  price: number;
+}
+
+export interface CreateProductPayload {
+  name: string;
+  slug: string;
+  description: string;
+  categoryId: string;
+  images: string[];
+  basePrice: number;
+  sizes: ProductSize[];
+  isAvailable: boolean;
+  isFeatured: boolean;
+}
+
+export interface CreateProductResponse {
+  statusCode: number;
+  data: Product;
+  message: string;
+  success: boolean;
+}

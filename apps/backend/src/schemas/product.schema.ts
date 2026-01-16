@@ -13,6 +13,7 @@ export const getProductsQuerySchema = z.object({
     categoryId: objectIdSchema.optional(),
     isFeatured: z.enum(['true', 'false']).optional(),
     isBestSelling: z.enum(['true', 'false']).optional(),
+    isAvailable: z.enum(['true', 'false']).optional(),
     tags: z.union([z.string(), z.array(z.string())]).optional(),
     minPrice: z.coerce.number().min(0).optional(),
     maxPrice: z.coerce.number().min(0).optional(),

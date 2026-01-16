@@ -3,13 +3,11 @@
 import React from "react";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
 import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import {
   ThemeCustomizer,
   ThemeCustomizerTrigger,
 } from "@/components/theme-customizer";
-import { UpgradeToProButton } from "@/components/upgrade-to-pro-button";
 import { useSidebarConfig } from "@/hooks/use-sidebar-config";
 import { AuthGuard } from "@/components/auth-guard";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
@@ -43,7 +41,7 @@ export default function DashboardLayout({
             />
             <SidebarInset>
               <SiteHeader />
-              <DashboardBreadcrumb />
+              {/* <DashboardBreadcrumb /> */}
               <div className="flex flex-1 flex-col">
                 <div className="@container/main flex flex-1 flex-col gap-2">
                   <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6 px-4">
@@ -51,7 +49,7 @@ export default function DashboardLayout({
                   </div>
                 </div>
               </div>
-              <SiteFooter />
+              {/* <SiteFooter /> */}
             </SidebarInset>
           </>
         ) : (
@@ -65,7 +63,7 @@ export default function DashboardLayout({
                   </div>
                 </div>
               </div>
-              <SiteFooter />
+              {/* <SiteFooter /> */}
             </SidebarInset>
             <AppSidebar
               variant={config.variant}
@@ -81,7 +79,7 @@ export default function DashboardLayout({
           open={themeCustomizerOpen}
           onOpenChange={setThemeCustomizerOpen}
         />
-        <UpgradeToProButton />
+        {/* <UpgradeToProButton /> */}
       </SidebarProvider>
     </AuthGuard>
   );

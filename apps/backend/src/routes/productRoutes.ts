@@ -96,6 +96,15 @@ router.get(
   productController.getProducts
 );
 
+// Admin only: Get all products (includes unavailable)
+router.get(
+  '/admin/all',
+  authenticate,
+  authorize({ roles: ['admin'] }),
+  validate(getProductsQuerySchema),
+  productController.getAllProductsAdmin
+);
+
 // Get product by ID
 router.get('/:id', validate(idParamSchema), productController.getProductById);
 

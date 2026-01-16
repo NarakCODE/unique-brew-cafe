@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useProducts } from "@/hooks/use-products";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
-import { Loader2, Package } from "lucide-react";
+import { Loader2, Package, Plus } from "lucide-react";
 import {
   Empty,
   EmptyContent,
@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
+import { CreateProductDialog } from "./components/create-product-dialog";
 
 export default function ProductsPage() {
   const searchParams = useSearchParams();
@@ -35,6 +36,12 @@ export default function ProductsPage() {
           title="Products"
           description="Manage your products catalogue."
         />
+        <CreateProductDialog>
+          <Button>
+            <Plus />
+            Add Product
+          </Button>
+        </CreateProductDialog>
       </div>
       {isLoading ? (
         <div className="flex h-full items-center justify-center">
@@ -50,7 +57,9 @@ export default function ProductsPage() {
             <EmptyDescription>There are no products found.</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
-            <Button>Add Product</Button>
+            <CreateProductDialog>
+              <Button>Add Product</Button>
+            </CreateProductDialog>
           </EmptyContent>
         </Empty>
       ) : (

@@ -37,13 +37,34 @@ const processMultipart = (req: Request, _res: Response, next: NextFunction) => {
   // Parse JSON fields that might be strings in multipart/form-data
   const jsonFields = ['openingHours', 'features', 'specialHours', 'images'];
   jsonFields.forEach((field) => {
-    if (req.body && req.body[field] && typeof req.body[field] === 'string') {
-      try {
-        req.body[field] = JSON.parse(req.body[field]);
-      } catch (error) {
-        // Let validation handle invalid format
+    if (req.body && req.body[field]) {
+      if (typeof req.body[field] === 'string') {
+        try {
+          req.body[field] = JSON.parse(req.body[field]);
+        } catch (error) {
+          // Let validation handle invalid format
 
-        throw new Error('Invalid JSON format for ' + field + error);
+          throw new Error('Invalid JSON format for ' + field + error);
+        }
+      } else if (
+        Array.isArray(req.body[field]) &&
+        req.body[field].length === 1 &&
+        typeof req.body[field][0] === 'string'
+      ) {
+        // Handle case where the field is an array containing a single JSON string
+        // This can happen with some multipart form parsers
+        const potentialJson = req.body[field][0];
+        try {
+          // Only attempt to parse if it looks like an array or object
+          if (
+            (potentialJson.startsWith('[') && potentialJson.endsWith(']')) ||
+            (potentialJson.startsWith('{') && potentialJson.endsWith('}'))
+          ) {
+            req.body[field] = JSON.parse(potentialJson);
+          }
+        } catch {
+          // Ignore parsing error and keep original value
+        }
       }
     }
   });

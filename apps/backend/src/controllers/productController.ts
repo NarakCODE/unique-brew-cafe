@@ -95,6 +95,104 @@ export const getProducts = asyncHandler(
 );
 
 /**
+ * Get all products for admin
+ * GET /api/products/admin/all
+ */
+export const getAllProductsAdmin = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const {
+      categoryId,
+      isFeatured,
+      isBestSelling,
+      isAvailable,
+      tags,
+      minPrice,
+      maxPrice,
+      search,
+    } = req.query;
+
+    // Build filters
+    const filters: {
+      categoryId?: string;
+      isFeatured?: boolean;
+      isBestSelling?: boolean;
+      isAvailable?: boolean;
+      tags?: string[];
+      minPrice?: number;
+      maxPrice?: number;
+      search?: string;
+    } = {};
+
+    if (categoryId) {
+      filters.categoryId = categoryId as string;
+    }
+
+    if (isFeatured !== undefined) {
+      filters.isFeatured = isFeatured === 'true';
+    }
+
+    if (isBestSelling !== undefined) {
+      filters.isBestSelling = isBestSelling === 'true';
+    }
+
+    if (isAvailable !== undefined) {
+      filters.isAvailable = isAvailable === 'true';
+    }
+
+    if (tags) {
+      filters.tags = Array.isArray(tags)
+        ? (tags as string[])
+        : [tags as string];
+    }
+
+    if (minPrice) {
+      const min = parseFloat(minPrice as string);
+      if (isNaN(min) || min < 0) {
+        throw new BadRequestError('minPrice must be a non-negative number');
+      }
+      filters.minPrice = min;
+    }
+
+    if (maxPrice) {
+      const max = parseFloat(maxPrice as string);
+      if (isNaN(max) || max < 0) {
+        throw new BadRequestError('maxPrice must be a non-negative number');
+      }
+      filters.maxPrice = max;
+    }
+
+    if (search) {
+      filters.search = search as string;
+    }
+
+    // Parse pagination params
+    const paginationParams = {
+      page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
+      limit: req.query.limit
+        ? parseInt(req.query.limit as string, 10)
+        : undefined,
+      sortBy: req.query.sortBy as string,
+      sortOrder: req.query.sortOrder as 'asc' | 'desc',
+    };
+
+    const result = await productService.getAllProductsAdmin(
+      filters,
+      paginationParams
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: result.data, pagination: result.pagination },
+          'Admin products fetched successfully'
+        )
+      );
+  }
+);
+
+/**
  * Get product by ID
  * GET /api/products/:id
  */
