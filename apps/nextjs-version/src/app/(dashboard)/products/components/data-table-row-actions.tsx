@@ -35,6 +35,7 @@ import { Product } from "@/types/product";
 import { ProductDetailsDialog } from "./product-details-dialog";
 import { EditProductDialog } from "./edit-product-dialog";
 import { useDeleteProduct, useUpdateProductStatus } from "@/hooks/use-products";
+import { toast } from "sonner";
 
 interface DataTableRowActionsProps {
   row: Row<Product>;
@@ -61,6 +62,11 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
     updateStatus({ productId: product.id, isAvailable: !product.isAvailable });
   };
 
+  const handleCopyId = (id: string) => {
+    navigator.clipboard.writeText(id);
+    toast.success("Product ID copied to clipboard");
+  };
+
   return (
     <>
       <DropdownMenu>
@@ -72,9 +78,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem
-            onClick={() => navigator.clipboard.writeText(product.id)}
-          >
+          <DropdownMenuItem onClick={() => handleCopyId(product._id)}>
             <Copy />
             Copy ID
           </DropdownMenuItem>
