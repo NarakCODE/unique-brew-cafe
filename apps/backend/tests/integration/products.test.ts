@@ -41,8 +41,8 @@ describe('Products API', () => {
       const response = await request(app).get('/api/products').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeInstanceOf(Array);
-      expect(response.body.data.length).toBeGreaterThanOrEqual(2);
+      expect(response.body.data.data).toBeInstanceOf(Array);
+      expect(response.body.data.data.length).toBeGreaterThanOrEqual(2);
     });
 
     it('should filter by category', async () => {
@@ -52,7 +52,7 @@ describe('Products API', () => {
 
       expect(response.body.success).toBe(true);
       expect(
-        response.body.data.every(
+        response.body.data.data.every(
           (p: any) => p.category._id.toString() === categoryId
         )
       ).toBe(true);
@@ -63,8 +63,8 @@ describe('Products API', () => {
         .get('/api/products?page=1&limit=1')
         .expect(200);
 
-      expect(response.body.data.length).toBeLessThanOrEqual(1);
-      expect(response.body.pagination).toBeDefined();
+      expect(response.body.data.data.length).toBeLessThanOrEqual(1);
+      expect(response.body.data.pagination).toBeDefined();
     });
   });
 

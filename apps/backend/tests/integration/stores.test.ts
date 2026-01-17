@@ -26,8 +26,8 @@ describe('Stores API', () => {
       const response = await request(app).get('/api/stores').expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeInstanceOf(Array);
-      expect(response.body.data.length).toBeGreaterThan(0);
+      expect(response.body.data.data).toBeInstanceOf(Array);
+      expect(response.body.data.data.length).toBeGreaterThan(0);
     });
 
     it('should filter stores by city', async () => {
@@ -38,18 +38,18 @@ describe('Stores API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data.every((s: any) => s.city === 'New York')).toBe(
-        true
-      );
+      expect(
+        response.body.data.data.every((s: any) => s.city === 'New York')
+      ).toBe(true);
     });
 
     it('should include pagination metadata', async () => {
       const response = await request(app).get('/api/stores').expect(200);
 
-      expect(response.body).toHaveProperty('pagination');
-      expect(response.body.pagination).toHaveProperty('page');
-      expect(response.body.pagination).toHaveProperty('limit');
-      expect(response.body.pagination).toHaveProperty('total');
+      expect(response.body.data).toHaveProperty('pagination');
+      expect(response.body.data.pagination).toHaveProperty('page');
+      expect(response.body.data.pagination).toHaveProperty('limit');
+      expect(response.body.data.pagination).toHaveProperty('total');
     });
   });
 
