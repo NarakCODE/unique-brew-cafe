@@ -57,7 +57,7 @@ export function CreateProductForm({
 }: CreateProductFormProps) {
   const isEditMode = !!productId && !!initialData;
   const createProductMutation = useCreateProduct();
-  const updateProductMutation = productId ? useUpdateProduct(productId) : null;
+  const updateProductMutation = useUpdateProduct(productId || "");
   const { data: categoriesData, isLoading: isLoadingCategories } =
     useCategories();
   const { mutate: uploadImage, isPending: isUploading } = useUpload();
@@ -165,7 +165,7 @@ export function CreateProductForm({
       toast.error(
         error instanceof Error
           ? error.message
-          : `Failed to ${isEditMode ? "update" : "create"} product`
+          : `Failed to ${isEditMode ? "update" : "create"} product`,
       );
     }
   };
@@ -205,7 +205,7 @@ export function CreateProductForm({
                     onClick={() =>
                       form.setValue(
                         "slug",
-                        generateSlug(form.getValues("name"))
+                        generateSlug(form.getValues("name")),
                       )
                     }
                     title="Regenerate slug"
@@ -335,7 +335,7 @@ export function CreateProductForm({
                           onClick={() => {
                             const imgWindow = window.open(
                               urlField.value,
-                              "_blank"
+                              "_blank",
                             );
                             if (imgWindow) imgWindow.focus();
                           }}
