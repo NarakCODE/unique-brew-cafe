@@ -1,6 +1,13 @@
-import { TrendingDown, TrendingUp } from "lucide-react"
+import {
+  TrendingDown,
+  TrendingUp,
+  DollarSign,
+  ShoppingBag,
+  Users,
+  Package,
+} from "lucide-react";
 
-import { Badge } from "@/components/ui/badge"
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -8,95 +15,102 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
+} from "@/components/ui/card";
+import { DashboardStats } from "@/types/report";
+import { Skeleton } from "@/components/ui/skeleton";
 
-export function SectionCards() {
+interface SectionCardsProps {
+  stats?: DashboardStats;
+  isLoading?: boolean;
+}
+
+export function SectionCards({ stats, isLoading }: SectionCardsProps) {
+  if (isLoading) {
+    return (
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+          <Card key={i} className="@container/card">
+            <CardHeader>
+              <Skeleton className="h-4 w-1/2 mb-2" />
+              <Skeleton className="h-8 w-3/4" />
+            </CardHeader>
+            <CardFooter>
+              <Skeleton className="h-4 w-full" />
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:shadow-xs grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Total Revenue</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            $1,250.00
+            ${stats?.totalRevenue.toLocaleString() ?? "0.00"}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingUp />
-              +12.5%
-            </Badge>
+            <div className="p-2 bg-primary/10 rounded-full">
+              <DollarSign className="w-5 h-5 text-primary" />
+            </div>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Trending up this month <TrendingUp className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Visitors for the last 6 months
-          </div>
+          <div className="text-muted-foreground">Total lifetime revenue</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>New Customers</CardDescription>
+          <CardDescription>Total Orders</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            1,234
+            {stats?.totalOrders.toLocaleString() ?? "0"}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingDown />
-              -20%
-            </Badge>
+            <div className="p-2 bg-primary/10 rounded-full">
+              <ShoppingBag className="w-5 h-5 text-primary" />
+            </div>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Down 20% this period <TrendingDown className="size-4" />
-          </div>
-          <div className="text-muted-foreground">
-            Acquisition needs attention
-          </div>
+          <div className="text-muted-foreground">Total completed orders</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader>
           <CardDescription>Active Accounts</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            45,678
+            {stats?.activeUsers.toLocaleString() ?? "0"}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingUp />
-              +12.5%
-            </Badge>
+            <div className="p-2 bg-primary/10 rounded-full">
+              <Users className="w-5 h-5 text-primary" />
+            </div>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Strong user retention <TrendingUp className="size-4" />
-          </div>
-          <div className="text-muted-foreground">Engagement exceed targets</div>
+          <div className="text-muted-foreground">Registered active users</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Growth Rate</CardDescription>
+          <CardDescription>Top Products Revenue</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            4.5%
+            ${stats?.topProductsAmount.toLocaleString() ?? "0.00"}
           </CardTitle>
           <CardAction>
-            <Badge variant="outline">
-              <TrendingUp />
-              +4.5%
-            </Badge>
+            <div className="p-2 bg-primary/10 rounded-full">
+              <Package className="w-5 h-5 text-primary" />
+            </div>
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="line-clamp-1 flex gap-2 font-medium">
-            Steady performance increase <TrendingUp className="size-4" />
+          <div className="text-muted-foreground">
+            Revenue from top 5 products
           </div>
-          <div className="text-muted-foreground">Meets growth projections</div>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

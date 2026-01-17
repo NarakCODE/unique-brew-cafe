@@ -1,35 +1,44 @@
-import { ChartAreaInteractive } from "./components/chart-area-interactive"
-import { DataTable } from "./components/data-table"
-import { SectionCards } from "./components/section-cards"
+"use client";
 
-import data from "./data/data.json"
-import pastPerformanceData from "./data/past-performance-data.json"
-import keyPersonnelData from "./data/key-personnel-data.json"
-import focusDocumentsData from "./data/focus-documents-data.json"
+import {
+  useDashboardStats,
+  useSalesReport,
+  useProductPerformance,
+} from "@/hooks/use-report";
+import { ChartAreaInteractive } from "./components/chart-area-interactive";
+import { SectionCards } from "./components/section-cards";
+import { ProductPerformanceTable } from "./components/product-performance-table";
 
 export default function Page() {
+  const { stats, isLoading: statsLoading } = useDashboardStats();
+  const { sales, isLoading: salesLoading } = useSalesReport({ groupBy: "day" });
+  const { products, isLoading: productsLoading } = useProductPerformance();
+
   return (
     <>
-      {/* Page Title and Description */}
       <div className="">
         <div className="flex flex-col gap-2">
           <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
-          <p className="text-muted-foreground">Welcome to your admin dashboard</p>
+          <p className="text-muted-foreground">
+            Welcome to your admin dashboard
+          </p>
         </div>
       </div>
 
-      <div className="@container/main  space-y-6">
-        <SectionCards />
-        <ChartAreaInteractive />
-      </div>
-      <div className="@container/main">
-        <DataTable
-          data={data}
-          pastPerformanceData={pastPerformanceData}
-          keyPersonnelData={keyPersonnelData}
-          focusDocumentsData={focusDocumentsData}
-        />
+      <div className="@container/main space-y-6">
+        <SectionCards stats={stats} isLoading={statsLoading} />
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div className="col-span-4">
+            <ChartAreaInteractive data={sales} isLoading={salesLoading} />
+          </div>
+          <div className="col-span-3">
+            <ProductPerformanceTable
+              data={products}
+              isLoading={productsLoading}
+            />
+          </div>
+        </div>
       </div>
     </>
-  )
+  );
 }

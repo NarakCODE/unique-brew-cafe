@@ -2,15 +2,7 @@
 
 import { useState } from "react";
 import { Row } from "@tanstack/react-table";
-import {
-  MoreHorizontal,
-  Eye,
-  Pencil,
-  Copy,
-  Trash2,
-  Ban,
-  CheckCircle,
-} from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -31,40 +23,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Product } from "@/types/product";
-import { ProductDetailsDialog } from "./product-details-dialog";
-import { EditProductDialog } from "./edit-product-dialog";
-import { useDeleteProduct, useUpdateProductStatus } from "@/hooks/use-products";
-import { toast } from "sonner";
+import { FAQ } from "@/types/support";
+import { useDeleteFAQ } from "@/hooks/use-support";
+import { EditFAQDialog } from "./edit-faq-dialog";
 
 interface DataTableRowActionsProps {
-  row: Row<Product>;
+  row: Row<FAQ>;
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const product = row.original;
-  const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
-  const { mutate: updateStatus, isPending: isUpdatingStatus } =
-    useUpdateProductStatus();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const faq = row.original;
+  const { mutate: deleteFAQ, isPending: isDeleting } = useDeleteFAQ();
 
   const handleDelete = () => {
-    deleteProduct(product.id, {
+    deleteFAQ(faq._id, {
       onSuccess: () => {
         setShowDeleteDialog(false);
       },
     });
-  };
-
-  const handleToggleStatus = () => {
-    updateStatus({ productId: product.id, isAvailable: !product.isAvailable });
-  };
-
-  const handleCopyId = (id: string) => {
-    navigator.clipboard.writeText(id);
-    toast.success("Product ID copied to clipboard");
   };
 
   return (
@@ -78,60 +56,24 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => handleCopyId(product._id)}>
-            <Copy />
-            Copy ID
-          </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem
-            onClick={() => setShowDetailsDialog(true)}
-            disabled={!product.isAvailable}
-          >
-            <Eye />
-            View details
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => setShowEditDialog(true)}
-            disabled={!product.isAvailable}
-          >
-            <Pencil />
-            Edit product
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={handleToggleStatus}
-            disabled={isUpdatingStatus}
-          >
-            {product.isAvailable ? (
-              <>
-                <Ban />
-                Deactivate
-              </>
-            ) : (
-              <>
-                <CheckCircle />
-                Activate
-              </>
-            )}
+          <DropdownMenuItem onClick={() => setShowEditDialog(true)}>
+            <Pencil className="mr-2 h-4 w-4" />
+            Edit FAQ
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
             onSelect={() => setShowDeleteDialog(true)}
             className="text-destructive focus:text-destructive"
           >
-            <Trash2 />
+            <Trash2 className="mr-2 h-4 w-4" />
             Delete
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <ProductDetailsDialog
-        productId={product.id}
-        open={showDetailsDialog}
-        onOpenChange={setShowDetailsDialog}
-      />
-
-      <EditProductDialog
-        productId={product.id}
+      <EditFAQDialog
+        faq={faq}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
@@ -141,8 +83,8 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              product "{product.name}" and remove its data from our servers.
+              This action cannot be undone. This will permanently delete the FAQ
+              "{faq.question}" and remove it from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

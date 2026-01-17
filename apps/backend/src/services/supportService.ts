@@ -218,4 +218,26 @@ export const supportService = {
   async createFAQ(data: Partial<IFAQ>) {
     return await FAQ.create(data);
   },
+
+  /**
+   * Update FAQ (Admin)
+   */
+  async updateFAQ(id: string, data: Partial<IFAQ>) {
+    const faq = await FAQ.findByIdAndUpdate(id, data, { new: true });
+    if (!faq) {
+      throw new NotFoundError('FAQ not found');
+    }
+    return faq;
+  },
+
+  /**
+   * Delete FAQ (Admin)
+   */
+  async deleteFAQ(id: string) {
+    const faq = await FAQ.findByIdAndDelete(id);
+    if (!faq) {
+      throw new NotFoundError('FAQ not found');
+    }
+    return faq;
+  },
 };

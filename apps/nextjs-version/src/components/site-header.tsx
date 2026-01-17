@@ -1,11 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { CommandSearch, SearchTrigger } from "@/components/command-search";
 import { ModeToggle } from "@/components/mode-toggle";
+import { NotificationPopover } from "@/components/notification-popover";
+import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
 
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -32,10 +34,12 @@ export function SiteHeader() {
             className="mx-2 data-[orientation=vertical]:h-4"
           />
           <div className="flex-1 max-w-sm">
-            <SearchTrigger onClick={() => setSearchOpen(true)} />
+            <DashboardBreadcrumb />
           </div>
           <div className="ml-auto flex items-center gap-2">
-            <Button
+            <SearchTrigger onClick={() => setSearchOpen(true)} />
+
+            {/* <Button
               variant="ghost"
               asChild
               size="sm"
@@ -79,7 +83,8 @@ export function SiteHeader() {
               >
                 GitHub
               </a>
-            </Button>
+            </Button> */}
+            <NotificationPopover />
             <ModeToggle />
           </div>
         </div>

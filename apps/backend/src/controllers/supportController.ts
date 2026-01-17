@@ -186,3 +186,36 @@ export const createFAQ = asyncHandler(async (req: Request, res: Response) => {
 
   res.status(201).json(new ApiResponse(201, faq, 'FAQ created successfully'));
 });
+
+/**
+ * Update FAQ (Admin)
+ * PATCH /faq/:id
+ */
+export const updateFAQ = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const data = req.body;
+
+  if (!id) {
+    throw new BadRequestError('FAQ ID is required');
+  }
+
+  const faq = await supportService.updateFAQ(id, data);
+
+  res.status(200).json(new ApiResponse(200, faq, 'FAQ updated successfully'));
+});
+
+/**
+ * Delete FAQ (Admin)
+ * DELETE /faq/:id
+ */
+export const deleteFAQ = asyncHandler(async (req: Request, res: Response) => {
+  const { id } = req.params;
+
+  if (!id) {
+    throw new BadRequestError('FAQ ID is required');
+  }
+
+  await supportService.deleteFAQ(id);
+
+  res.status(200).json(new ApiResponse(200, null, 'FAQ deleted successfully'));
+});

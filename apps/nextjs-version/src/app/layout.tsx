@@ -8,30 +8,25 @@ import { Toaster } from "@/components/ui/sonner";
 import { inter } from "@/lib/fonts";
 
 export const metadata: Metadata = {
-    title: "Shadcn Dashboard",
-    description: "A dashboard built with Next.js and shadcn/ui",
+  title: "Shadcn Dashboard",
+  description: "A dashboard built with Next.js and shadcn/ui",
 };
 
 export default function RootLayout({
-    children,
+  children,
 }: {
-    children: React.ReactNode;
+  children: React.ReactNode;
 }) {
-    return (
-        <html lang="en" className={`${inter.variable} antialiased`}>
-            <body className={inter.className}>
-                <ThemeProvider
-                    defaultTheme="system"
-                    storageKey="nextjs-ui-theme"
-                >
-                    <QueryProvider>
-                        <SidebarConfigProvider>
-                            {children}
-                        </SidebarConfigProvider>
-                        <Toaster />
-                    </QueryProvider>
-                </ThemeProvider>
-            </body>
-        </html>
-    );
+  return (
+    <html lang="en" className={`${inter.variable} antialiased`}>
+      <body className={inter.className}>
+        <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
+          <QueryProvider>
+            <SidebarConfigProvider>{children}</SidebarConfigProvider>
+            <Toaster />
+          </QueryProvider>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
 }

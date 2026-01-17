@@ -107,6 +107,11 @@ const data = {
           url: "/announcements",
           icon: Megaphone,
         },
+        {
+          title: "Support",
+          url: "/support",
+          icon: HelpCircle,
+        },
       ],
     },
     {
@@ -218,11 +223,6 @@ const data = {
               url: "/settings/connections",
             },
           ],
-        },
-        {
-          title: "FAQs",
-          url: "/faqs",
-          icon: HelpCircle,
         },
         {
           title: "Pricing",

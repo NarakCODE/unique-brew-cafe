@@ -31,7 +31,7 @@ export function DashboardBreadcrumb() {
   };
 
   return (
-    <Breadcrumb className="mb-4 hidden md:flex px-6 py-4">
+    <Breadcrumb className="hidden md:flex">
       <BreadcrumbList>
         <BreadcrumbItem>
           <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>

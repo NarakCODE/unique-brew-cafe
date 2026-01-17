@@ -8,6 +8,8 @@ import {
   getMessages,
   getFAQs,
   createFAQ,
+  updateFAQ,
+  deleteFAQ,
 } from '../controllers/supportController.js';
 import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
@@ -34,5 +36,7 @@ router.patch(
   updateTicketStatus
 );
 router.post('/faq', authorize({ roles: ['admin'] }), createFAQ);
+router.patch('/faq/:id', authorize({ roles: ['admin'] }), updateFAQ);
+router.delete('/faq/:id', authorize({ roles: ['admin'] }), deleteFAQ);
 
 export default router;
