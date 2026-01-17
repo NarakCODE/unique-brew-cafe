@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as productService from '../services/productService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Get all products with optional filtering
@@ -81,11 +82,113 @@ export const getProducts = asyncHandler(
 
     const result = await productService.getProducts(filters, paginationParams);
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: result.data, pagination: result.pagination },
+          'Products fetched successfully'
+        )
+      );
+  }
+);
+
+/**
+ * Get all products for admin
+ * GET /api/products/admin/all
+ */
+export const getAllProductsAdmin = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const {
+      categoryId,
+      isFeatured,
+      isBestSelling,
+      isAvailable,
+      tags,
+      minPrice,
+      maxPrice,
+      search,
+    } = req.query;
+
+    // Build filters
+    const filters: {
+      categoryId?: string;
+      isFeatured?: boolean;
+      isBestSelling?: boolean;
+      isAvailable?: boolean;
+      tags?: string[];
+      minPrice?: number;
+      maxPrice?: number;
+      search?: string;
+    } = {};
+
+    if (categoryId) {
+      filters.categoryId = categoryId as string;
+    }
+
+    if (isFeatured !== undefined) {
+      filters.isFeatured = isFeatured === 'true';
+    }
+
+    if (isBestSelling !== undefined) {
+      filters.isBestSelling = isBestSelling === 'true';
+    }
+
+    if (isAvailable !== undefined) {
+      filters.isAvailable = isAvailable === 'true';
+    }
+
+    if (tags) {
+      filters.tags = Array.isArray(tags)
+        ? (tags as string[])
+        : [tags as string];
+    }
+
+    if (minPrice) {
+      const min = parseFloat(minPrice as string);
+      if (isNaN(min) || min < 0) {
+        throw new BadRequestError('minPrice must be a non-negative number');
+      }
+      filters.minPrice = min;
+    }
+
+    if (maxPrice) {
+      const max = parseFloat(maxPrice as string);
+      if (isNaN(max) || max < 0) {
+        throw new BadRequestError('maxPrice must be a non-negative number');
+      }
+      filters.maxPrice = max;
+    }
+
+    if (search) {
+      filters.search = search as string;
+    }
+
+    // Parse pagination params
+    const paginationParams = {
+      page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
+      limit: req.query.limit
+        ? parseInt(req.query.limit as string, 10)
+        : undefined,
+      sortBy: req.query.sortBy as string,
+      sortOrder: req.query.sortOrder as 'asc' | 'desc',
+    };
+
+    const result = await productService.getAllProductsAdmin(
+      filters,
+      paginationParams
+    );
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: result.data, pagination: result.pagination },
+          'Admin products fetched successfully'
+        )
+      );
   }
 );
 
@@ -103,10 +206,9 @@ export const getProductById = asyncHandler(
 
     const product = await productService.getProductById(id);
 
-    res.status(200).json({
-      success: true,
-      data: product,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, product, 'Product fetched successfully'));
   }
 );
 
@@ -124,10 +226,9 @@ export const getProductBySlug = asyncHandler(
 
     const product = await productService.getProductBySlug(slug);
 
-    res.status(200).json({
-      success: true,
-      data: product,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, product, 'Product fetched successfully'));
   }
 );
 
@@ -212,12 +313,15 @@ export const searchProducts = asyncHandler(
       paginationParams
     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-      message: 'Products found',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: result.data, pagination: result.pagination },
+          'Products found'
+        )
+      );
   }
 );
 
@@ -296,11 +400,15 @@ export const getStoreMenu = asyncHandler(
       paginationParams
     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: result.data, pagination: result.pagination },
+          'Store menu fetched successfully'
+        )
+      );
   }
 );
 
@@ -318,13 +426,15 @@ export const getProductCustomizations = asyncHandler(
 
     const customizations = await productService.getProductCustomizations(id);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        productId: id,
-        customizations,
-      },
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { productId: id, customizations },
+          'Product customizations fetched successfully'
+        )
+      );
   }
 );
 
@@ -342,13 +452,15 @@ export const getProductAddOns = asyncHandler(
 
     const addOns = await productService.getProductAddOns(id);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        productId: id,
-        addOns,
-      },
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { productId: id, addOns },
+          'Product add-ons fetched successfully'
+        )
+      );
   }
 );
 
@@ -379,11 +491,15 @@ export const getProductsByCategory = asyncHandler(
       paginationParams
     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { data: result.data, pagination: result.pagination },
+          'Category products fetched successfully'
+        )
+      );
   }
 );
 
@@ -410,11 +526,15 @@ export const updateProductStatus = asyncHandler(
       isAvailable
     );
 
-    res.status(200).json({
-      success: true,
-      message: `Product ${isAvailable ? 'activated' : 'deactivated'} successfully`,
-      data: product,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          product,
+          `Product ${isAvailable ? 'activated' : 'deactivated'} successfully`
+        )
+      );
   }
 );
 
@@ -433,11 +553,15 @@ export const duplicateProduct = asyncHandler(
 
     const duplicatedProduct = await productService.duplicateProduct(productId);
 
-    res.status(201).json({
-      success: true,
-      message: 'Product duplicated successfully',
-      data: duplicatedProduct,
-    });
+    res
+      .status(201)
+      .json(
+        new ApiResponse(
+          201,
+          duplicatedProduct,
+          'Product duplicated successfully'
+        )
+      );
   }
 );
 
@@ -448,13 +572,89 @@ export const duplicateProduct = asyncHandler(
  */
 export const createProduct = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const product = await productService.createProduct(req.body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productData: Record<string, any> = { ...req.body };
 
-    res.status(201).json({
-      success: true,
-      message: 'Product created successfully',
-      data: product,
-    });
+    // Parse JSON strings from FormData for arrays and objects
+    if (typeof productData.allergens === 'string') {
+      try {
+        productData.allergens = JSON.parse(productData.allergens);
+      } catch {
+        productData.allergens = [];
+      }
+    }
+    if (typeof productData.tags === 'string') {
+      try {
+        productData.tags = JSON.parse(productData.tags);
+      } catch {
+        productData.tags = [];
+      }
+    }
+    if (typeof productData.sizes === 'string') {
+      try {
+        productData.sizes = JSON.parse(productData.sizes);
+      } catch {
+        productData.sizes = [];
+      }
+    }
+    if (typeof productData.nutritionalInfo === 'string') {
+      try {
+        productData.nutritionalInfo = JSON.parse(productData.nutritionalInfo);
+      } catch {
+        productData.nutritionalInfo = undefined;
+      }
+    }
+
+    // Parse numeric fields from FormData
+    if (typeof productData.basePrice === 'string') {
+      productData.basePrice = parseFloat(productData.basePrice);
+    }
+    if (typeof productData.preparationTime === 'string') {
+      productData.preparationTime = parseInt(productData.preparationTime, 10);
+    }
+    if (typeof productData.displayOrder === 'string') {
+      productData.displayOrder = parseInt(productData.displayOrder, 10);
+    }
+
+    // Parse boolean fields from FormData
+    if (typeof productData.isAvailable === 'string') {
+      productData.isAvailable = productData.isAvailable === 'true';
+    }
+    if (typeof productData.isFeatured === 'string') {
+      productData.isFeatured = productData.isFeatured === 'true';
+    }
+    if (typeof productData.isBestSelling === 'string') {
+      productData.isBestSelling = productData.isBestSelling === 'true';
+    }
+
+    // Handle uploaded files (multiple images)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const files = (req as any).files as Express.Multer.File[] | undefined;
+    if (files && files.length > 0) {
+      const uploadedUrls = files.map((file) => file.path);
+      // Merge with any existing image URLs from the request
+      const existingImages = Array.isArray(productData.images)
+        ? productData.images.filter(
+            (img: string) => typeof img === 'string' && img.startsWith('http')
+          )
+        : [];
+      productData.images = [...existingImages, ...uploadedUrls];
+    }
+
+    // Fallback for single file upload
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const singleFile = (req as any).file as Express.Multer.File | undefined;
+    if (singleFile && singleFile.path) {
+      if (!productData.images || productData.images.length === 0) {
+        productData.images = [singleFile.path];
+      }
+    }
+
+    const product = await productService.createProduct(productData);
+
+    res
+      .status(201)
+      .json(new ApiResponse(201, product, 'Product created successfully'));
   }
 );
 
@@ -468,13 +668,89 @@ export const updateProduct = asyncHandler(
     const { id } = req.params;
     if (!id) throw new BadRequestError('Product ID is required');
 
-    const product = await productService.updateProduct(id, req.body);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const productData: Record<string, any> = { ...req.body };
 
-    res.status(200).json({
-      success: true,
-      message: 'Product updated successfully',
-      data: product,
-    });
+    // Parse JSON strings from FormData for arrays and objects
+    if (typeof productData.allergens === 'string') {
+      try {
+        productData.allergens = JSON.parse(productData.allergens);
+      } catch {
+        productData.allergens = [];
+      }
+    }
+    if (typeof productData.tags === 'string') {
+      try {
+        productData.tags = JSON.parse(productData.tags);
+      } catch {
+        productData.tags = [];
+      }
+    }
+    if (typeof productData.sizes === 'string') {
+      try {
+        productData.sizes = JSON.parse(productData.sizes);
+      } catch {
+        productData.sizes = [];
+      }
+    }
+    if (typeof productData.nutritionalInfo === 'string') {
+      try {
+        productData.nutritionalInfo = JSON.parse(productData.nutritionalInfo);
+      } catch {
+        productData.nutritionalInfo = undefined;
+      }
+    }
+
+    // Parse numeric fields from FormData
+    if (typeof productData.basePrice === 'string') {
+      productData.basePrice = parseFloat(productData.basePrice);
+    }
+    if (typeof productData.preparationTime === 'string') {
+      productData.preparationTime = parseInt(productData.preparationTime, 10);
+    }
+    if (typeof productData.displayOrder === 'string') {
+      productData.displayOrder = parseInt(productData.displayOrder, 10);
+    }
+
+    // Parse boolean fields from FormData
+    if (typeof productData.isAvailable === 'string') {
+      productData.isAvailable = productData.isAvailable === 'true';
+    }
+    if (typeof productData.isFeatured === 'string') {
+      productData.isFeatured = productData.isFeatured === 'true';
+    }
+    if (typeof productData.isBestSelling === 'string') {
+      productData.isBestSelling = productData.isBestSelling === 'true';
+    }
+
+    // Handle uploaded files (multiple images)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const files = (req as any).files as Express.Multer.File[] | undefined;
+    if (files && files.length > 0) {
+      const uploadedUrls = files.map((file) => file.path);
+      // Merge with any existing image URLs from the request
+      const existingImages = Array.isArray(productData.images)
+        ? productData.images.filter(
+            (img: string) => typeof img === 'string' && img.startsWith('http')
+          )
+        : [];
+      productData.images = [...existingImages, ...uploadedUrls];
+    }
+
+    // Fallback for single file upload
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const singleFile = (req as any).file as Express.Multer.File | undefined;
+    if (singleFile && singleFile.path) {
+      if (!productData.images || productData.images.length === 0) {
+        productData.images = [singleFile.path];
+      }
+    }
+
+    const product = await productService.updateProduct(id, productData);
+
+    res
+      .status(200)
+      .json(new ApiResponse(200, product, 'Product updated successfully'));
   }
 );
 
@@ -490,9 +766,8 @@ export const deleteProduct = asyncHandler(
 
     await productService.deleteProduct(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Product deleted successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Product deleted successfully'));
   }
 );

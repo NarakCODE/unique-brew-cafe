@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { searchService } from '../services/searchService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Search for stores and/or products
@@ -57,10 +58,9 @@ export const search = asyncHandler(async (req: Request, res: Response) => {
     );
   }
 
-  res.status(200).json({
-    success: true,
-    data: results,
-  });
+  res
+    .status(200)
+    .json(new ApiResponse(200, results, 'Search results fetched successfully'));
 });
 
 /**
@@ -82,10 +82,11 @@ export const getSuggestions = asyncHandler(
 
     const suggestions = await searchService.getSuggestions(query, limitNum);
 
-    res.status(200).json({
-      success: true,
-      data: suggestions,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, suggestions, 'Suggestions fetched successfully')
+      );
   }
 );
 
@@ -107,10 +108,11 @@ export const getRecentSearches = asyncHandler(
       limitNum
     );
 
-    res.status(200).json({
-      success: true,
-      data: searches,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, searches, 'Recent searches retrieved successfully')
+      );
   }
 );
 
@@ -126,10 +128,11 @@ export const deleteAllSearches = asyncHandler(
 
     await searchService.deleteAllSearches(req.userId);
 
-    res.status(200).json({
-      success: true,
-      message: 'All search history deleted successfully',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, null, 'All search history deleted successfully')
+      );
   }
 );
 
@@ -151,9 +154,10 @@ export const deleteSearch = asyncHandler(
 
     await searchService.deleteSearch(req.userId, searchId);
 
-    res.status(200).json({
-      success: true,
-      message: 'Search history entry deleted successfully',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, null, 'Search history entry deleted successfully')
+      );
   }
 );

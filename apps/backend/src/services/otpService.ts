@@ -152,7 +152,6 @@ export const verifyOtp = async (
   const otp = await Otp.findOne({
     email,
     verificationType,
-    verified: false,
   }).sort({ createdAt: -1 });
 
   if (!otp) {
@@ -162,6 +161,16 @@ export const verifyOtp = async (
   // Check if OTP has expired
   if (otp.expiresAt < new Date()) {
     throw new BadRequestError('OTP has expired. Please request a new one.');
+  }
+
+  // If already verified, ensure code matches and it's within valid window
+  if (otp.verified) {
+    if (otp.otpCode !== otpCode) {
+      throw new UnauthorizedError('Invalid OTP code.');
+    }
+    // Optional: Check if verified recently (e.g., within 30 mins)
+    // This allows the second step (reset password) to proceed
+    return { success: true };
   }
 
   // Check if max attempts exceeded

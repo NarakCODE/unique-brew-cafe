@@ -68,7 +68,8 @@ export const reportService = {
       totalRevenue,
       totalOrders,
       activeUsers,
-      topProducts: topProductsAmount,
+      topProducts: topProductsData,
+      topProductsAmount: topProductsAmount,
     };
   },
 

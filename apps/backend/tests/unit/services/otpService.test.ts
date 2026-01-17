@@ -375,7 +375,6 @@ describe('OtpService', () => {
       expect(Otp.findOne).toHaveBeenCalledWith({
         email,
         verificationType,
-        verified: false,
       });
       expect(mockSort).toHaveBeenCalledWith({ createdAt: -1 });
     });

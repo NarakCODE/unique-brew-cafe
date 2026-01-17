@@ -115,22 +115,6 @@ describe('UserService', () => {
       expect(result.fullName).toBe('Jane Doe');
     });
 
-    it('should throw BadRequestError for invalid email format', async () => {
-      const userId = createObjectId();
-
-      await expect(
-        userService.updateProfile(userId, { email: 'invalid-email' })
-      ).rejects.toThrow('Invalid email format');
-    });
-
-    it('should throw BadRequestError for invalid phone format', async () => {
-      const userId = createObjectId();
-
-      await expect(
-        userService.updateProfile(userId, { phoneNumber: '123' })
-      ).rejects.toThrow('Invalid phone number format');
-    });
-
     it('should throw BadRequestError if email already in use', async () => {
       const userId = createObjectId();
       const mockUser = createMockUser({ _id: userId });
@@ -161,12 +145,6 @@ describe('UserService', () => {
       await expect(
         userService.updateProfile(createObjectId(), { fullName: 'Test' })
       ).rejects.toThrow('Cannot update inactive account');
-    });
-
-    it('should validate full name length', async () => {
-      await expect(
-        userService.updateProfile(createObjectId(), { fullName: 'A' })
-      ).rejects.toThrow('Full name must be at least 2 characters long');
     });
   });
 

@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 import { OrderService } from '../services/orderService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
-import type { ApiResponse } from '../types/index.js';
-import type { IOrder, OrderStatus } from '../models/Order.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
+import type { OrderStatus } from '../models/Order.js';
 
 const orderService = new OrderService();
 
@@ -58,14 +58,15 @@ export const getOrders = asyncHandler(
       paginationParams
     );
 
-    const response: ApiResponse = {
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-      message: 'Orders retrieved successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { items: result.data, pagination: result.pagination },
+          'Orders retrieved successfully'
+        )
+      );
   }
 );
 
@@ -82,13 +83,9 @@ export const getOrderById = asyncHandler(
 
     const order = await orderService.getOrderById(orderId, userId, role);
 
-    const response: ApiResponse<IOrder> = {
-      success: true,
-      data: order,
-      message: 'Order retrieved successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(new ApiResponse(200, order, 'Order retrieved successfully'));
   }
 );
 
@@ -104,13 +101,11 @@ export const getOrderTracking = asyncHandler(
 
     const tracking = await orderService.getOrderTracking(orderId, userId);
 
-    const response: ApiResponse = {
-      success: true,
-      data: tracking,
-      message: 'Order tracking retrieved successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, tracking, 'Order tracking retrieved successfully')
+      );
   }
 );
 
@@ -148,22 +143,17 @@ export const cancelOrder = asyncHandler(
     const { reason } = req.body;
 
     if (!reason || typeof reason !== 'string' || reason.trim().length === 0) {
-      res.status(400).json({
-        success: false,
-        error: 'Cancellation reason is required',
-      });
+      res
+        .status(400)
+        .json(new ApiResponse(400, null, 'Cancellation reason is required'));
       return;
     }
 
     const order = await orderService.cancelOrder(orderId, userId, reason);
 
-    const response: ApiResponse<IOrder> = {
-      success: true,
-      data: order,
-      message: 'Order cancelled successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(new ApiResponse(200, order, 'Order cancelled successfully'));
   }
 );
 
@@ -179,21 +169,19 @@ export const rateOrder = asyncHandler(
     const { rating, review } = req.body;
 
     if (!rating || typeof rating !== 'number') {
-      res.status(400).json({
-        success: false,
-        error: 'Rating is required and must be a number',
-      });
+      res
+        .status(400)
+        .json(
+          new ApiResponse(400, null, 'Rating is required and must be a number')
+        );
       return;
     }
 
     await orderService.rateOrder(orderId, userId, rating, review);
 
-    const response: ApiResponse = {
-      success: true,
-      message: 'Order rated successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Order rated successfully'));
   }
 );
 
@@ -209,12 +197,9 @@ export const reorder = asyncHandler(
 
     await orderService.reorder(orderId, userId);
 
-    const response: ApiResponse = {
-      success: true,
-      message: 'Items added to cart successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Items added to cart successfully'));
   }
 );
 
@@ -249,22 +234,15 @@ export const addInternalNotes = asyncHandler(
     const { notes } = req.body;
 
     if (!notes || typeof notes !== 'string' || notes.trim().length === 0) {
-      res.status(400).json({
-        success: false,
-        error: 'Notes are required',
-      });
+      res.status(400).json(new ApiResponse(400, null, 'Notes are required'));
       return;
     }
 
     const order = await orderService.addInternalNotes(orderId, notes);
 
-    const response: ApiResponse<IOrder> = {
-      success: true,
-      data: order,
-      message: 'Internal notes added successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(new ApiResponse(200, order, 'Internal notes added successfully'));
   }
 );
 
@@ -279,10 +257,7 @@ export const updateOrderStatus = asyncHandler(
     const { status } = req.body;
 
     if (!status || typeof status !== 'string') {
-      res.status(400).json({
-        success: false,
-        error: 'Status is required',
-      });
+      res.status(400).json(new ApiResponse(400, null, 'Status is required'));
       return;
     }
 
@@ -291,13 +266,9 @@ export const updateOrderStatus = asyncHandler(
       status as OrderStatus
     );
 
-    const response: ApiResponse<IOrder> = {
-      success: true,
-      data: order,
-      message: 'Order status updated successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(new ApiResponse(200, order, 'Order status updated successfully'));
   }
 );
 
@@ -312,21 +283,14 @@ export const assignDriver = asyncHandler(
     const { driverId } = req.body;
 
     if (!driverId || typeof driverId !== 'string') {
-      res.status(400).json({
-        success: false,
-        error: 'Driver ID is required',
-      });
+      res.status(400).json(new ApiResponse(400, null, 'Driver ID is required'));
       return;
     }
 
     const order = await orderService.assignDriver(orderId, driverId);
 
-    const response: ApiResponse<IOrder> = {
-      success: true,
-      data: order,
-      message: 'Driver assigned successfully',
-    };
-
-    res.status(200).json(response);
+    res
+      .status(200)
+      .json(new ApiResponse(200, order, 'Driver assigned successfully'));
   }
 );

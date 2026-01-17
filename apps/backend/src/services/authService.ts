@@ -306,6 +306,40 @@ export const resetPassword = async (
 };
 
 /**
+ * Verify OTP code
+ * @param email - User email
+ * @param otpCode - OTP code
+ * @param verificationType - Type of verification (optional)
+ * @returns Success message
+ */
+export const verifyOtpCode = async (
+  email: string,
+  otpCode: string,
+  verificationType?: 'registration' | 'password_reset'
+): Promise<{ message: string }> => {
+  // Verify OTP
+  // If verificationType is not provided, try password_reset first then registration?
+  // Or just rely on what the user sends. As per schemas it is optional but usually good to be specific.
+  // Actually the otpService.verifyOtp takes type as argument.
+  // If not provided, we might need to check both or assume one.
+  // Given the context of forgot password, default to 'password_reset' if not specified, or logic?
+  // Let's passed it through. If undefined, we might need to handle it.
+  // However, otpService.verifyOtp likely requires it.
+  // Looking at imports: verifyOtp(email, otpCode, type)
+
+  if (verificationType) {
+    await verifyOtp(email, otpCode, verificationType);
+  } else {
+    // Try password_reset by default for this flow
+    await verifyOtp(email, otpCode, 'password_reset');
+  }
+
+  return {
+    message: 'OTP verified successfully',
+  };
+};
+
+/**
  * Resend OTP for registration or password reset
  * @param email - User email
  * @param verificationType - Type of verification

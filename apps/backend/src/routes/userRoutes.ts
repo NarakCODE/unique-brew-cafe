@@ -11,6 +11,7 @@ import {
   getUserByIdAdmin,
   getUserOrdersAdmin,
   updateUserStatusAdmin,
+  createUserAdmin,
 } from '../controllers/userController.js';
 import { validateUser } from '../middlewares/validateRequest.js';
 import { authenticate } from '../middlewares/auth.js';
@@ -22,6 +23,7 @@ import {
   userParamSchema,
   updateUserStatusSchema,
   deleteAccountSchema,
+  createUserSchema,
 } from '../schemas/index.js';
 
 const router: Router = express.Router();
@@ -43,6 +45,18 @@ router.delete(
   authenticate,
   validate(deleteAccountSchema),
   deleteAccount
+);
+
+/**
+ * ADMIN: Create new user
+ * POST /api/users
+ */
+router.post(
+  '/',
+  authenticate,
+  authorize({ roles: ['admin'] }),
+  validate(createUserSchema),
+  createUserAdmin
 );
 
 /**

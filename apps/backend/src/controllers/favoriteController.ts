@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as favoriteService from '../services/favoriteService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 import mongoose from 'mongoose';
 
 /**
@@ -16,13 +17,16 @@ export const getFavorites = asyncHandler(
 
     const favorites = await favoriteService.getFavorites(req.userId);
 
-    res.status(200).json({
-      success: true,
-      data: {
-        favorites,
-        count: favorites.length,
-      },
-    });
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          favorites,
+          count: favorites.length,
+        },
+        'Favorites fetched successfully'
+      )
+    );
   }
 );
 
@@ -50,10 +54,9 @@ export const addFavorite = asyncHandler(
 
     const result = await favoriteService.addFavorite(req.userId, productId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Product added to favorites'));
   }
 );
 
@@ -81,9 +84,8 @@ export const removeFavorite = asyncHandler(
 
     const result = await favoriteService.removeFavorite(req.userId, productId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Product removed from favorites'));
   }
 );

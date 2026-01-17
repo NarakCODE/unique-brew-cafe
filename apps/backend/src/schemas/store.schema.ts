@@ -23,7 +23,8 @@ export const createStoreSchema = z.object({
     description: z.string().trim().max(1000).optional(),
     phone: phoneSchema,
     email: emailSchema.optional(),
-    images: z.array(z.string().url()).optional(),
+    imageUrl: z.string().optional(),
+    images: z.array(z.url()).optional(),
     openingHours: z.object({
       monday: z.object({ open: z.string(), close: z.string() }).optional(),
       tuesday: z.object({ open: z.string(), close: z.string() }).optional(),
@@ -38,9 +39,9 @@ export const createStoreSchema = z.object({
     state: z.string().min(1, 'State is required'),
     country: z.string().default('Cambodia'),
     postalCode: z.string().optional(),
-    latitude: z.number().min(-90).max(90),
-    longitude: z.number().min(-180).max(180),
-    isActive: z.boolean().optional(),
+    latitude: z.coerce.number().min(-90).max(90),
+    longitude: z.coerce.number().min(-180).max(180),
+    isActive: z.coerce.boolean().optional(),
   }),
 });
 

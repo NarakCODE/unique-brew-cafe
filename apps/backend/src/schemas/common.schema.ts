@@ -19,11 +19,7 @@ export const objectIdSchema = z
 /**
  * Validates email format
  */
-export const emailSchema = z
-  .string()
-  .email('Invalid email format')
-  .toLowerCase()
-  .trim();
+export const emailSchema = z.email('Invalid email format').toLowerCase().trim();
 
 /**
  * Validates phone number (E.164 format)
@@ -31,7 +27,10 @@ export const emailSchema = z
 export const phoneSchema = z
   .string()
   .trim()
-  .regex(/^\+?[1-9]\d{1,14}$/, 'Invalid phone number format');
+  .regex(
+    /^0\d{8,9}$/,
+    'Phone number must start with 0 and be 9-10 digits long'
+  );
 
 /**
  * Validates positive integer

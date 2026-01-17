@@ -51,7 +51,7 @@ const supportTicketSchema = new Schema<ISupportTicket>(
 
 // Index for faster queries
 supportTicketSchema.index({ userId: 1, status: 1 });
-supportTicketSchema.index({ ticketNumber: 1 });
+
 supportTicketSchema.index({ status: 1 });
 
 export const SupportTicket = mongoose.model<ISupportTicket>(

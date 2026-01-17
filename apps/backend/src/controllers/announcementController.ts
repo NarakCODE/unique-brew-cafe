@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { announcementService } from '../services/announcementService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Create a new announcement
@@ -19,10 +20,11 @@ export const createAnnouncement = asyncHandler(
 
     const announcement = await announcementService.createAnnouncement(req.body);
 
-    res.status(201).json({
-      success: true,
-      data: announcement,
-    });
+    res
+      .status(201)
+      .json(
+        new ApiResponse(201, announcement, 'Announcement created successfully')
+      );
   }
 );
 
@@ -43,10 +45,11 @@ export const updateAnnouncement = asyncHandler(
       req.body
     );
 
-    res.status(200).json({
-      success: true,
-      data: announcement,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, announcement, 'Announcement updated successfully')
+      );
   }
 );
 
@@ -64,10 +67,9 @@ export const deleteAnnouncement = asyncHandler(
 
     await announcementService.deleteAnnouncement(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Announcement deleted successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Announcement deleted successfully'));
   }
 );
 
@@ -85,13 +87,17 @@ export const togglePublish = asyncHandler(
 
     const announcement = await announcementService.togglePublish(id);
 
-    res.status(200).json({
-      success: true,
-      data: announcement,
-      message: `Announcement ${
-        announcement.isActive ? 'published' : 'unpublished'
-      } successfully`,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          announcement,
+          `Announcement ${
+            announcement.isActive ? 'published' : 'unpublished'
+          } successfully`
+        )
+      );
   }
 );
 
@@ -106,10 +112,15 @@ export const getAnnouncements = asyncHandler(
       req.userId
     );
 
-    res.status(200).json({
-      success: true,
-      data: announcements,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          announcements,
+          'Active announcements fetched successfully'
+        )
+      );
   }
 );
 
@@ -123,10 +134,15 @@ export const getAdminAnnouncements = asyncHandler(
       req.userId
     );
 
-    res.status(200).json({
-      success: true,
-      data: adminAnnouncements,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          adminAnnouncements,
+          'Admin announcements fetched successfully'
+        )
+      );
   }
 );
 
@@ -144,10 +160,11 @@ export const getAnnouncement = asyncHandler(
 
     const announcement = await announcementService.getAnnouncementById(id);
 
-    res.status(200).json({
-      success: true,
-      data: announcement,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, announcement, 'Announcement fetched successfully')
+      );
   }
 );
 
@@ -164,10 +181,7 @@ export const trackView = asyncHandler(async (req: Request, res: Response) => {
 
   await announcementService.trackView(id);
 
-  res.status(200).json({
-    success: true,
-    message: 'View tracked',
-  });
+  res.status(200).json(new ApiResponse(200, null, 'View tracked'));
 });
 
 /**
@@ -183,8 +197,5 @@ export const trackClick = asyncHandler(async (req: Request, res: Response) => {
 
   await announcementService.trackClick(id);
 
-  res.status(200).json({
-    success: true,
-    message: 'Click tracked',
-  });
+  res.status(200).json(new ApiResponse(200, null, 'Click tracked'));
 });

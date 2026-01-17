@@ -13,6 +13,7 @@ export const getProductsQuerySchema = z.object({
     categoryId: objectIdSchema.optional(),
     isFeatured: z.enum(['true', 'false']).optional(),
     isBestSelling: z.enum(['true', 'false']).optional(),
+    isAvailable: z.enum(['true', 'false']).optional(),
     tags: z.union([z.string(), z.array(z.string())]).optional(),
     minPrice: z.coerce.number().min(0).optional(),
     maxPrice: z.coerce.number().min(0).optional(),
@@ -80,6 +81,51 @@ export type ProductSlugParams = z.infer<
 >['params'];
 
 /**
+ * Helper to preprocess boolean values from FormData (strings like "true"/"false")
+ */
+const preprocessBoolean = (val: unknown) => {
+  if (typeof val === 'boolean') return val;
+  if (val === 'true') return true;
+  if (val === 'false') return false;
+  return val;
+};
+
+/**
+ * Helper to preprocess JSON string arrays from FormData
+ */
+const preprocessJsonArray = (val: unknown) => {
+  if (Array.isArray(val)) return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+};
+
+/**
+ * Helper to preprocess JSON string objects from FormData
+ */
+const preprocessJsonObject = (val: unknown) => {
+  if (typeof val === 'object' && val !== null && !Array.isArray(val))
+    return val;
+  if (typeof val === 'string') {
+    try {
+      const parsed = JSON.parse(val);
+      return typeof parsed === 'object' && !Array.isArray(parsed)
+        ? parsed
+        : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+};
+
+/**
  * Schema for creating a product
  */
 export const createProductSchema = z.object({
@@ -87,24 +133,37 @@ export const createProductSchema = z.object({
     name: z.string().min(1, 'Name is required'),
     description: z.string().min(1, 'Description is required'),
     categoryId: objectIdSchema,
-    basePrice: z.number().min(0, 'Base price must be non-negative'),
+    basePrice: z.coerce.number().min(0, 'Base price must be non-negative'),
     currency: z.enum(['USD', 'KHR']).default('USD'),
-    preparationTime: z.number().min(1).default(5),
-    images: z.array(z.string()).min(1, 'At least one image is required'),
-    isAvailable: z.boolean().default(true),
-    isFeatured: z.boolean().default(false),
-    isBestSelling: z.boolean().default(false),
-    allergens: z.array(z.string()).optional(),
-    tags: z.array(z.string()).optional(),
-    displayOrder: z.number().min(0).default(0),
-    nutritionalInfo: z
-      .object({
-        protein: z.number().min(0).optional(),
-        carbohydrates: z.number().min(0).optional(),
-        fat: z.number().min(0).optional(),
-        caffeine: z.number().min(0).optional(),
-      })
-      .optional(),
+    preparationTime: z.coerce.number().min(1).default(5),
+    images: z.preprocess(
+      preprocessJsonArray,
+      z.array(z.string()).min(1, 'At least one image is required')
+    ),
+    isAvailable: z.preprocess(preprocessBoolean, z.boolean().default(true)),
+    isFeatured: z.preprocess(preprocessBoolean, z.boolean().default(false)),
+    isBestSelling: z.preprocess(preprocessBoolean, z.boolean().default(false)),
+    allergens: z.preprocess(
+      preprocessJsonArray,
+      z.array(z.string()).optional()
+    ),
+    tags: z.preprocess(preprocessJsonArray, z.array(z.string()).optional()),
+    sizes: z.preprocess(
+      preprocessJsonArray,
+      z.array(z.record(z.string(), z.unknown())).default([])
+    ),
+    displayOrder: z.coerce.number().min(0).default(0),
+    nutritionalInfo: z.preprocess(
+      preprocessJsonObject,
+      z
+        .object({
+          protein: z.coerce.number().min(0).optional(),
+          carbohydrates: z.coerce.number().min(0).optional(),
+          fat: z.coerce.number().min(0).optional(),
+          caffeine: z.coerce.number().min(0).optional(),
+        })
+        .optional()
+    ),
   }),
 });
 

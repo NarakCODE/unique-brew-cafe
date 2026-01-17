@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as addonService from '../services/addonService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Create a new add-on
@@ -14,11 +15,9 @@ export const createAddOn = asyncHandler(
 
     const addOn = await addonService.createAddOn(addOnData);
 
-    res.status(201).json({
-      success: true,
-      message: 'Add-on created successfully',
-      data: addOn,
-    });
+    res
+      .status(201)
+      .json(new ApiResponse(201, addOn, 'Add-on created successfully'));
   }
 );
 
@@ -30,13 +29,16 @@ export const getAllAddOns = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const addOns = await addonService.getAllAddOns();
 
-    res.status(200).json({
-      success: true,
-      data: {
-        addOns,
-        count: addOns.length,
-      },
-    });
+    res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          addOns,
+          count: addOns.length,
+        },
+        'Add-ons fetched successfully'
+      )
+    );
   }
 );
 
@@ -56,11 +58,9 @@ export const updateAddOn = asyncHandler(
 
     const addOn = await addonService.updateAddOn(id, updateData);
 
-    res.status(200).json({
-      success: true,
-      message: 'Add-on updated successfully',
-      data: addOn,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, addOn, 'Add-on updated successfully'));
   }
 );
 
@@ -79,9 +79,8 @@ export const deleteAddOn = asyncHandler(
 
     await addonService.deleteAddOn(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Add-on deleted successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Add-on deleted successfully'));
   }
 );

@@ -41,11 +41,17 @@ describe('ProductController', () => {
         expect.any(Object)
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockResult.data,
-        pagination: mockResult.pagination,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Products fetched successfully',
+          data: {
+            data: mockResult.data,
+            pagination: mockResult.pagination,
+          },
+        })
+      );
     });
 
     it('should apply category filter', async () => {
@@ -234,10 +240,14 @@ describe('ProductController', () => {
 
       expect(productService.getProductById).toHaveBeenCalledWith('prod-123');
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockProduct,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Product fetched successfully',
+          data: mockProduct,
+        })
+      );
     });
 
     it('should throw error when ID is missing', async () => {
@@ -435,11 +445,14 @@ describe('ProductController', () => {
 
       expect(productService.duplicateProduct).toHaveBeenCalledWith('prod-123');
       expect(status).toHaveBeenCalledWith(201);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        message: 'Product duplicated successfully',
-        data: mockDuplicate,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 201,
+          message: 'Product duplicated successfully',
+          data: mockDuplicate,
+        })
+      );
     });
 
     it('should throw error when productId is missing', async () => {
@@ -473,13 +486,17 @@ describe('ProductController', () => {
         'prod-123'
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: {
-          productId: 'prod-123',
-          customizations: mockCustomizations,
-        },
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Product customizations fetched successfully',
+          data: {
+            productId: 'prod-123',
+            customizations: mockCustomizations,
+          },
+        })
+      );
     });
   });
 
@@ -499,13 +516,17 @@ describe('ProductController', () => {
 
       expect(productService.getProductAddOns).toHaveBeenCalledWith('prod-123');
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: {
-          productId: 'prod-123',
-          addOns: mockAddOns,
-        },
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Product add-ons fetched successfully',
+          data: {
+            productId: 'prod-123',
+            addOns: mockAddOns,
+          },
+        })
+      );
     });
   });
 

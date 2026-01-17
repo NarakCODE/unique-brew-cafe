@@ -37,7 +37,7 @@ describe('Orders API', () => {
         .expect(200);
 
       expect(response.body.success).toBe(true);
-      expect(response.body.data).toBeInstanceOf(Array);
+      expect(response.body.data.items).toBeInstanceOf(Array);
     });
 
     it('should return 401 without auth', async () => {
@@ -50,7 +50,7 @@ describe('Orders API', () => {
         .set('Authorization', `Bearer ${userToken}`)
         .expect(200);
 
-      expect(response.body.pagination).toBeDefined();
+      expect(response.body.data.pagination).toBeDefined();
     });
   });
 

@@ -18,7 +18,7 @@ const createMockStore = (overrides = {}) => ({
   state: 'WA',
   postalCode: '98101',
   country: 'USA',
-  phone: '+1234567890',
+  phone: '0122674709',
   latitude: 47.6062,
   longitude: -122.3321,
   isOpen: true,
@@ -101,7 +101,7 @@ describe('StoreService', () => {
           }) as any
       );
 
-      const result = await storeService.createStore(storeData);
+      const result = await storeService.createStore(storeData as any);
 
       expect(mockSave).toHaveBeenCalled();
       expect(result.name).toBe(storeData.name);

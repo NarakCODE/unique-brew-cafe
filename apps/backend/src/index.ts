@@ -45,9 +45,9 @@ if (config.nodeEnv === 'development') {
   app.use(morgan('dev'));
 }
 
-// Body Parser
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Body Parser (Limit size for memory optimization)
+app.use(express.json({ limit: '5mb' }));
+app.use(express.urlencoded({ limit: '5mb', extended: true }));
 
 // API Documentation (Swagger UI)
 try {
@@ -64,6 +64,9 @@ try {
 } catch (error) {
   console.warn('⚠️  Could not load OpenAPI specification:', error);
 }
+
+// Serve uploaded files
+app.use('/uploads', express.static('uploads'));
 
 // Routes
 app.get('/', (_req, res) => {
@@ -84,3 +87,24 @@ app.use(errorHandler);
 app.listen(config.port, () => {
   console.log(`Server running on http://localhost:${config.port}`);
 });
+
+// Graceful shutdown for production deployments
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM signal received: closing HTTP server gracefully');
+  const mongoose = await import('mongoose');
+  await mongoose.default.connection.close();
+  console.log('MongoDB connection closed');
+  process.exit(0);
+});
+
+// Optional: Memory monitoring in production
+if (config.nodeEnv === 'production') {
+  setInterval(() => {
+    const usage = process.memoryUsage();
+    const heapUsedMB = Math.round(usage.heapUsed / 1024 / 1024);
+    const heapTotalMB = Math.round(usage.heapTotal / 1024 / 1024);
+    if (heapUsedMB > 400) {
+      console.warn(`⚠️  High memory usage: ${heapUsedMB}MB / ${heapTotalMB}MB`);
+    }
+  }, 300000); // Check every 5 minutes
+}

@@ -2,17 +2,28 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as storeService from '../services/storeService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 export const createStore = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const storeData = req.body;
 
+    // Explicitly handle file upload if present
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const file = (req as any).file;
+    if (file && file.path) {
+      storeData.imageUrl = file.path;
+      // Also add to images array if not present
+      if (!storeData.images) {
+        storeData.images = [file.path];
+      }
+    }
+
     const store = await storeService.createStore(storeData);
 
-    res.status(201).json({
-      success: true,
-      data: store,
-    });
+    res
+      .status(201)
+      .json(new ApiResponse(201, store, 'Store created successfully'));
   }
 );
 
@@ -43,11 +54,9 @@ export const getAllStoresAdmin = asyncHandler(
       filters
     );
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Stores retrieved successfully'));
   }
 );
 
@@ -125,11 +134,9 @@ export const getAllStores = asyncHandler(
 
     const result = await storeService.getAllStores(filters, paginationParams);
 
-    res.status(200).json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Stores retrieved successfully'));
   }
 );
 
@@ -147,10 +154,9 @@ export const getStoreById = asyncHandler(
 
     const store = await storeService.getStoreById(id);
 
-    res.status(200).json({
-      success: true,
-      data: store,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, store, 'Store retrieved successfully'));
   }
 );
 
@@ -168,10 +174,9 @@ export const getStoreBySlug = asyncHandler(
 
     const store = await storeService.getStoreBySlug(slug);
 
-    res.status(200).json({
-      success: true,
-      data: store,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, store, 'Store retrieved successfully'));
   }
 );
 
@@ -203,10 +208,11 @@ export const getPickupTimes = asyncHandler(
       targetDate
     );
 
-    res.status(200).json({
-      success: true,
-      data: pickupTimes,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, pickupTimes, 'Pickup times retrieved successfully')
+      );
   }
 );
 
@@ -224,10 +230,11 @@ export const getStoreGallery = asyncHandler(
 
     const gallery = await storeService.getStoreGallery(storeId);
 
-    res.status(200).json({
-      success: true,
-      data: gallery,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, gallery, 'Store gallery retrieved successfully')
+      );
   }
 );
 
@@ -245,10 +252,9 @@ export const getStoreHours = asyncHandler(
 
     const hours = await storeService.getStoreHours(storeId);
 
-    res.status(200).json({
-      success: true,
-      data: hours,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, hours, 'Store hours retrieved successfully'));
   }
 );
 
@@ -266,10 +272,11 @@ export const getStoreLocation = asyncHandler(
 
     const location = await storeService.getStoreLocation(storeId);
 
-    res.status(200).json({
-      success: true,
-      data: location,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, location, 'Store location retrieved successfully')
+      );
   }
 );
 
@@ -288,11 +295,9 @@ export const updateStore = asyncHandler(
 
     const store = await storeService.updateStore(id, updateData);
 
-    res.status(200).json({
-      success: true,
-      data: store,
-      message: 'Store updated successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, store, 'Store updated successfully'));
   }
 );
 
@@ -310,10 +315,9 @@ export const deleteStore = asyncHandler(
 
     await storeService.deleteStore(id);
 
-    res.status(200).json({
-      success: true,
-      message: 'Store deleted successfully',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, null, 'Store deleted successfully'));
   }
 );
 
@@ -331,10 +335,14 @@ export const toggleStoreStatus = asyncHandler(
 
     const store = await storeService.toggleStoreStatus(id);
 
-    res.status(200).json({
-      success: true,
-      data: store,
-      message: `Store ${store.isActive ? 'activated' : 'deactivated'} successfully`,
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          store,
+          `Store ${store.isActive ? 'activated' : 'deactivated'} successfully`
+        )
+      );
   }
 );

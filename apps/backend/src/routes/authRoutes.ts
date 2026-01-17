@@ -10,6 +10,7 @@ import {
   forgotPasswordSchema,
   resetPasswordSchema,
   resendOtpSchema,
+  verifyOtpSchema,
   refreshTokenSchema,
   logoutSchema,
 } from '../schemas/auth.schema.js';
@@ -68,6 +69,12 @@ router.post(
   validate(resetPasswordSchema),
   authController.resetPassword
 );
+
+/**
+ * POST /api/auth/verify-otp
+ * Verify OTP code without completing registration or password reset
+ */
+router.post('/verify-otp', validate(verifyOtpSchema), authController.verifyOtp);
 
 /**
  * POST /api/auth/resend-otp

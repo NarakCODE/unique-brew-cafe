@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import * as cartService from '../services/cartService.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 import mongoose from 'mongoose';
 
 /**
@@ -16,10 +17,9 @@ export const getCart = asyncHandler(
 
     const result = await cartService.getCart(req.userId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Cart fetched successfully'));
   }
 );
 
@@ -66,11 +66,9 @@ export const addItem = asyncHandler(
       notes,
     });
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: 'Item added to cart',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Item added to cart successfully'));
   }
 );
 
@@ -107,11 +105,9 @@ export const updateItemQuantity = asyncHandler(
       quantity
     );
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: 'Cart item updated',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Cart item updated successfully'));
   }
 );
 
@@ -138,11 +134,11 @@ export const removeItem = asyncHandler(
 
     const result = await cartService.removeItem(req.userId, itemId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: 'Item removed from cart',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, result, 'Item removed from cart successfully')
+      );
   }
 );
 
@@ -158,10 +154,9 @@ export const clearCart = asyncHandler(
 
     const result = await cartService.clearCart(req.userId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Cart cleared successfully'));
   }
 );
 
@@ -177,10 +172,9 @@ export const validateCart = asyncHandler(
 
     const result = await cartService.validateCart(req.userId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Cart validated successfully'));
   }
 );
 
@@ -203,11 +197,11 @@ export const setDeliveryAddress = asyncHandler(
 
     const result = await cartService.setDeliveryAddress(req.userId, addressId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: 'Delivery address updated',
-    });
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, result, 'Delivery address updated successfully')
+      );
   }
 );
 
@@ -230,11 +224,9 @@ export const setNotes = asyncHandler(
 
     const result = await cartService.setNotes(req.userId, notes);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-      message: 'Cart notes updated',
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Cart notes updated successfully'));
   }
 );
 
@@ -250,9 +242,8 @@ export const getCartSummary = asyncHandler(
 
     const result = await cartService.getCartSummary(req.userId);
 
-    res.status(200).json({
-      success: true,
-      data: result,
-    });
+    res
+      .status(200)
+      .json(new ApiResponse(200, result, 'Cart summary fetched successfully'));
   }
 );

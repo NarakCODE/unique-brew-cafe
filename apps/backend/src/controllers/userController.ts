@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { userService } from '../services/userService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { BadRequestError } from '../utils/AppError.js';
+import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Get authenticated user's profile
@@ -12,10 +13,7 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
   const userId = req.userId as string;
   const user = await userService.getUserProfile(userId);
 
-  res.json({
-    success: true,
-    data: user,
-  });
+  res.json(new ApiResponse(200, user, 'User profile retrieved successfully'));
 });
 
 /**
@@ -26,7 +24,8 @@ export const getProfile = asyncHandler(async (req: Request, res: Response) => {
 export const updateProfile = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.userId as string;
-    const { fullName, email, phoneNumber, dateOfBirth, gender } = req.body;
+    const { fullName, email, phoneNumber, dateOfBirth, gender, preferences } =
+      req.body;
 
     const user = await userService.updateProfile(userId, {
       fullName,
@@ -34,13 +33,10 @@ export const updateProfile = asyncHandler(
       phoneNumber,
       dateOfBirth,
       gender,
+      preferences,
     });
 
-    res.json({
-      success: true,
-      data: user,
-      message: 'Profile updated successfully',
-    });
+    res.json(new ApiResponse(200, user, 'Profile updated successfully'));
   }
 );
 
@@ -60,11 +56,9 @@ export const uploadProfileImage = asyncHandler(
 
     const result = await userService.updateProfileImage(userId, imageUrl);
 
-    res.json({
-      success: true,
-      data: result,
-      message: 'Profile image updated successfully',
-    });
+    res.json(
+      new ApiResponse(200, result, 'Profile image updated successfully')
+    );
   }
 );
 
@@ -86,11 +80,7 @@ export const uploadAvatar = asyncHandler(
 
     const result = await userService.uploadAvatar(userId, filePath);
 
-    res.json({
-      success: true,
-      data: result,
-      message: 'Avatar uploaded successfully',
-    });
+    res.json(new ApiResponse(200, result, 'Avatar uploaded successfully'));
   }
 );
 
@@ -116,10 +106,7 @@ export const updatePassword = asyncHandler(
       newPassword
     );
 
-    res.json({
-      success: true,
-      message: result.message,
-    });
+    res.json(new ApiResponse(200, result, result.message));
   }
 );
 
@@ -149,11 +136,7 @@ export const updateSettings = asyncHandler(
       currency,
     });
 
-    res.json({
-      success: true,
-      data: user,
-      message: 'Settings updated successfully',
-    });
+    res.json(new ApiResponse(200, user, 'Settings updated successfully'));
   }
 );
 
@@ -167,10 +150,9 @@ export const getReferralStats = asyncHandler(
     const userId = req.userId as string;
     const stats = await userService.getReferralStats(userId);
 
-    res.json({
-      success: true,
-      data: stats,
-    });
+    res.json(
+      new ApiResponse(200, stats, 'Referral stats retrieved successfully')
+    );
   }
 );
 
@@ -190,10 +172,7 @@ export const deleteAccount = asyncHandler(
 
     const result = await userService.deleteAccount(userId, password, reason);
 
-    res.json({
-      success: true,
-      message: result.message,
-    });
+    res.json(new ApiResponse(200, null, result.message));
   }
 );
 
@@ -228,11 +207,7 @@ export const getAllUsersAdmin = asyncHandler(
       filters
     );
 
-    res.json({
-      success: true,
-      data: result.data,
-      pagination: result.pagination,
-    });
+    res.json(new ApiResponse(200, result, 'Users retrieved successfully'));
   }
 );
 
@@ -251,10 +226,7 @@ export const getUserByIdAdmin = asyncHandler(
 
     const user = await userService.getUserByIdAdmin(userId);
 
-    res.json({
-      success: true,
-      data: user,
-    });
+    res.json(new ApiResponse(200, user, 'User retrieved successfully'));
   }
 );
 
@@ -273,10 +245,9 @@ export const getUserOrdersAdmin = asyncHandler(
 
     const orders = await userService.getUserOrders(userId);
 
-    res.json({
-      success: true,
-      data: orders,
-    });
+    res.json(
+      new ApiResponse(200, orders, 'User orders retrieved successfully')
+    );
   }
 );
 
@@ -302,11 +273,34 @@ export const updateUserStatusAdmin = asyncHandler(
 
     const user = await userService.updateUserStatus(userId, status);
 
-    res.json({
-      success: true,
-      data: user,
-      message: `User status updated to ${status}`,
-    });
+    res.json(new ApiResponse(200, user, `User status updated to ${status}`));
+  }
+);
+
+/**
+ * Create new user (Admin only)
+ * POST /api/users
+ */
+export const createUserAdmin = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { fullName, email, password, role } = req.body;
+
+    if (!fullName || !email || !password) {
+      throw new BadRequestError('Full name, email, and password are required');
+    }
+
+    const userData = {
+      fullName,
+      email,
+      password,
+      ...(role && { role }),
+    };
+
+    const user = await userService.createUser(userData);
+
+    res
+      .status(201)
+      .json(new ApiResponse(201, user, 'User created successfully'));
   }
 );
 
@@ -314,29 +308,29 @@ export const updateUserStatusAdmin = asyncHandler(
 export const getAllUsers = asyncHandler(
   async (_req: Request, res: Response) => {
     const users = await userService.getAllUsers();
-    res.json(users);
+    res.json(new ApiResponse(200, users, 'All users retrieved successfully'));
   }
 );
 
 export const getUserById = asyncHandler(async (req: Request, res: Response) => {
   const user = await userService.getUserById(req.params.id as string);
   if (!user) {
-    return res.status(404).json({ message: 'User not found' });
+    return res.status(404).json(new ApiResponse(404, null, 'User not found'));
   }
-  res.json(user);
+  res.json(new ApiResponse(200, user, 'User retrieved successfully'));
 });
 
 export const createUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await userService.createUser(req.body);
-  res.status(201).json(user);
+  res.status(201).json(new ApiResponse(201, user, 'User created successfully'));
 });
 
 export const updateUser = asyncHandler(async (req: Request, res: Response) => {
   const user = await userService.updateUser(req.params.id as string, req.body);
-  res.json(user);
+  res.json(new ApiResponse(200, user, 'User updated successfully'));
 });
 
 export const deleteUser = asyncHandler(async (req: Request, res: Response) => {
   await userService.deleteUser(req.params.id as string);
-  res.status(204).send();
+  res.status(200).json(new ApiResponse(200, null, 'User deleted successfully'));
 });

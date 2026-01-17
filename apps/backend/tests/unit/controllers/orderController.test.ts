@@ -67,12 +67,17 @@ describe('OrderController', () => {
       await orderController.getOrders(req as Request, res as Response, next);
 
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockResult.data,
-        pagination: mockResult.pagination,
-        message: 'Orders retrieved successfully',
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Orders retrieved successfully',
+          data: {
+            items: mockResult.data,
+            pagination: mockResult.pagination,
+          },
+        })
+      );
     });
 
     it('should apply status filter', async () => {
@@ -149,10 +154,14 @@ describe('OrderController', () => {
       await orderController.cancelOrder(req as Request, res as Response, next);
 
       expect(status).toHaveBeenCalledWith(400);
-      expect(json).toHaveBeenCalledWith({
-        success: false,
-        error: 'Cancellation reason is required',
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: false,
+          statusCode: 400,
+          message: 'Cancellation reason is required',
+          data: null,
+        })
+      );
     });
 
     it('should return 400 when reason is empty string', async () => {

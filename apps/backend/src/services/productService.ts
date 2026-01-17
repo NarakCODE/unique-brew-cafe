@@ -23,6 +23,7 @@ import {
 
 interface ProductFilters {
   categoryId?: string;
+  isAvailable?: boolean;
   isFeatured?: boolean;
   isBestSelling?: boolean;
   tags?: string[];
@@ -105,9 +106,106 @@ export const getProducts = async (
 ): Promise<PaginationResult<ProductResponse>> => {
   // Build query
   const query: mongoose.FilterQuery<IProduct> = {
-    isAvailable: true,
     deletedAt: null,
   };
+
+  // Availability filter (default to true if not specified)
+  if (filters?.isAvailable !== undefined) {
+    query.isAvailable = filters.isAvailable;
+  } else {
+    query.isAvailable = true;
+  }
+
+  // Category filter
+  if (filters?.categoryId) {
+    query.categoryId = filters.categoryId;
+  }
+
+  // Featured filter
+  if (filters?.isFeatured !== undefined) {
+    query.isFeatured = filters.isFeatured;
+  }
+
+  // Best selling filter
+  if (filters?.isBestSelling !== undefined) {
+    query.isBestSelling = filters.isBestSelling;
+  }
+
+  // Tags filter
+  if (filters?.tags && filters.tags.length > 0) {
+    query.tags = { $in: filters.tags };
+  }
+
+  // Price range filter
+  if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
+    query.basePrice = {};
+    if (filters.minPrice !== undefined) {
+      query.basePrice.$gte = filters.minPrice;
+    }
+    if (filters.maxPrice !== undefined) {
+      query.basePrice.$lte = filters.maxPrice;
+    }
+  }
+
+  // Search filter (name or description)
+  if (filters?.search) {
+    query.$or = [
+      { name: { $regex: filters.search, $options: 'i' } },
+      { description: { $regex: filters.search, $options: 'i' } },
+    ];
+  }
+
+  // Parse pagination parameters
+  const { page, limit, skip, sortBy, sortOrder } = parsePaginationParams(
+    paginationParams || {}
+  );
+
+  // Build sort object - default to displayOrder, then name
+  const sort: Record<string, 1 | -1> =
+    sortBy === 'createdAt'
+      ? { [sortBy]: sortOrder }
+      : { displayOrder: 1, name: 1 };
+
+  // Execute query with pagination and projection
+  const [products, total] = await Promise.all([
+    Product.find(query)
+      .select('-__v') // Exclude version key
+      .populate('categoryId', 'name slug imageUrl icon')
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Product.countDocuments(query),
+  ]);
+
+  const mappedProducts = products.map((product) => ({
+    ...product,
+    id: product._id?.toString(),
+    category: product.categoryId,
+  })) as unknown as ProductResponse[];
+
+  return buildPaginationResult(mappedProducts, total, page, limit);
+};
+
+/**
+ * Get all products for admin (includes unavailable)
+ * @param filters - Optional filters
+ * @param paginationParams - Pagination parameters
+ * @returns Paginated products
+ */
+export const getAllProductsAdmin = async (
+  filters?: ProductFilters,
+  paginationParams?: PaginationParams
+): Promise<PaginationResult<ProductResponse>> => {
+  // Build query
+  const query: mongoose.FilterQuery<IProduct> = {
+    deletedAt: null,
+  };
+
+  // Availability filter (only apply if specifically requested)
+  if (filters?.isAvailable !== undefined) {
+    query.isAvailable = filters.isAvailable;
+  }
 
   // Category filter
   if (filters?.categoryId) {

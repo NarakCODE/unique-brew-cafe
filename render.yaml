@@ -1,0 +1,81 @@
+services:
+  # Backend API Service
+  - type: web
+    name: unique-brew-cafe-backend
+    runtime: node
+    region: singapore # Change to oregon/frankfurt if needed
+    plan: free
+    rootDir: apps/backend
+    buildCommand: pnpm install --frozen-lockfile && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /api/health
+
+    # Environment Variables
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: PORT
+        value: 10000
+
+      # Database - Add this manually in Render Dashboard for security
+      - key: DATABASE_URL
+        sync: false
+
+      # JWT Secrets - Auto-generate or add manually
+      - key: JWT_SECRET
+        generateValue: true
+
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+      - key: JWT_EXPIRES_IN
+        value: 15m
+
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 7d
+
+      # CORS - Update with your frontend URL
+      - key: FRONTEND_URL
+        value: http://localhost:3000
+
+      - key: ALLOWED_ORIGINS
+        value: http://localhost:3000,https://your-frontend.vercel.app
+
+      # Cloudinary - Add manually in Render Dashboard
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+
+      - key: CLOUDINARY_API_KEY
+        sync: false
+
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+
+      # Email (Brevo) - Add manually if using email features
+      - key: BREVO_API_KEY
+        sync: false
+
+      - key: EMAIL_FROM
+        value: noreply@unique-brew-cafe.com
+
+      # Rate Limiting
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+
+      # MongoDB Connection Pool (Optimized for 512MB)
+      - key: MONGO_MAX_POOL_SIZE
+        value: 10
+
+      - key: MONGO_MIN_POOL_SIZE
+        value: 2
+
+    # Auto-deploy on push to main/develop
+    autoDeploy: true
+
+    # Custom domains (optional - configure in Render dashboard)
+    # domains:
+    #   - api.unique-brew-cafe.com

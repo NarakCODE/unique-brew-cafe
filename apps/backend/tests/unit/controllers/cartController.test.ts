@@ -34,10 +34,14 @@ describe('CartController', () => {
 
       expect(cartService.getCart).toHaveBeenCalledWith('user-123');
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockCart,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Cart fetched successfully',
+          data: mockCart,
+        })
+      );
     });
 
     it('should throw error when userId is missing', async () => {
@@ -65,11 +69,14 @@ describe('CartController', () => {
         notes: undefined,
       });
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockCart,
-        message: 'Item added to cart',
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Item added to cart successfully',
+          data: mockCart,
+        })
+      );
     });
 
     it('should add item with customization and addOns', async () => {
@@ -161,11 +168,14 @@ describe('CartController', () => {
         5
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockCart,
-        message: 'Cart item updated',
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Cart item updated successfully',
+          data: mockCart,
+        })
+      );
     });
 
     it('should throw error when itemId is missing', async () => {
@@ -221,11 +231,14 @@ describe('CartController', () => {
         validObjectId
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockCart,
-        message: 'Item removed from cart',
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Item removed from cart successfully',
+          data: mockCart,
+        })
+      );
     });
 
     it('should throw error when itemId is missing', async () => {
@@ -254,10 +267,14 @@ describe('CartController', () => {
 
       expect(cartService.clearCart).toHaveBeenCalledWith('user-123');
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockResult,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Cart cleared successfully',
+          data: mockResult,
+        })
+      );
     });
 
     it('should throw error when userId is missing', async () => {
@@ -278,10 +295,14 @@ describe('CartController', () => {
 
       expect(cartService.validateCart).toHaveBeenCalledWith('user-123');
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockResult,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Cart validated successfully',
+          data: mockResult,
+        })
+      );
     });
   });
 
@@ -304,11 +325,14 @@ describe('CartController', () => {
         'addr-123'
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockCart,
-        message: 'Delivery address updated',
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Delivery address updated successfully',
+          data: mockCart,
+        })
+      );
     });
 
     it('should throw error when addressId is missing', async () => {
@@ -337,11 +361,14 @@ describe('CartController', () => {
         'Please deliver to back door'
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockCart,
-        message: 'Cart notes updated',
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Cart notes updated successfully',
+          data: mockCart,
+        })
+      );
     });
 
     it('should allow empty string notes', async () => {
@@ -382,10 +409,14 @@ describe('CartController', () => {
 
       expect(cartService.getCartSummary).toHaveBeenCalledWith('user-123');
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockSummary,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'Cart summary fetched successfully',
+          data: mockSummary,
+        })
+      );
     });
   });
 });
