@@ -94,13 +94,14 @@ describe('Products API', () => {
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: 'New Product',
+          slug: 'new-product',
           description: 'Test description',
           categoryId,
           storeId,
           basePrice: 15.99,
           currency: 'USD',
           preparationTime: 10,
-          images: ['test.jpg'],
+          images: ['https://example.com/test.jpg'],
         })
         .expect(201);
 
@@ -142,8 +143,18 @@ describe('Products API', () => {
         .send({
           name: 'Updated Product',
           basePrice: 20.0,
+          images: ['https://example.com/updated.jpg'],
         })
-        .expect(200);
+        .expect(200)
+        .catch((err) => {
+          if (err.response) {
+            console.log(
+              'Update failed:',
+              JSON.stringify(err.response.body, null, 2)
+            );
+          }
+          throw err;
+        });
 
       expect(response.body.success).toBe(true);
       expect(response.body.data.name).toBe('Updated Product');
