@@ -54,10 +54,14 @@ describe('AuthController', () => {
         expect.any(Object)
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockAuthResponse,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'User logged in successfully',
+          data: mockAuthResponse,
+        })
+      );
     });
 
     it('should throw error if email or password missing', async () => {
@@ -106,10 +110,14 @@ describe('AuthController', () => {
         expect.any(Object)
       );
       expect(status).toHaveBeenCalledWith(201);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: mockAuthResponse,
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 201,
+          message: 'User registered successfully',
+          data: mockAuthResponse,
+        })
+      );
     });
   });
 
@@ -129,10 +137,14 @@ describe('AuthController', () => {
         'valid-refresh-token'
       );
       expect(status).toHaveBeenCalledWith(200);
-      expect(json).toHaveBeenCalledWith({
-        success: true,
-        data: { message: 'Logged out successfully' },
-      });
+      expect(json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          success: true,
+          statusCode: 200,
+          message: 'User logged out successfully',
+          data: { message: 'Logged out successfully' },
+        })
+      );
     });
 
     it('should throw error if refresh token missing', async () => {
