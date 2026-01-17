@@ -23,6 +23,16 @@ import uploadRoutes from './uploadRoutes.js';
 
 const router: Router = express.Router();
 
+// Health check endpoint for deployment monitoring
+router.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    environment: process.env.NODE_ENV || 'development',
+  });
+});
+
 // Authentication routes
 router.use('/auth', authRoutes);
 
