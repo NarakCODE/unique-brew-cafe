@@ -46,8 +46,10 @@ describe('ProductController', () => {
           success: true,
           statusCode: 200,
           message: 'Products fetched successfully',
-          data: mockResult.data,
-          pagination: mockResult.pagination,
+          data: {
+            data: mockResult.data,
+            pagination: mockResult.pagination,
+          },
         })
       );
     });
