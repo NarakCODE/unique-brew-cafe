@@ -27,8 +27,12 @@ describe('ReportService', () => {
       expect(result.totalRevenue).toBe(5000);
       expect(result.totalOrders).toBe(50);
       expect(result.activeUsers).toBe(100);
-      // topProducts is the total revenue from top 5 products (450 + 400 = 850)
-      expect(result.topProducts).toBe(850);
+      // topProducts is the array of top 5 products
+      expect(result.topProducts).toHaveLength(2);
+      expect(result.topProducts).toEqual([
+        { _id: 'prod1', name: 'Latte', totalSold: 100, revenue: 450 },
+        { _id: 'prod2', name: 'Cappuccino', totalSold: 80, revenue: 400 },
+      ]);
     });
 
     it('should return zero revenue when no orders exist', async () => {
@@ -41,8 +45,8 @@ describe('ReportService', () => {
 
       expect(result.totalRevenue).toBe(0);
       expect(result.totalOrders).toBe(0);
-      // topProducts is 0 when there are no products
-      expect(result.topProducts).toBe(0);
+      // topProducts is empty array when there are no products
+      expect(result.topProducts).toEqual([]);
     });
 
     it('should filter by date range when provided', async () => {
