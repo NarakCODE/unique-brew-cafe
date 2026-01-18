@@ -69,7 +69,7 @@ try {
 app.use('/uploads', express.static('uploads'));
 
 // Routes
-app.get('/', (_req, res) => {
+app.get('/', (_req: express.Request, res: express.Response) => {
   res.json({
     message: 'Corner Coffee API',
     version: '1.0.0',

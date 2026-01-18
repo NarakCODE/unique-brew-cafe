@@ -49,6 +49,7 @@ import {
   Tag,
   Cpu,
   Globe,
+  Camera,
 } from "lucide-react";
 import { useRef, useState, useEffect } from "react";
 import {
@@ -62,6 +63,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/page-header";
 import { format } from "date-fns";
+import ImagePreviewDialog from "@/components/image-preview-dialog";
 
 // --- SCHEMA DEFINITIONS ---
 // Defining these here based on your prompt, assuming email/phone logic
@@ -283,13 +285,21 @@ export default function UserSettingsPage() {
                     <Logo size={40} />
                   </div>
                 ) : (
-                  <Avatar className="h-24 w-24 border-2 border-border">
-                    <AvatarImage
-                      src={profileImage || undefined}
-                      className="object-cover"
-                    />
-                    <AvatarFallback>User</AvatarFallback>
-                  </Avatar>
+                  <ImagePreviewDialog imageSrc={profileImage}>
+                    <div className="relative h-full rounded-full w-full flex items-center justify-center group ">
+                      <Avatar className="h-24 w-24 border-2 border-border">
+                        <AvatarImage
+                          src={profileImage || undefined}
+                          className="object-cover"
+                        />
+                        <AvatarFallback>User</AvatarFallback>
+                      </Avatar>
+
+                      <div className="absolute opacity-0 rounded-full flex duration-300 group-hover:opacity-100 bottom-0 right-0 w-full h-full bg-secondary/50 text-foreground  items-center justify-center">
+                        <Camera className="w-6 h-6 text-background" />
+                      </div>
+                    </div>
+                  </ImagePreviewDialog>
                 )}
                 <div className="flex flex-col gap-2 items-center sm:items-start">
                   <div className="flex gap-2">
@@ -422,7 +432,7 @@ export default function UserSettingsPage() {
                               variant="outline"
                               className={cn(
                                 "w-full justify-between font-normal",
-                                !field.value && "text-muted-foreground"
+                                !field.value && "text-muted-foreground",
                               )}
                             >
                               {/* Check if field.value exists before formatting */}

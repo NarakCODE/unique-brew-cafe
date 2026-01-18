@@ -11,6 +11,7 @@ export interface Announcement {
   isActive: boolean;
   viewCount: number;
   clickCount: number;
+  imageUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
