@@ -1,81 +1,77 @@
 services:
-  # Backend API Service
   - type: web
     name: unique-brew-cafe-backend
     runtime: node
-    region: singapore # Change to oregon/frankfurt if needed
+    region: singapore
     plan: free
-    rootDir: apps/backend
-    buildCommand: pnpm install --frozen-lockfile && pnpm build
-    startCommand: pnpm start
+
+    # Use repo root for monorepo installs
+    rootDir: .
+
+    # Install once at root, then build only backend
+    buildCommand: pnpm install --frozen-lockfile && pnpm --filter backend build
+    startCommand: pnpm --filter backend start
+
     healthCheckPath: /api/health
 
-    # Environment Variables
     envVars:
       - key: NODE_ENV
         value: production
 
-      - key: PORT
-        value: 10000
-
-      # Database - Add this manually in Render Dashboard for security
+      # ✅ Use the env key your backend actually reads
       - key: MONGODB_URI
         sync: false
 
-      # JWT Secrets - Auto-generate or add manually
+      # JWT
       - key: JWT_SECRET
         generateValue: true
-
       - key: JWT_REFRESH_SECRET
         generateValue: true
-
       - key: JWT_EXPIRES_IN
-        value: 15m
-
+        value: 24h
       - key: JWT_REFRESH_EXPIRES_IN
         value: 7d
 
-      # CORS - Update with your frontend URL
+      # Admin
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+
+      # CORS (set these to REAL domains)
       - key: FRONTEND_URL
-        value: http://localhost:3000
-
+        sync: false
       - key: ALLOWED_ORIGINS
-        value: http://localhost:3000,https://your-frontend.vercel.app
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
 
-      # Cloudinary - Add manually in Render Dashboard
+      # Cloudinary
       - key: CLOUDINARY_CLOUD_NAME
         sync: false
-
       - key: CLOUDINARY_API_KEY
         sync: false
-
       - key: CLOUDINARY_API_SECRET
         sync: false
 
-      # Email (Brevo) - Add manually if using email features
+      # Brevo (match your backend keys)
       - key: BREVO_API_KEY
         sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: BREVO_SENDER_NAME
+        sync: false
+      - key: BREVO_PARTNER_KEY
+        sync: false
 
-      - key: EMAIL_FROM
-        value: noreply@unique-brew-cafe.com
-
-      # Rate Limiting
+      # Rate limiting + pool sizes
       - key: RATE_LIMIT_WINDOW_MS
         value: 900000
-
       - key: RATE_LIMIT_MAX_REQUESTS
         value: 100
-
-      # MongoDB Connection Pool (Optimized for 512MB)
       - key: MONGO_MAX_POOL_SIZE
         value: 10
-
       - key: MONGO_MIN_POOL_SIZE
         value: 2
 
-    # Auto-deploy on push to main/develop
     autoDeploy: true
-
-    # Custom domains (optional - configure in Render dashboard)
-    # domains:
-    #   - api.unique-brew-cafe.com
