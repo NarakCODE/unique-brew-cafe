@@ -12,6 +12,8 @@ import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
+import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface AnnouncementDetailsDialogProps {
   id: string | null;
@@ -53,6 +55,17 @@ export function AnnouncementDetailsDialog({
           </div>
         ) : announcement ? (
           <div className="grid gap-6 py-4">
+            <div className="grid">
+              <Avatar className="h-20 w-20 border">
+                <AvatarImage
+                  src={announcement.imageUrl}
+                  alt={announcement.title}
+                />
+                <AvatarFallback className="text-xl">
+                  {announcement.title.slice(0, 2).toUpperCase()}
+                </AvatarFallback>
+              </Avatar>
+            </div>
             <div className="grid gap-2">
               <Label className="text-muted-foreground">Title</Label>
               <div className="font-semibold text-lg">{announcement.title}</div>

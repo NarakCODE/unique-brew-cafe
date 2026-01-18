@@ -1,10 +1,9 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
-import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
-
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DataTableColumnHeader } from "./data-table-column-header";
 import { Announcement } from "@/types/announcement";
 import { DataTableRowActions } from "./data-table-row-actions";
@@ -42,7 +41,16 @@ export const columns: ColumnDef<Announcement>[] = [
     ),
     cell: ({ row }) => {
       return (
-        <div className="flex space-x-2">
+        <div className="flex items-center gap-3">
+          <Avatar className="h-9 w-9">
+            <AvatarImage src={row.original.imageUrl} alt={row.original.title} />
+            <AvatarFallback>
+              {row.original.title.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col">
+            <span className="font-medium">{row.original.title}</span>
+          </div>
           <span className="max-w-125 truncate font-medium">
             {row.getValue("title")}
           </span>
