@@ -19,7 +19,7 @@ services:
         value: 10000
 
       # Database - Add this manually in Render Dashboard for security
-      - key: DATABASE_URL
+      - key: MONGODB_URI
         sync: false
 
       # JWT Secrets - Auto-generate or add manually

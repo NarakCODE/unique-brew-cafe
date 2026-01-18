@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 export const config = {
-  port: process.env.PORT || 8080,
+  port: process.env.PORT || 8081,
   mongoUri:
     process.env.MONGODB_URI ||
     process.env.DATABASE_URL ||
