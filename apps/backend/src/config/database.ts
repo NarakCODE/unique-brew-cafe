@@ -5,20 +5,23 @@ import mongoose from 'mongoose';
  */
 export const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI || '', {
-      // Connection pool configuration
-      maxPoolSize: 10, // Maximum number of connections in the pool
-      minPoolSize: 2, // Minimum number of connections to maintain
-      maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
+    const conn = await mongoose.connect(
+      process.env.MONGODB_URI || process.env.DATABASE_URL || '',
+      {
+        // Connection pool configuration
+        maxPoolSize: 10, // Maximum number of connections in the pool
+        minPoolSize: 2, // Minimum number of connections to maintain
+        maxIdleTimeMS: 30000, // Close connections after 30 seconds of inactivity
 
-      // Connection timeout settings
-      serverSelectionTimeoutMS: 5000, // Timeout for server selection
-      socketTimeoutMS: 45000, // Socket timeout
+        // Connection timeout settings
+        serverSelectionTimeoutMS: 5000, // Timeout for server selection
+        socketTimeoutMS: 45000, // Socket timeout
 
-      // Retry configuration
-      retryWrites: true,
-      retryReads: true,
-    });
+        // Retry configuration
+        retryWrites: true,
+        retryReads: true,
+      }
+    );
 
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     console.log(`Connection pool size: ${conn.connection.getMaxListeners()}`);
