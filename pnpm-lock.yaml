@@ -26,6 +26,9 @@ importers:
       '@types/multer':
         specifier: ^2.0.0
         version: 2.0.0
+      '@types/node':
+        specifier: ^24.10.1
+        version: 24.10.1
       '@types/swagger-ui-express':
         specifier: ^4.1.8
         version: 4.1.8
@@ -114,9 +117,6 @@ importers:
       '@types/morgan':
         specifier: ^1.9.9
         version: 1.9.10
-      '@types/node':
-        specifier: ^24.10.1
-        version: 24.10.1
       '@types/pdfkit':
         specifier: ^0.17.3
         version: 0.17.4
