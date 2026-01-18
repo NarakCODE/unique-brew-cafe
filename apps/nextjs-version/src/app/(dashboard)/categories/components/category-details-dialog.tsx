@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { getStatusColor } from "@/lib/badge-styles";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import Image from "next/image";
 
 interface CategoryDetailsDialogProps {
   categoryId: string | null;
@@ -29,14 +30,14 @@ export function CategoryDetailsDialog({
 }: CategoryDetailsDialogProps) {
   const { data: category, isLoading: isLoadingCategory } = useCategory(
     categoryId || "",
-    open
+    open,
   );
 
   // Use category?.storeId directly for the store query
   // We don't wait for category to be loaded in the hook definition,
   // but the hook handles undefined/null IDs gracefully by being disabled
   const { store, isLoading: isLoadingStore } = useStore(
-    category?.storeId || ""
+    category?.storeId || "",
   );
 
   const isLoading = isLoadingCategory;
@@ -72,7 +73,7 @@ export function CategoryDetailsDialog({
                   variant="secondary"
                   className={cn(
                     "capitalize",
-                    getStatusColor(category.isActive ? "active" : "inactive")
+                    getStatusColor(category.isActive ? "active" : "inactive"),
                   )}
                 >
                   {category.isActive ? "Active" : "Inactive"}
@@ -133,9 +134,11 @@ export function CategoryDetailsDialog({
                     <div className="mb-4">
                       <div className="relative h-40 w-full overflow-hidden rounded-md border">
                         {/* Using standard img tag for external URLs without specific domain config in next.config */}
-                        <img
+                        <Image
                           src={store.imageUrl}
                           alt={store.name}
+                          width={300}
+                          height={300}
                           className="h-full w-full object-cover"
                         />
                       </div>
