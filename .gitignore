@@ -41,3 +41,5 @@ yarn-error.log*
 apps/frontend
 
 mcp.server.config.ts
+
+mcp.server.config.ts
