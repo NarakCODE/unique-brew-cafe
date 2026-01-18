@@ -39,3 +39,7 @@ yarn-error.log*
 
 # Legacy frontend
 apps/frontend
+
+mcp.server.config.ts
+
+mcp.server.config.ts
