@@ -91,7 +91,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
   const [imageUrl, setImageUrl] = useState<string | null>(
     initialData?.imageUrl ?? null
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const [imageError, setImageError] = useState(false);
   const [isSlugAuto, setIsSlugAuto] = useState(!initialData);
   const [selectedCountryCode, setSelectedCountryCode] = useState("");

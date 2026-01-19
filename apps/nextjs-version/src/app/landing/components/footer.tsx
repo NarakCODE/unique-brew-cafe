@@ -110,7 +110,7 @@ export function LandingFooter() {
           {/* Brand Column */}
           <div className="col-span-4 lg:col-span-2 max-w-2xl">
             <div className="flex items-center space-x-2 mb-4 max-lg:justify-center">
-              <a href="https://shadcnstore.com" target='_blank' className="flex items-center space-x-2 cursor-pointer">
+              <a href="https://shadcnstore.com" target='_blank' className="flex items-center space-x-2 cursor-pointer" rel="noreferrer">
                 <Logo size={32} />
                 <span className="font-bold text-xl">ShadcnStore</span>
               </a>
@@ -209,7 +209,7 @@ export function LandingFooter() {
               <span>Made with</span>
               <Heart className="h-4 w-4 text-red-500 fill-current" />
               <span>by</span>
-              <a href="https://shadcnstore.com" target='_blank' className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer">
+              <a href="https://shadcnstore.com" target='_blank' className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer" rel="noreferrer">
                 ShadcnStore
               </a>
             </div>
