@@ -68,8 +68,18 @@ describe('EmailService', () => {
       ]);
       expect(callArg.htmlContent).toContain(mockParams.otpCode);
       expect(callArg.htmlContent).toContain(mockParams.userName);
+
+      // Check for attempt log
       expect(consoleLogSpy).toHaveBeenCalledWith(
-        `OTP email sent successfully to ${mockParams.email}`
+        `📤 Attempting to send OTP email to ${mockParams.email}...`
+      );
+
+      // Check for success log
+      expect(consoleLogSpy).toHaveBeenCalledWith(
+        `✅ OTP email sent successfully to ${mockParams.email}`,
+        expect.objectContaining({
+          messageId: 'N/A',
+        })
       );
     });
 
@@ -115,11 +125,16 @@ describe('EmailService', () => {
         mockError
       );
 
-      await emailService.sendOtpEmail(mockParams);
+      await expect(emailService.sendOtpEmail(mockParams)).rejects.toThrow(
+        'Failed to send OTP email: Network error'
+      );
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Failed to send OTP email:',
-        mockError
+        '❌ Failed to send OTP email:',
+        expect.objectContaining({
+          email: mockParams.email,
+          error: 'Network error',
+        })
       );
       expect(consoleLogSpy).toHaveBeenCalledWith(
         `[FALLBACK] OTP Code for ${mockParams.email}: ${mockParams.otpCode}`
@@ -394,11 +409,11 @@ describe('EmailService', () => {
         new Error('Failed')
       );
 
-      // Should not throw
+      // Should not throw (sendWelcomeEmail catches errors internally)
       await expect(
-        emailService.sendOtpEmail({
+        emailService.sendWelcomeEmail({
           email: 'user@example.com',
-          otpCode: '123456',
+          userName: 'User',
         })
       ).resolves.not.toThrow();
 

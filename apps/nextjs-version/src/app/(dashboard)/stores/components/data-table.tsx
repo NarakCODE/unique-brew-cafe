@@ -74,7 +74,7 @@ export function DataTable<TData, TValue>({
 
       return newSearchParams.toString();
     },
-    [searchParams]
+    [searchParams],
   );
 
   const [rowSelection, setRowSelection] = React.useState({});
@@ -98,7 +98,7 @@ export function DataTable<TData, TValue>({
         filters.push({ id: "isActive", value: [isActive] });
       }
       return filters;
-    }
+    },
   );
 
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -159,7 +159,7 @@ export function DataTable<TData, TValue>({
     return () => clearTimeout(timeout);
   }, [columnFilters, pathname, router, searchParams]);
 
-  // Handle pagination change
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const onPaginationChange = (updaterOrValue: any) => {
     const newPagination =
       typeof updaterOrValue === "function"
@@ -173,7 +173,7 @@ export function DataTable<TData, TValue>({
       `${pathname}?${createQueryString({
         page: newPagination.pageIndex + 1,
         limit: newPagination.pageSize,
-      })}`
+      })}`,
     );
   };
 
@@ -223,7 +223,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -242,7 +242,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

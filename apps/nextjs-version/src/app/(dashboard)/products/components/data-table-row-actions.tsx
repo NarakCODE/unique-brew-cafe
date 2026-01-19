@@ -142,7 +142,8 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              product "{product.name}" and remove its data from our servers.
+              product &quot;{product.name}&quot; and remove its data from our
+              servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

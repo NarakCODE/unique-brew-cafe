@@ -20,8 +20,12 @@ import configRoutes from './configRoutes.js';
 
 import addonRoutes from './addonRoutes.js';
 import uploadRoutes from './uploadRoutes.js';
+import diagnosticsRoutes from './diagnosticsRoutes.js';
 
 const router: Router = express.Router();
+
+// Diagnostics endpoints for production debugging
+router.use('/diagnostics', diagnosticsRoutes);
 
 // Health check endpoint for deployment monitoring
 router.get('/health', (req, res) => {

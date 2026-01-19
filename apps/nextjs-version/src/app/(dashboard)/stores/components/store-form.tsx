@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -83,15 +84,15 @@ interface StoreFormProps {
 export function StoreForm({ initialData }: StoreFormProps) {
   const { mutate: createStore, isPending: isCreating } = useCreateStore();
   const { mutate: updateStore, isPending: isUpdating } = useUpdateStore(
-    initialData?._id ?? ""
+    initialData?._id ?? "",
   );
   const { mutate: updateStatus, isPending: isUpdatingStatus } =
     useUpdateStoreStatus();
   const { mutate: uploadImage, isPending: isUploading } = useUpload();
   const [imageUrl, setImageUrl] = useState<string | null>(
-    initialData?.imageUrl ?? null
+    initialData?.imageUrl ?? null,
   );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
   const [imageError, setImageError] = useState(false);
   const [isSlugAuto, setIsSlugAuto] = useState(!initialData);
   const [selectedCountryCode, setSelectedCountryCode] = useState("");
@@ -114,7 +115,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
     const countryName = initialData?.country || "Cambodia";
     if (countryName) {
       const country = countries.all.find(
-        (c) => c.name.toLowerCase() === countryName.toLowerCase()
+        (c) => c.name.toLowerCase() === countryName.toLowerCase(),
       );
       if (country) {
         setSelectedCountryCode(country.alpha2);
@@ -124,7 +125,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
         if (stateName) {
           const states = State.getStatesOfCountry(country.alpha2);
           const state = states.find(
-            (s) => s.name.toLowerCase() === stateName.toLowerCase()
+            (s) => s.name.toLowerCase() === stateName.toLowerCase(),
           );
           if (state) {
             setSelectedStateCode(state.isoCode);
@@ -312,7 +313,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
                                 slugify(form.getValues("name")),
                                 {
                                   shouldValidate: true,
-                                }
+                                },
                               );
                             } else {
                               setIsSlugAuto(false);
@@ -486,7 +487,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
                               setSelectedStateCode("");
 
                               const countryData = Country.getCountryByCode(
-                                country.alpha2
+                                country.alpha2,
                               );
                               if (
                                 countryData &&
@@ -527,7 +528,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
 
                               const state = State.getStateByCodeAndCountry(
                                 code,
-                                selectedCountryCode
+                                selectedCountryCode,
                               );
                               if (state && state.latitude && state.longitude) {
                                 setMapCenter([
@@ -560,7 +561,7 @@ export function StoreForm({ initialData }: StoreFormProps) {
                               field.onChange(name);
                               const cities = City.getCitiesOfState(
                                 selectedCountryCode,
-                                selectedStateCode
+                                selectedStateCode,
                               );
                               const city = cities.find((c) => c.name === name);
                               if (city && city.latitude && city.longitude) {
