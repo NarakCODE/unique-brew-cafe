@@ -1,4 +1,6 @@
-import { Router, Request, Response } from 'express';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Router } from 'express';
+import type { Request, Response } from 'express';
 import { isBrevoConfigured, getDefaultSender } from '../config/brevo.js';
 
 const router = Router();
@@ -45,7 +47,7 @@ router.get('/brevo', (_req: Request, res: Response) => {
         }
       : null,
     status: configured ? 'ready' : 'misconfigured',
-    issues: [],
+    issues: [] as string[],
   };
 
   // Identify specific issues
@@ -145,11 +147,10 @@ router.get('/health', (_req: Request, res: Response) => {
         configured: !!(
           process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY
         ),
-        status: !!(
+        status:
           process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY
-        )
-          ? 'operational'
-          : 'misconfigured',
+            ? 'operational'
+            : 'misconfigured',
       },
     },
     uptime: process.uptime(),

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { TransactionalEmailsApi, SendSmtpEmail } from '@getbrevo/brevo';
 import dotenv from 'dotenv';
 dotenv.config();
