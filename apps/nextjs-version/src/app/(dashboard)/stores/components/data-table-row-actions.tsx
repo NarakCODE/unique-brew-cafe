@@ -106,7 +106,8 @@ export function DataTableRowActions<TData>({
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              store "{store.name}" and remove its data from our servers.
+              store &quot;{store.name}&quot; and remove its data from our
+              servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

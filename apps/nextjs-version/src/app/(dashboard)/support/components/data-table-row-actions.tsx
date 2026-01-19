@@ -84,7 +84,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the FAQ
-              "{faq.question}" and remove it from our servers.
+              &quot;{faq.question}&quot; and remove it from our servers.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

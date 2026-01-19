@@ -110,14 +110,14 @@ function MapSearchControlWrapper() {
   React.useEffect(() => {
     if (!selectedPosition) return;
     map.panTo(selectedPosition);
-  }, [selectedPosition]);
+  }, [selectedPosition, map]);
 
   return (
     <>
       <MapSearchControl
         onPlaceSelect={(feature) =>
           setSelectedPosition(
-            [...feature.geometry.coordinates].reverse() as LatLngExpression
+            [...feature.geometry.coordinates].reverse() as LatLngExpression,
           )
         }
       />
