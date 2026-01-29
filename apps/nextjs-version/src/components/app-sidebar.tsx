@@ -1,27 +1,8 @@
 "use client";
 
 import * as React from "react";
-import {
-  LayoutPanelLeft,
-  Mail,
-  CheckSquare,
-  MessageCircle,
-  Calendar,
-  Shield,
-  AlertTriangle,
-  Settings,
-  HelpCircle,
-  CreditCard,
-  LayoutTemplate,
-  Users,
-  Megaphone,
-  Store,
-  ChartBarStacked,
-  Package,
-} from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/logo";
-import { SidebarNotification } from "@/components/sidebar-notification";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -36,6 +17,23 @@ import {
 } from "@/components/ui/sidebar";
 import { LayoutDashboard } from "./animate-ui/icons/layout-dashboard";
 import { useProfile } from "@/hooks/use-profile";
+
+// Import Hugeicons
+import {
+  DashboardBrowsingIcon,
+  PanelLeftIcon,
+  Package01Icon,
+  Store03Icon,
+  ChartBarLineIcon,
+  UserGroupIcon,
+  Megaphone01Icon,
+  HelpCircleIcon,
+  Shield02Icon,
+  Alert02Icon,
+  Settings05Icon,
+  CreditCardIcon,
+  Layout03Icon,
+} from "@hugeicons/core-free-icons";
 
 const data = {
   user: {
@@ -55,7 +53,7 @@ const data = {
         {
           title: "Dashboard 2",
           url: "/dashboard-2",
-          icon: LayoutPanelLeft,
+          icon: PanelLeftIcon,
         },
       ],
     },
@@ -63,54 +61,34 @@ const data = {
       label: "Apps",
       items: [
         {
-          title: "Mail",
-          url: "/mail",
-          icon: Mail,
-        },
-        {
-          title: "Tasks",
-          url: "/tasks",
-          icon: CheckSquare,
-        },
-        {
-          title: "Chat",
-          url: "/chat",
-          icon: MessageCircle,
-        },
-        {
-          title: "Calendar",
-          url: "/calendar",
-          icon: Calendar,
-        },
-        {
           title: "Products",
           url: "/products",
-          icon: Package,
+          icon: Package01Icon,
         },
         {
           title: "Stores",
           url: "/stores",
-          icon: Store,
+          icon: Store03Icon,
         },
         {
           title: "Categories",
           url: "/categories",
-          icon: ChartBarStacked,
+          icon: ChartBarLineIcon,
         },
         {
           title: "Users",
           url: "/users",
-          icon: Users,
+          icon: UserGroupIcon,
         },
         {
           title: "Announcements",
           url: "/announcements",
-          icon: Megaphone,
+          icon: Megaphone01Icon,
         },
         {
           title: "Support",
           url: "/support",
-          icon: HelpCircle,
+          icon: HelpCircleIcon,
         },
       ],
     },
@@ -121,12 +99,12 @@ const data = {
           title: "Landing",
           url: "/landing",
           target: "_blank",
-          icon: LayoutTemplate,
+          icon: Layout03Icon,
         },
         {
           title: "Auth Pages",
           url: "#",
-          icon: Shield,
+          icon: Shield02Icon,
           items: [
             {
               title: "Sign In 1",
@@ -169,7 +147,7 @@ const data = {
         {
           title: "Errors",
           url: "#",
-          icon: AlertTriangle,
+          icon: Alert02Icon,
           items: [
             {
               title: "Unauthorized",
@@ -196,7 +174,7 @@ const data = {
         {
           title: "Settings",
           url: "#",
-          icon: Settings,
+          icon: Settings05Icon,
           items: [
             {
               title: "User Settings",
@@ -227,7 +205,7 @@ const data = {
         {
           title: "Pricing",
           url: "/pricing",
-          icon: CreditCard,
+          icon: CreditCardIcon,
         },
       ],
     },

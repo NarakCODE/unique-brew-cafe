@@ -1,16 +1,42 @@
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
+"use client";
 
+import { Button } from "@/components/ui/button";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
 export default function NotFound() {
+  const router = useRouter();
   return (
-    <div className="flex min-h-screen items-center justify-center">
+    <div className="mx-auto flex min-h-dvh flex-col items-center justify-center gap-8 p-8 md:gap-12 md:p-16">
+      <Image
+        src="/errors/404-error.svg"
+        alt="404 Error"
+        width={960}
+        height={540}
+        className="aspect-video w-240 rounded-xl object-cover"
+      />
       <div className="text-center">
-        <h1 className="text-4xl font-bold">404</h1>
-        <p className="text-muted-foreground mt-2">Page not found</p>
-        <Button asChild className="mt-4">
-          <Link href="/dashboard">Go to Dashboard</Link>
-        </Button>
+        <h1 className="mb-4 text-3xl font-bold">404</h1>
+        <h2 className="mb-3 text-2xl font-semibold">Page Not Found</h2>
+        <p>
+          The page you are looking for doesn&apos;t exist or has been moved to
+          another location.
+        </p>
+        <div className="mt-6 flex items-center justify-center gap-4 md:mt-8">
+          <Button
+            className="cursor-pointer"
+            onClick={() => router.push("/dashboard")}
+          >
+            Go Back Home
+          </Button>
+          <Button
+            variant="outline"
+            className="flex cursor-pointer items-center gap-1"
+            onClick={() => router.push("#")}
+          >
+            Contact Us
+          </Button>
+        </div>
       </div>
     </div>
-  )
+  );
 }
