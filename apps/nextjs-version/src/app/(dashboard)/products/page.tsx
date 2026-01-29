@@ -4,7 +4,8 @@ import { useSearchParams } from "next/navigation";
 import { useProducts } from "@/hooks/use-products";
 import { DataTable } from "./components/data-table";
 import { columns } from "./components/columns";
-import { Loader2, Package, Plus } from "lucide-react";
+import { Package, Plus } from "lucide-react";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import {
   Empty,
   EmptyContent,
@@ -44,9 +45,7 @@ export default function ProductsPage() {
         </CreateProductDialog>
       </div>
       {isLoading ? (
-        <div className="flex h-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
+        <TableSkeleton rows={10} columns={5} />
       ) : products?.length === 0 ? (
         <Empty className="min-h-[50vh]">
           <EmptyHeader>

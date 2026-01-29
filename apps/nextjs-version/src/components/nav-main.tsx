@@ -22,7 +22,10 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 
-type IconType = LucideIcon | React.ReactElement | Record<string, unknown>; // Hugeicon object type
+type IconType =
+  | LucideIcon
+  | React.ReactElement
+  | readonly (readonly [string, { readonly [key: string]: string | number }])[]; // Hugeicon object type from core-free-icons
 
 export function NavMain({
   label,
@@ -34,6 +37,7 @@ export function NavMain({
     url: string;
     icon?: IconType;
     isActive?: boolean;
+    target?: string;
     items?: {
       title: string;
       url: string;

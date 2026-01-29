@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 
 export default function StoresPage() {
   const searchParams = useSearchParams();
@@ -54,7 +55,7 @@ export default function StoresPage() {
       </div>
       {isLoading ? (
         <div className="flex h-full items-center justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
+          <TableSkeleton rows={10} columns={5} />
         </div>
       ) : stores?.length === 0 ? (
         <Empty className="min-h-[50vh]">

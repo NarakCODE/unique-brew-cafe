@@ -8,6 +8,7 @@ import { ticketColumns } from "./components/ticket-columns";
 import { faqColumns } from "./components/faq-columns";
 import { Button } from "@/components/ui/button";
 import { Plus, Ticket as TicketIcon, HelpCircle } from "lucide-react";
+import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { CreateFAQDialog } from "./components/create-faq-dialog";
 import { PageHeader } from "@/components/page-header";
 import {
@@ -50,7 +51,9 @@ export default function SupportPage() {
 
         <TabsContent value="tickets" className="space-y-4">
           <div className="rounded-md border bg-card p-4">
-            {tickets.length > 0 ? (
+            {ticketsLoading ? (
+              <TableSkeleton rows={8} columns={5} />
+            ) : tickets.length > 0 ? (
               <DataTable columns={ticketColumns} data={tickets} />
             ) : (
               <Empty className="min-h-[40vh]">
@@ -70,7 +73,9 @@ export default function SupportPage() {
 
         <TabsContent value="faq" className="space-y-4">
           <div className="rounded-md border bg-card p-4">
-            {faqs.length > 0 ? (
+            {faqsLoading ? (
+              <TableSkeleton rows={8} columns={4} />
+            ) : faqs.length > 0 ? (
               <DataTable columns={faqColumns} data={faqs} />
             ) : (
               <Empty className="min-h-[40vh]">
