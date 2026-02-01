@@ -1,5 +1,5 @@
 import { Logo } from "@/components/logo";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { SignupForm2 } from "./components/signup-form-2";
 

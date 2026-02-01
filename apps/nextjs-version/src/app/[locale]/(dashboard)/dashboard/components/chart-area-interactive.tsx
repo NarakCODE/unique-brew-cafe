@@ -20,19 +20,9 @@ import {
 } from "@/components/ui/chart";
 import { SalesReportItem } from "@/types/report";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations, useFormatter } from "next-intl";
 
 export const description = "An interactive area chart";
-
-const chartConfig = {
-  revenue: {
-    label: "Revenue",
-    color: "hsl(var(--primary))",
-  },
-  orders: {
-    label: "Orders",
-    color: "hsl(var(--chart-2))",
-  },
-} satisfies ChartConfig;
 
 interface ChartAreaInteractiveProps {
   data?: SalesReportItem[];
@@ -44,7 +34,25 @@ export function ChartAreaInteractive({
   isLoading,
 }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [timeRange, setTimeRange] = React.useState("90d");
+  const t = useTranslations("Dashboard.Chart");
+  const format = useFormatter();
+
+  const chartConfig = React.useMemo(
+    () =>
+      ({
+        revenue: {
+          label: t("revenue"),
+          color: "hsl(var(--primary))",
+        },
+        orders: {
+          label: t("orders"),
+          color: "hsl(var(--chart-2))",
+        },
+      }) satisfies ChartConfig,
+    [t],
+  );
 
   React.useEffect(() => {
     if (isMobile) {
@@ -86,8 +94,8 @@ export function ChartAreaInteractive({
   return (
     <Card className="@container/card">
       <CardHeader>
-        <CardTitle>Total Sales</CardTitle>
-        <CardDescription>Daily Revenue and Orders</CardDescription>
+        <CardTitle>{t("totalSales")}</CardTitle>
+        <CardDescription>{t("dailyRevenueAndOrders")}</CardDescription>
       </CardHeader>
       <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
         <ChartContainer
@@ -118,7 +126,7 @@ export function ChartAreaInteractive({
               minTickGap={32}
               tickFormatter={(value) => {
                 const date = new Date(value);
-                return date.toLocaleDateString("en-US", {
+                return format.dateTime(date, {
                   month: "short",
                   day: "numeric",
                 });
@@ -129,9 +137,8 @@ export function ChartAreaInteractive({
               content={
                 <ChartTooltipContent
                   labelFormatter={(value: any) => {
-                    return new Date(
-                      value as string | number | Date
-                    ).toLocaleDateString("en-US", {
+                    const date = new Date(value as string | number | Date);
+                    return format.dateTime(date, {
                       month: "short",
                       day: "numeric",
                     });

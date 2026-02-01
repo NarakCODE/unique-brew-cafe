@@ -7,7 +7,6 @@ import {
   Package,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardAction,
@@ -18,6 +17,7 @@ import {
 } from "@/components/ui/card";
 import { DashboardStats } from "@/types/report";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations, useFormatter } from "next-intl";
 
 interface SectionCardsProps {
   stats?: DashboardStats;
@@ -25,6 +25,9 @@ interface SectionCardsProps {
 }
 
 export function SectionCards({ stats, isLoading }: SectionCardsProps) {
+  const t = useTranslations("Dashboard.Stats");
+  const format = useFormatter();
+
   if (isLoading) {
     return (
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -47,9 +50,12 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
     <div className="*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:shadow-xs grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Revenue</CardDescription>
+          <CardDescription>{t("totalRevenue")}</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            ${stats?.totalRevenue.toLocaleString() ?? "0.00"}
+            {format.number(stats?.totalRevenue ?? 0, {
+              style: "currency",
+              currency: "USD",
+            })}
           </CardTitle>
           <CardAction>
             <div className="p-2 bg-primary/10 rounded-full">
@@ -58,14 +64,14 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="text-muted-foreground">Total lifetime revenue</div>
+          <div className="text-muted-foreground">{t("totalRevenueDesc")}</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Total Orders</CardDescription>
+          <CardDescription>{t("totalOrders")}</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats?.totalOrders.toLocaleString() ?? "0"}
+            {format.number(stats?.totalOrders ?? 0)}
           </CardTitle>
           <CardAction>
             <div className="p-2 bg-primary/10 rounded-full">
@@ -74,14 +80,14 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="text-muted-foreground">Total completed orders</div>
+          <div className="text-muted-foreground">{t("totalOrdersDesc")}</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Active Accounts</CardDescription>
+          <CardDescription>{t("activeUsers")}</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            {stats?.activeUsers.toLocaleString() ?? "0"}
+            {format.number(stats?.activeUsers ?? 0)}
           </CardTitle>
           <CardAction>
             <div className="p-2 bg-primary/10 rounded-full">
@@ -90,14 +96,17 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
           </CardAction>
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
-          <div className="text-muted-foreground">Registered active users</div>
+          <div className="text-muted-foreground">{t("activeUsersDesc")}</div>
         </CardFooter>
       </Card>
       <Card className="@container/card">
         <CardHeader>
-          <CardDescription>Top Products Revenue</CardDescription>
+          <CardDescription>{t("topProductsRevenue")}</CardDescription>
           <CardTitle className="text-2xl font-semibold tabular-nums @[250px]/card:text-3xl">
-            ${stats?.topProductsAmount.toLocaleString() ?? "0.00"}
+            {format.number(stats?.topProductsAmount ?? 0, {
+              style: "currency",
+              currency: "USD",
+            })}
           </CardTitle>
           <CardAction>
             <div className="p-2 bg-primary/10 rounded-full">
@@ -107,7 +116,7 @@ export function SectionCards({ stats, isLoading }: SectionCardsProps) {
         </CardHeader>
         <CardFooter className="flex-col items-start gap-1.5 text-sm">
           <div className="text-muted-foreground">
-            Revenue from top 5 products
+            {t("topProductsRevenueDesc")}
           </div>
         </CardFooter>
       </Card>

@@ -73,7 +73,7 @@ const ProductImage = ({ row }: { row: any }) => {
   );
 };
 
-export const columns: ColumnDef<Product>[] = [
+export const getColumns = (t: any): ColumnDef<Product>[] => [
   // SELECT
   {
     id: "select",
@@ -104,7 +104,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "images",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Image" />
+      <DataTableColumnHeader column={column} title={t("imageHeader")} />
     ),
     cell: ({ row }) => <ProductImage row={row} />,
     enableSorting: false,
@@ -114,7 +114,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Product" />
+      <DataTableColumnHeader column={column} title={t("productHeader")} />
     ),
     cell: ({ row }) => {
       const category = row.original.category ?? row.original.categoryId;
@@ -151,7 +151,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "basePrice",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Price" />
+      <DataTableColumnHeader column={column} title={t("priceHeader")} />
     ),
     cell: ({ row }) => {
       const raw = row.getValue("basePrice");
@@ -170,13 +170,13 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "isAvailable",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title={t("statusHeader")} />
     ),
     cell: ({ row }) => {
       const isAvailable = row.getValue("isAvailable") as boolean;
       return (
         <Badge variant={isAvailable ? "default" : "destructive"}>
-          {isAvailable ? "Available" : "Unavailable"}
+          {isAvailable ? t("availableBadge") : t("unavailableBadge")}
         </Badge>
       );
     },
@@ -190,7 +190,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     id: "flags",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Flags" />
+      <DataTableColumnHeader column={column} title={t("flagsHeader")} />
     ),
     cell: ({ row }) => {
       const featured = Boolean(row.original.isFeatured);
@@ -201,8 +201,12 @@ export const columns: ColumnDef<Product>[] = [
 
       return (
         <div className="flex flex-wrap gap-1">
-          {featured ? <Badge variant="secondary">Featured</Badge> : null}
-          {best ? <Badge variant="outline">Best Selling</Badge> : null}
+          {featured ? (
+            <Badge variant="secondary">{t("featuredBadge")}</Badge>
+          ) : null}
+          {best ? (
+            <Badge variant="outline">{t("bestSellingBadge")}</Badge>
+          ) : null}
         </div>
       );
     },
@@ -221,7 +225,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "rating",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Rating" />
+      <DataTableColumnHeader column={column} title={t("ratingHeader")} />
     ),
     cell: ({ row }) => {
       const rating = row.getValue("rating") as number | undefined;
@@ -245,7 +249,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "preparationTime",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Prep" />
+      <DataTableColumnHeader column={column} title={t("prepHeader")} />
     ),
     cell: ({ row }) => {
       const t = row.getValue("preparationTime") as number | undefined;
@@ -259,7 +263,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "calories",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Calories" />
+      <DataTableColumnHeader column={column} title={t("caloriesHeader")} />
     ),
     cell: ({ row }) => {
       const c = row.getValue("calories") as number | undefined;
@@ -273,7 +277,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "tags",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Tags" />
+      <DataTableColumnHeader column={column} title={t("tagsHeader")} />
     ),
     cell: ({ row }) => {
       const tags = (row.getValue("tags") as string[] | undefined) ?? [];
@@ -284,9 +288,9 @@ export const columns: ColumnDef<Product>[] = [
 
       return (
         <div className="flex flex-wrap gap-1">
-          {shown.map((t) => (
-            <Badge key={t} variant="outline" className="font-normal">
-              {t}
+          {shown.map((tag) => (
+            <Badge key={tag} variant="outline" className="font-normal">
+              {tag}
             </Badge>
           ))}
           {remaining > 0 ? (
@@ -302,7 +306,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "displayOrder",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Order" />
+      <DataTableColumnHeader column={column} title={t("orderHeader")} />
     ),
     cell: ({ row }) => {
       const v = row.getValue("displayOrder") as number | undefined;
@@ -314,7 +318,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "createdAt",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created" />
+      <DataTableColumnHeader column={column} title={t("createdHeader")} />
     ),
     cell: ({ row }) => (
       <span className="text-muted-foreground whitespace-nowrap">
@@ -327,7 +331,7 @@ export const columns: ColumnDef<Product>[] = [
   {
     accessorKey: "updatedAt",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Updated" />
+      <DataTableColumnHeader column={column} title={t("updatedHeader")} />
     ),
     cell: ({ row }) => (
       <span className="text-muted-foreground whitespace-nowrap">

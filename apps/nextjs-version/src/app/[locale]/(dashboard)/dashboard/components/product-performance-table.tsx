@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/card";
 import { ProductPerformanceItem } from "@/types/report";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useTranslations, useFormatter } from "next-intl";
 
 interface ProductPerformanceTableProps {
   data?: ProductPerformanceItem[];
@@ -28,6 +29,9 @@ export function ProductPerformanceTable({
   data = [],
   isLoading,
 }: ProductPerformanceTableProps) {
+  const t = useTranslations("Dashboard.ProductTable");
+  const format = useFormatter();
+
   if (isLoading) {
     return (
       <Card>
@@ -49,16 +53,16 @@ export function ProductPerformanceTable({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Top Selling Products</CardTitle>
-        <CardDescription>Best performing products by revenue</CardDescription>
+        <CardTitle>{t("title")}</CardTitle>
+        <CardDescription>{t("description")}</CardDescription>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Product Name</TableHead>
-              <TableHead className="text-right">Quantity Sold</TableHead>
-              <TableHead className="text-right">Revenue</TableHead>
+              <TableHead>{t("productName")}</TableHead>
+              <TableHead className="text-right">{t("quantitySold")}</TableHead>
+              <TableHead className="text-right">{t("revenue")}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -67,17 +71,20 @@ export function ProductPerformanceTable({
                 <TableRow key={item._id}>
                   <TableCell className="font-medium">{item.name}</TableCell>
                   <TableCell className="text-right">
-                    {item.quantitySold.toLocaleString()}
+                    {format.number(item.quantitySold)}
                   </TableCell>
                   <TableCell className="text-right">
-                    ${item.revenue.toLocaleString()}
+                    {format.number(item.revenue, {
+                      style: "currency",
+                      currency: "USD",
+                    })}
                   </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
                 <TableCell colSpan={3} className="h-24 text-center">
-                  No results.
+                  {t("noResults")}
                 </TableCell>
               </TableRow>
             )}

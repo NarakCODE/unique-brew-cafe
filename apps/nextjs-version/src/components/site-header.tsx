@@ -8,6 +8,7 @@ import { CommandSearch, SearchTrigger } from "@/components/command-search";
 import { ModeToggle } from "@/components/mode-toggle";
 import { NotificationPopover } from "@/components/notification-popover";
 import { DashboardBreadcrumb } from "@/components/dashboard-breadcrumb";
+import { LanguageSelector } from "./language-selector";
 
 export function SiteHeader() {
   const [searchOpen, setSearchOpen] = React.useState(false);
@@ -85,6 +86,7 @@ export function SiteHeader() {
               </a>
             </Button> */}
             <NotificationPopover />
+            <LanguageSelector />
             <ModeToggle />
           </div>
         </div>

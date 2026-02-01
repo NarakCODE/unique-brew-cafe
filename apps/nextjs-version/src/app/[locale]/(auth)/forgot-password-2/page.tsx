@@ -1,7 +1,7 @@
-import { ForgotPasswordForm2 } from "./components/forgot-password-form-2"
-import { Logo } from "@/components/logo"
-import Link from "next/link"
-import Image from "next/image"
+import { ForgotPasswordForm2 } from "./components/forgot-password-form-2";
+import { Logo } from "@/components/logo";
+import { Link } from "@/i18n/routing";
+import Image from "next/image";
 
 export default function ForgotPassword2Page() {
   return (
@@ -30,5 +30,5 @@ export default function ForgotPassword2Page() {
         />
       </div>
     </div>
-  )
+  );
 }

@@ -17,30 +17,36 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-const signupFormSchema = z
-  .object({
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-    email: z.string().email("Invalid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Please confirm your password"),
-    terms: z
-      .boolean()
-      .refine((val) => val === true, "You must agree to the terms"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"],
-  });
-
-type SignupFormValues = z.infer<typeof signupFormSchema>;
+import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/routing";
 
 export function SignupForm2({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const { register, isLoading } = useRegister();
+  const t = useTranslations("Auth");
+
+  const signupFormSchema = z
+    .object({
+      firstName: z.string().min(1, t("validation.firstNameRequired")),
+      lastName: z.string().min(1, t("validation.lastNameRequired")),
+      email: z.string().email(t("validation.invalidEmail")),
+      password: z.string().min(6, t("validation.passwordLength")),
+      confirmPassword: z
+        .string()
+        .min(6, t("validation.confirmPasswordRequired")),
+      terms: z
+        .boolean()
+        .refine((val) => val === true, t("validation.termsRequired")),
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+      message: t("validation.passwordMismatch"),
+      path: ["confirmPassword"],
+    });
+
+  type SignupFormValues = z.infer<typeof signupFormSchema>;
+
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
@@ -64,9 +70,9 @@ export function SignupForm2({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Create your account</h1>
+        <h1 className="text-2xl font-bold">{t("createAccount")}</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your information to create a new account
+          {t("createAccountSubtitle")}
         </p>
       </div>
       <Form {...form}>
@@ -77,7 +83,7 @@ export function SignupForm2({
               name="firstName"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel>First Name</FormLabel>
+                  <FormLabel>{t("firstName")}</FormLabel>
                   <FormControl>
                     <Input id="firstName" placeholder="John" {...field} />
                   </FormControl>
@@ -90,7 +96,7 @@ export function SignupForm2({
               name="lastName"
               render={({ field }) => (
                 <FormItem className="grid gap-2">
-                  <FormLabel>Last Name</FormLabel>
+                  <FormLabel>{t("lastName")}</FormLabel>
                   <FormControl>
                     <Input id="lastName" placeholder="Doe" {...field} />
                   </FormControl>
@@ -104,12 +110,12 @@ export function SignupForm2({
             name="email"
             render={({ field }) => (
               <FormItem className="grid gap-2">
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t("emailLabel")}</FormLabel>
                 <FormControl>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder={t("emailPlaceholder")}
                     {...field}
                   />
                 </FormControl>
@@ -122,7 +128,7 @@ export function SignupForm2({
             name="password"
             render={({ field }) => (
               <FormItem className="grid gap-2">
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t("passwordLabel")}</FormLabel>
                 <FormControl>
                   <Input id="password" type="password" {...field} />
                 </FormControl>
@@ -135,7 +141,7 @@ export function SignupForm2({
             name="confirmPassword"
             render={({ field }) => (
               <FormItem className="grid gap-2">
-                <FormLabel>Confirm Password</FormLabel>
+                <FormLabel>{t("confirmPassword")}</FormLabel>
                 <FormControl>
                   <Input id="confirmPassword" type="password" {...field} />
                 </FormControl>
@@ -157,20 +163,20 @@ export function SignupForm2({
                 </FormControl>
                 <div className="leading-none">
                   <FormLabel htmlFor="terms" className="text-sm font-normal">
-                    I agree to the{" "}
-                    <a
+                    {t("termsAgreement")}{" "}
+                    <Link
                       href="#"
                       className="underline underline-offset-4 hover:text-primary"
                     >
-                      Terms of Service
-                    </a>{" "}
-                    and{" "}
-                    <a
+                      {t("termsOfService")}
+                    </Link>{" "}
+                    {t("and")}{" "}
+                    <Link
                       href="#"
                       className="underline underline-offset-4 hover:text-primary"
                     >
-                      Privacy Policy
-                    </a>
+                      {t("privacyPolicy")}
+                    </Link>
                   </FormLabel>
                 </div>
               </FormItem>
@@ -181,11 +187,11 @@ export function SignupForm2({
             className="w-full cursor-pointer"
             disabled={isLoading}
           >
-            {isLoading ? "Creating Account..." : "Create Account"}
+            {isLoading ? t("creatingAccount") : t("createAccountButton")}
           </Button>
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-background text-muted-foreground relative z-10 px-2">
-              Or continue with
+              {t("orContinueWith")}
             </span>
           </div>
           <Button
@@ -199,15 +205,15 @@ export function SignupForm2({
                 fill="currentColor"
               />
             </svg>
-            Sign up with GitHub
+            {t("signUpGithub")}
           </Button>
         </form>
       </Form>
       <div className="text-center text-sm">
-        Already have an account?{" "}
-        <a href="/sign-in" className="underline underline-offset-4">
-          Sign in
-        </a>
+        {t("alreadyHaveAccount")}{" "}
+        <Link href="/sign-in" className="underline underline-offset-4">
+          {t("signIn")}
+        </Link>
       </div>
     </div>
   );

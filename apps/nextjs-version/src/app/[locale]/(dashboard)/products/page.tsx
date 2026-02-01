@@ -3,7 +3,7 @@
 import { useSearchParams } from "next/navigation";
 import { useProducts } from "@/hooks/use-products";
 import { DataTable } from "./components/data-table";
-import { columns } from "./components/columns";
+import { getColumns } from "./components/columns";
 import { Package, Plus } from "lucide-react";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import {
@@ -17,8 +17,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { CreateProductDialog } from "./components/create-product-dialog";
+import { useTranslations } from "next-intl";
 
 export default function ProductsPage() {
+  const t = useTranslations("Products");
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 20;
@@ -33,14 +35,11 @@ export default function ProductsPage() {
   return (
     <div className="flex h-full flex-1 flex-col space-y-4 md:flex">
       <div className="flex items-end justify-between">
-        <PageHeader
-          title="Products"
-          description="Manage your products catalogue."
-        />
+        <PageHeader title={t("title")} description={t("description")} />
         <CreateProductDialog>
           <Button>
             <Plus />
-            Add Product
+            {t("addProduct")}
           </Button>
         </CreateProductDialog>
       </div>
@@ -52,17 +51,17 @@ export default function ProductsPage() {
             <EmptyMedia variant="icon">
               <Package className="h-6 w-6" />
             </EmptyMedia>
-            <EmptyTitle>No products found</EmptyTitle>
-            <EmptyDescription>There are no products found.</EmptyDescription>
+            <EmptyTitle>{t("noProductsFound")}</EmptyTitle>
+            <EmptyDescription>{t("noProductsDescription")}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <CreateProductDialog>
-              <Button>Add Product</Button>
+              <Button>{t("addProduct")}</Button>
             </CreateProductDialog>
           </EmptyContent>
         </Empty>
       ) : (
-        <DataTable data={products} columns={columns} />
+        <DataTable data={products} columns={getColumns(t)} />
       )}
     </div>
   );

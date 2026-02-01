@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { format } from "date-fns";
 import {
   Clock,
@@ -85,6 +86,7 @@ export function ProductDetailsDialog({
   open,
   onOpenChange,
 }: ProductDetailsDialogProps) {
+  const t = useTranslations("Products");
   // Assuming useProduct returns the 'data' object from your JSON as 'product'
   const { product, isLoading, isError } = useProduct(productId);
 
@@ -104,10 +106,8 @@ export function ProductDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col">
         <DialogHeader className="px-6 py-4 border-b">
-          <DialogTitle className="text-xl">Product Details</DialogTitle>
-          <DialogDescription>
-            Full specifications for this item
-          </DialogDescription>
+          <DialogTitle className="text-xl">{t("details.title")}</DialogTitle>
+          <DialogDescription>{t("details.description")}</DialogDescription>
         </DialogHeader>
 
         <ScrollArea className="flex-1 px-6 py-4">
@@ -137,7 +137,7 @@ export function ProductDetailsDialog({
           {isError && (
             <div className="flex flex-col items-center justify-center py-12 text-center text-muted-foreground">
               <AlertTriangle className="h-12 w-12 text-destructive/50 mb-3" />
-              <p>Unable to load product information.</p>
+              <p>{t("details.errorTitle")}</p>
             </div>
           )}
 
@@ -186,7 +186,9 @@ export function ProductDetailsDialog({
                       ) : (
                         <XCircle className="h-3.5 w-3.5" />
                       )}
-                      {product.isAvailable ? "Available" : "Unavailable"}
+                      {product.isAvailable
+                        ? t("details.available")
+                        : t("details.unavailable")}
                     </Badge>
 
                     {product.isFeatured && (
@@ -195,7 +197,7 @@ export function ProductDetailsDialog({
                         className="gap-1 text-amber-600 bg-amber-50 hover:bg-amber-100 border-amber-200"
                       >
                         <Sparkles className="h-3.5 w-3.5" />
-                        Featured
+                        {t("details.featured")}
                       </Badge>
                     )}
 
@@ -205,7 +207,7 @@ export function ProductDetailsDialog({
                         className="gap-1 border-blue-200 text-blue-700 bg-blue-50"
                       >
                         <TrendingUp className="h-3.5 w-3.5" />
-                        Best Seller
+                        {t("details.bestSeller")}
                       </Badge>
                     )}
                   </div>
@@ -216,7 +218,8 @@ export function ProductDetailsDialog({
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                 <div className="flex flex-col justify-center p-3 rounded-lg bg-card border shadow-sm">
                   <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs font-medium uppercase">
-                    <DollarSign className="h-3.5 w-3.5 text-green-600" /> Price
+                    <DollarSign className="h-3.5 w-3.5 text-green-600" />{" "}
+                    {t("details.price")}
                   </div>
                   <div className="text-lg font-bold">
                     {formatPrice(product.basePrice, product.currency)}
@@ -225,7 +228,8 @@ export function ProductDetailsDialog({
 
                 <div className="flex flex-col justify-center p-3 rounded-lg bg-card border shadow-sm">
                   <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs font-medium uppercase">
-                    <Clock className="h-3.5 w-3.5 text-blue-500" /> Prep Time
+                    <Clock className="h-3.5 w-3.5 text-blue-500" />{" "}
+                    {t("details.prepTime")}
                   </div>
                   <div className="text-lg font-bold">
                     {product.preparationTime
@@ -236,7 +240,8 @@ export function ProductDetailsDialog({
 
                 <div className="flex flex-col justify-center p-3 rounded-lg bg-card border shadow-sm">
                   <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs font-medium uppercase">
-                    <Flame className="h-3.5 w-3.5 text-orange-500" /> Calories
+                    <Flame className="h-3.5 w-3.5 text-orange-500" />{" "}
+                    {t("details.calories")}
                   </div>
                   <div className="text-lg font-bold">
                     {product.calories ? `${product.calories} kcal` : "N/A"}
@@ -245,7 +250,8 @@ export function ProductDetailsDialog({
 
                 <div className="flex flex-col justify-center p-3 rounded-lg bg-card border shadow-sm">
                   <div className="flex items-center gap-2 mb-1 text-muted-foreground text-xs font-medium uppercase">
-                    <Star className="h-3.5 w-3.5 text-yellow-500" /> Reviews
+                    <Star className="h-3.5 w-3.5 text-yellow-500" />{" "}
+                    {t("details.reviews")}
                   </div>
                   <div className="text-lg font-bold">
                     {product.rating ? product.rating.toFixed(1) : "-"}
@@ -262,7 +268,7 @@ export function ProductDetailsDialog({
               {product.description && (
                 <div className="space-y-2">
                   <h4 className="text-sm font-semibold flex items-center gap-2">
-                    Description
+                    {t("details.descriptionHeader")}
                   </h4>
                   <p className="text-sm text-muted-foreground leading-relaxed">
                     {product.description}
@@ -277,7 +283,7 @@ export function ProductDetailsDialog({
                   {product.tags && product.tags.length > 0 && (
                     <div>
                       <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
-                        <Tag className="h-3.5 w-3.5" /> TAGS
+                        <Tag className="h-3.5 w-3.5" /> {t("details.tags")}
                       </h4>
                       <div className="flex flex-wrap gap-1.5">
                         {product.tags.map((tag: string) => (
@@ -296,7 +302,8 @@ export function ProductDetailsDialog({
                   {product.allergens && product.allergens.length > 0 && (
                     <div>
                       <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
-                        <AlertTriangle className="h-3.5 w-3.5" /> ALLERGENS
+                        <AlertTriangle className="h-3.5 w-3.5" />{" "}
+                        {t("details.allergens")}
                       </h4>
                       <div className="flex flex-wrap gap-1.5">
                         {product.allergens.map((allergen: string) => (
@@ -321,21 +328,24 @@ export function ProductDetailsDialog({
                       {(product?.customizations?.length ?? 0) > 0 && (
                         <div>
                           <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
-                            <Utensils className="h-3.5 w-3.5" /> CUSTOMIZATIONS
+                            <Utensils className="h-3.5 w-3.5" />{" "}
+                            {t("details.customizations")}
                           </h4>
                           <div className="text-sm text-muted-foreground">
-                            {product.customizations?.length ?? 0} options
-                            available
+                            {product.customizations?.length ?? 0}{" "}
+                            {t("details.optionsAvailable")}
                           </div>
                         </div>
                       )}
                       {(product?.addOns?.length ?? 0) > 0 && (
                         <div>
                           <h4 className="text-xs font-semibold text-muted-foreground mb-2 flex items-center gap-1.5">
-                            <Layers className="h-3.5 w-3.5" /> ADD-ONS
+                            <Layers className="h-3.5 w-3.5" />{" "}
+                            {t("details.addOns")}
                           </h4>
                           <div className="text-sm text-muted-foreground">
-                            {product.addOns?.length ?? 0} add-ons available
+                            {product.addOns?.length ?? 0}{" "}
+                            {t("details.addOnsAvailable")}
                           </div>
                         </div>
                       )}
@@ -343,7 +353,7 @@ export function ProductDetailsDialog({
                   ) : (
                     <div className="h-full flex items-center justify-center rounded-lg border border-dashed p-4">
                       <p className="text-xs text-muted-foreground text-center">
-                        No customizations or add-ons configured.
+                        {t("details.noCustomizations")}
                       </p>
                     </div>
                   )}
@@ -356,12 +366,14 @@ export function ProductDetailsDialog({
               <div className="flex flex-wrap gap-x-6 gap-y-2 text-xs text-muted-foreground bg-muted/30 p-3 rounded-md">
                 <div className="flex items-center gap-1.5">
                   <Package className="h-3.5 w-3.5" />
-                  <span>Display Order: {product.displayOrder ?? "-"}</span>
+                  <span>
+                    {t("details.displayOrder")}: {product.displayOrder ?? "-"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>
-                    Created:{" "}
+                    {t("details.created")}:{" "}
                     {product.createdAt
                       ? format(new Date(product.createdAt), "PPP")
                       : "-"}
@@ -370,7 +382,7 @@ export function ProductDetailsDialog({
                 <div className="flex items-center gap-1.5">
                   <Calendar className="h-3.5 w-3.5" />
                   <span>
-                    Updated:{" "}
+                    {t("details.updated")}:{" "}
                     {product.updatedAt
                       ? format(new Date(product.updatedAt), "PPP")
                       : "-"}

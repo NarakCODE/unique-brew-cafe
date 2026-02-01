@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
 import { useLogin } from "@/hooks/use-login";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -16,19 +16,22 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-
-const loginFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginFormValues = z.infer<typeof loginFormSchema>;
+import { useTranslations } from "next-intl";
 
 export function LoginForm2({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const t = useTranslations("Auth");
+
+  const loginFormSchema = z.object({
+    email: z.string().email(t("validation.invalidEmail")),
+    password: z.string().min(6, t("validation.passwordLength")),
+  });
+
+  type LoginFormValues = z.infer<typeof loginFormSchema>;
+
   const { login, isLoading } = useLogin({
     onSuccess: (data) => {
       localStorage.setItem("accessToken", data.data.accessToken);
@@ -53,9 +56,9 @@ export function LoginForm2({
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-2xl font-bold">Login to your account</h1>
+        <h1 className="text-2xl font-bold">{t("loginTitle")}</h1>
         <p className="text-muted-foreground text-sm text-balance">
-          Enter your email below to login to your account
+          {t("loginSubtitle")}
         </p>
       </div>
       <Form {...form}>
@@ -65,12 +68,12 @@ export function LoginForm2({
             name="email"
             render={({ field }) => (
               <FormItem className="grid gap-2">
-                <FormLabel>Email</FormLabel>
+                <FormLabel>{t("emailLabel")}</FormLabel>
                 <FormControl>
                   <Input
                     id="email"
                     type="email"
-                    placeholder="m@example.com"
+                    placeholder={t("emailPlaceholder")}
                     {...field}
                   />
                 </FormControl>
@@ -84,13 +87,13 @@ export function LoginForm2({
             render={({ field }) => (
               <FormItem className="grid gap-2">
                 <div className="flex items-center">
-                  <FormLabel>Password</FormLabel>
-                  <a
+                  <FormLabel>{t("passwordLabel")}</FormLabel>
+                  <Link
                     href="/forgot-password-2"
                     className="ml-auto text-sm underline-offset-4 hover:underline"
                   >
-                    Forgot your password?
-                  </a>
+                    {t("forgotPassword")}
+                  </Link>
                 </div>
                 <FormControl>
                   <Input id="password" type="password" {...field} />
@@ -104,11 +107,11 @@ export function LoginForm2({
             className="w-full cursor-pointer"
             disabled={isLoading}
           >
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading ? t("loggingIn") : t("loginButton")}
           </Button>
           <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
             <span className="bg-background text-muted-foreground relative z-10 px-2">
-              Or continue with
+              {t("orContinueWith")}
             </span>
           </div>
           <Button
@@ -122,15 +125,15 @@ export function LoginForm2({
                 fill="currentColor"
               />
             </svg>
-            Login with GitHub
+            {t("loginGithub")}
           </Button>
         </form>
       </Form>
       <div className="text-center text-sm">
-        Don&apos;t have an account?{" "}
-        <a href="/sign-up" className="underline underline-offset-4">
-          Sign up
-        </a>
+        {t("noAccount")}{" "}
+        <Link href="/sign-up" className="underline underline-offset-4">
+          {t("signUp")}
+        </Link>
       </div>
     </div>
   );

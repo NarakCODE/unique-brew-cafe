@@ -44,6 +44,7 @@ import {
   type CreateProductFormValues,
 } from "../validations/product.validation";
 import type { Category } from "@/types/category";
+import { useTranslations } from "next-intl";
 
 interface CreateProductFormProps {
   onSuccess: () => void;
@@ -56,6 +57,7 @@ export function CreateProductForm({
   initialData,
   productId,
 }: CreateProductFormProps) {
+  const t = useTranslations("Products");
   const isEditMode = !!productId && !!initialData;
   const createProductMutation = useCreateProduct();
   const updateProductMutation = useUpdateProduct(productId || "");
@@ -135,7 +137,7 @@ export function CreateProductForm({
         onSuccess: (response: UploadResponse) => {
           form.setValue(`images.${index}.url`, response.data.url);
           setUploadingIndex(null);
-          toast.success("Image uploaded successfully");
+          toast.success(t("imageUploaded"));
         },
         onError: () => {
           setUploadingIndex(null);
@@ -156,9 +158,10 @@ export function CreateProductForm({
         await updateProductMutation.mutateAsync(apiPayload);
         // Success toast is handled by the mutation
         onSuccess();
+        toast.success(t("productUpdated"));
       } else {
         await createProductMutation.mutateAsync(apiPayload);
-        toast.success("Product created successfully");
+        toast.success(t("productCreated"));
         form.reset();
         onSuccess();
       }
@@ -166,7 +169,9 @@ export function CreateProductForm({
       toast.error(
         error instanceof Error
           ? error.message
-          : `Failed to ${isEditMode ? "update" : "create"} product`,
+          : isEditMode
+            ? t("failedToUpdate")
+            : t("failedToCreate"),
       );
     }
   };
@@ -180,9 +185,9 @@ export function CreateProductForm({
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Product Name</FormLabel>
+              <FormLabel>{t("productName")}</FormLabel>
               <FormControl>
-                <Input placeholder="e.g., Cappuccino" {...field} />
+                <Input placeholder={t("productNamePlaceholder")} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -195,7 +200,7 @@ export function CreateProductForm({
           name="slug"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Slug</FormLabel>
+              <FormLabel>{t("slug")}</FormLabel>
               <FormControl>
                 <div className="flex gap-2">
                   <Input placeholder="e.g., cappuccino" {...field} />
@@ -209,15 +214,13 @@ export function CreateProductForm({
                         generateSlug(form.getValues("name")),
                       )
                     }
-                    title="Regenerate slug"
+                    title={t("regenerateSlug")}
                   >
                     <Wand2 className="h-4 w-4" />
                   </Button>
                 </div>
               </FormControl>
-              <FormDescription>
-                URL-friendly version of the product name
-              </FormDescription>
+              <FormDescription>{t("slugDescription")}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -229,10 +232,10 @@ export function CreateProductForm({
           name="description"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>{t("descriptionLabel")}</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Product details..."
+                  placeholder={t("descriptionPlaceholder")}
                   className="min-h-25"
                   {...field}
                 />
@@ -248,11 +251,11 @@ export function CreateProductForm({
           name="categoryId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Category</FormLabel>
+              <FormLabel>{t("category")}</FormLabel>
               <Select onValueChange={field.onChange} value={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
+                    <SelectValue placeholder={t("selectCategory")} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
@@ -276,11 +279,8 @@ export function CreateProductForm({
 
         {/* Images Field Array */}
         <div className="space-y-4">
-          <FormLabel>Product Images</FormLabel>
-          <FormDescription>
-            Upload product images or provide URLs. Click the upload button to
-            select a file.
-          </FormDescription>
+          <FormLabel>{t("productImages")}</FormLabel>
+          <FormDescription>{t("productImagesDescription")}</FormDescription>
           {imageFields.map((field, index) => (
             <FormField
               key={field.id}
@@ -292,7 +292,7 @@ export function CreateProductForm({
                     <div className="flex gap-2">
                       <div className="flex-1 flex gap-2">
                         <Input
-                          placeholder="https://example.com/image.jpg or upload"
+                          placeholder={t("imagePlaceholder")}
                           value={urlField.value}
                           onChange={urlField.onChange}
                           disabled={uploadingIndex === index}
@@ -319,7 +319,7 @@ export function CreateProductForm({
                               ?.click()
                           }
                           disabled={uploadingIndex === index}
-                          title="Upload image"
+                          title={t("uploadImage")}
                         >
                           {uploadingIndex === index ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -340,7 +340,7 @@ export function CreateProductForm({
                             );
                             if (imgWindow) imgWindow.focus();
                           }}
-                          title="Preview image"
+                          title={t("previewImage")}
                         >
                           <ImageIcon className="h-4 w-4" />
                         </Button>
@@ -370,7 +370,7 @@ export function CreateProductForm({
             onClick={() => appendImage({ url: "" })}
             className="w-full"
           >
-            <Plus className="mr-2 h-4 w-4" /> Add Image Slot
+            <Plus className="mr-2 h-4 w-4" /> {t("addImageSlot")}
           </Button>
         </div>
 
@@ -380,12 +380,12 @@ export function CreateProductForm({
           name="basePrice"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Base Price</FormLabel>
+              <FormLabel>{t("basePrice")}</FormLabel>
               <FormControl>
                 <Input
                   type="number"
                   step="0.01"
-                  placeholder="0.00"
+                  placeholder={t("basePricePlaceholder")}
                   {...field}
                 />
               </FormControl>
@@ -396,7 +396,7 @@ export function CreateProductForm({
 
         {/* Sizes Field Array */}
         <div className="space-y-4">
-          <FormLabel>Product Sizes</FormLabel>
+          <FormLabel>{t("productSizes")}</FormLabel>
           {sizeFields.map((field, index) => (
             <div key={field.id} className="flex gap-2 items-start">
               <FormField
@@ -405,7 +405,7 @@ export function CreateProductForm({
                 render={({ field }) => (
                   <FormItem className="flex-1">
                     <FormControl>
-                      <Input placeholder="Size Name" {...field} />
+                      <Input placeholder={t("sizeName")} {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -420,7 +420,7 @@ export function CreateProductForm({
                       <Input
                         type="number"
                         step="0.01"
-                        placeholder="Price"
+                        placeholder={t("price")}
                         {...field}
                       />
                     </FormControl>
@@ -448,7 +448,7 @@ export function CreateProductForm({
             onClick={() => appendSize({ name: "", price: 0 })}
             className="w-full"
           >
-            <Plus className="mr-2 h-4 w-4" /> Add Size
+            <Plus className="mr-2 h-4 w-4" /> {t("addSize")}
           </Button>
         </div>
 
@@ -460,7 +460,7 @@ export function CreateProductForm({
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <FormLabel className="text-base">Available</FormLabel>
+                  <FormLabel className="text-base">{t("available")}</FormLabel>
                 </div>
                 <FormControl>
                   <Switch
@@ -477,7 +477,7 @@ export function CreateProductForm({
             render={({ field }) => (
               <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                 <div className="space-y-0.5">
-                  <FormLabel className="text-base">Featured</FormLabel>
+                  <FormLabel className="text-base">{t("featured")}</FormLabel>
                 </div>
                 <FormControl>
                   <Switch
@@ -503,7 +503,7 @@ export function CreateProductForm({
             updateProductMutation?.isPending) && (
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
           )}
-          {isEditMode ? "Update Product" : "Create Product"}
+          {isEditMode ? t("updateProduct") : t("createProduct")}
         </Button>
       </form>
     </Form>

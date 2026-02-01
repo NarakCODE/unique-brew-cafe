@@ -17,13 +17,15 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useRouter } from "next/navigation";
+import { useRouter, Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 
 export function ForgotPasswordForm2({
   className,
   ...props
 }: React.ComponentProps<"form">) {
   const router = useRouter();
+  const t = useTranslations("Auth");
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [email, setEmail] = useState("");
   const [otpCode, setOtpCode] = useState("");
@@ -52,27 +54,27 @@ export function ForgotPasswordForm2({
           },
           onError: (error) => {
             toast.error(
-              error.response?.data?.message || "Something went wrong"
+              error.response?.data?.message || t("somethingWentWrong"),
             );
           },
-        }
+        },
       );
     } else if (step === 2) {
       verifyOtp(
         { email, otpCode },
         {
           onSuccess: (response) => {
-            toast.success("OTP Verified Successfully");
+            toast.success(t("otpVerifiedSuccess"));
             setStep(3);
           },
           onError: (error) => {
-            toast.error(error.response?.data?.message || "Invalid OTP");
+            toast.error(error.response?.data?.message || t("invalidOtp"));
           },
-        }
+        },
       );
     } else if (step === 3) {
       if (newPassword !== confirmPassword) {
-        toast.error("Passwords do not match");
+        toast.error(t("validation.passwordMismatch"));
         return;
       }
       resetPassword(
@@ -84,10 +86,10 @@ export function ForgotPasswordForm2({
           },
           onError: (error) => {
             toast.error(
-              error.response?.data?.message || "Something went wrong"
+              error.response?.data?.message || t("somethingWentWrong"),
             );
           },
-        }
+        },
       );
     }
   };
@@ -100,25 +102,24 @@ export function ForgotPasswordForm2({
     >
       <div className="flex flex-col items-center gap-2 text-center">
         <h1 className="text-2xl font-bold">
-          {step === 1 && "Forgot your password?"}
-          {step === 2 && "Enter OTP"}
-          {step === 3 && "Reset Password"}
+          {step === 1 && t("forgotPassword")}
+          {step === 2 && t("enterOtpTitle")}
+          {step === 3 && t("resetPasswordTitle")}
         </h1>
         <p className="text-muted-foreground text-sm text-balance">
-          {step === 1 &&
-            "Enter your email address and we'll send you a link to reset your password"}
-          {step === 2 && "Enter the 6-digit code sent to your email."}
-          {step === 3 && "Enter your new password."}
+          {step === 1 && t("forgotPasswordSubtitle")}
+          {step === 2 && t("enterOtpSubtitle")}
+          {step === 3 && t("resetPasswordSubtitle")}
         </p>
       </div>
       <div className="grid gap-6">
         {step === 1 && (
           <div className="grid gap-3">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">{t("emailLabel")}</Label>
             <Input
               id="email"
               type="email"
-              placeholder="m@example.com"
+              placeholder={t("emailPlaceholder")}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -129,7 +130,7 @@ export function ForgotPasswordForm2({
 
         {step === 2 && (
           <div className="grid gap-3">
-            <Label htmlFor="otp">OTP Code</Label>
+            <Label htmlFor="otp">{t("otpLabel")}</Label>
             <div className="flex justify-center">
               <InputOTP
                 maxLength={6}
@@ -153,11 +154,11 @@ export function ForgotPasswordForm2({
         {step === 3 && (
           <>
             <div className="grid gap-3">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">{t("newPasswordLabel")}</Label>
               <Input
                 id="newPassword"
                 type="password"
-                placeholder="New Password"
+                placeholder={t("newPasswordPlaceholder")}
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -165,11 +166,11 @@ export function ForgotPasswordForm2({
               />
             </div>
             <div className="grid gap-3">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
               <Input
                 id="confirmPassword"
                 type="password"
-                placeholder="Confirm Password"
+                placeholder={t("confirmPasswordPlaceholder")}
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -185,16 +186,16 @@ export function ForgotPasswordForm2({
           disabled={isPending}
         >
           {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {step === 1 && "Send Reset Link"}
-          {step === 2 && "Verify OTP"}
-          {step === 3 && "Reset Password"}
+          {step === 1 && t("sendResetLinkButton")}
+          {step === 2 && t("verifyOtpButton")}
+          {step === 3 && t("resetPasswordButton")}
         </Button>
       </div>
       <div className="text-center text-sm">
-        Remember your password?{" "}
-        <a href="/sign-in-2" className="underline underline-offset-4">
-          Back to sign in
-        </a>
+        {t("rememberPassword")}{" "}
+        <Link href="/sign-in-2" className="underline underline-offset-4">
+          {t("backToSignIn")}
+        </Link>
       </div>
     </form>
   );

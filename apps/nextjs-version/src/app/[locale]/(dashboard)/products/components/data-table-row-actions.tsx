@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Row } from "@tanstack/react-table";
+import { useTranslations } from "next-intl";
 import {
   MoreHorizontal,
   Eye,
@@ -42,29 +43,34 @@ interface DataTableRowActionsProps {
 }
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
-  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
+  const t = useTranslations("Products");
   const product = row.original;
+  const [showDetailsDialog, setShowDetailsDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const { mutate: deleteProduct, isPending: isDeleting } = useDeleteProduct();
   const { mutate: updateStatus, isPending: isUpdatingStatus } =
     useUpdateProductStatus();
 
+  const handleToggleStatus = () => {
+    updateStatus({
+      productId: product._id,
+      isAvailable: !product.isAvailable,
+    });
+  };
+
   const handleDelete = () => {
-    deleteProduct(product.id, {
+    deleteProduct(product._id, {
       onSuccess: () => {
         setShowDeleteDialog(false);
       },
     });
   };
 
-  const handleToggleStatus = () => {
-    updateStatus({ productId: product.id, isAvailable: !product.isAvailable });
-  };
-
   const handleCopyId = (id: string) => {
     navigator.clipboard.writeText(id);
-    toast.success("Product ID copied to clipboard");
+    toast.success(t("details.copySuccess"));
   };
 
   return (
@@ -77,10 +83,10 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+          <DropdownMenuLabel>{t("details.actions")}</DropdownMenuLabel>
           <DropdownMenuItem onClick={() => handleCopyId(product._id)}>
             <Copy />
-            Copy ID
+            {t("details.copyId")}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
@@ -88,14 +94,14 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             disabled={!product.isAvailable}
           >
             <Eye />
-            View details
+            {t("details.viewDetails")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={() => setShowEditDialog(true)}
             disabled={!product.isAvailable}
           >
             <Pencil />
-            Edit product
+            {t("details.editProduct")}
           </DropdownMenuItem>
           <DropdownMenuItem
             onClick={handleToggleStatus}
@@ -104,12 +110,12 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             {product.isAvailable ? (
               <>
                 <Ban />
-                Deactivate
+                {t("details.deactivate")}
               </>
             ) : (
               <>
                 <CheckCircle />
-                Activate
+                {t("details.activate")}
               </>
             )}
           </DropdownMenuItem>
@@ -119,19 +125,19 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
             className="text-destructive focus:text-destructive"
           >
             <Trash2 />
-            Delete
+            {t("details.delete")}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
       <ProductDetailsDialog
-        productId={product.id}
+        productId={product._id}
         open={showDetailsDialog}
         onOpenChange={setShowDetailsDialog}
       />
 
       <EditProductDialog
-        productId={product.id}
+        productId={product._id}
         open={showEditDialog}
         onOpenChange={setShowEditDialog}
       />
@@ -139,15 +145,17 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogTitle>
+              {t("details.deleteConfirmationTitle")}
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              product &quot;{product.name}&quot; and remove its data from our
-              servers.
+              {t("details.deleteConfirmationDescription", {
+                name: product.name,
+              })}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>{t("details.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               onClick={(e) => {
                 e.preventDefault();
@@ -156,7 +164,7 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               disabled={isDeleting}
             >
-              {isDeleting ? "Deleting..." : "Delete"}
+              {isDeleting ? t("details.deleting") : t("details.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
