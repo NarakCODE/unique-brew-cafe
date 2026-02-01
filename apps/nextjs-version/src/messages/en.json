@@ -190,6 +190,8 @@
     "productStatusUpdated": "Product status updated successfully",
     "failedToDelete": "Failed to delete product",
     "failedToUpdateStatus": "Failed to update product status",
+    "noResults": "No products found",
+    "noResultsDescription": "Try adjusting your search or filters to find what you're looking for.",
     "details": {
       "title": "Product Details",
       "description": "Full specifications for this item",
@@ -200,6 +202,7 @@
       "displayOrder": "Display Order",
       "copyId": "Copy ID",
       "copySuccess": "Product ID copied to clipboard",
+      "editProduct": "Edit product",
       "viewDetails": "View details",
       "deactivate": "Deactivate",
       "activate": "Activate",
@@ -213,12 +216,30 @@
       "allergens": "ALLERGENS",
       "customizations": "CUSTOMIZATIONS",
       "addOns": "ADD-ONS",
-      "reviews": "Reviews"
+      "reviews": "Reviews",
+      "available": "Available",
+      "unavailable": "Unavailable",
+      "featured": "Featured",
+      "bestSeller": "Best Seller",
+      "price": "Price",
+      "prepTime": "Prep Time",
+      "calories": "Calories",
+      "descriptionHeader": "Description",
+      "created": "Created",
+      "updated": "Updated"
     },
     "edit": {
       "title": "Edit Product",
       "description": "Make changes to your product details."
     }
+  },
+  "Stores": {
+    "title": "Stores",
+    "description": "Manage your stores and view their details.",
+    "addNew": "Add New",
+    "noStoresFound": "No stores found",
+    "noStoresDescription": "There are no stores registered in the system yet.",
+    "addStore": "Add Store"
   },
   "Common": {
     "dashboard": "Dashboard",

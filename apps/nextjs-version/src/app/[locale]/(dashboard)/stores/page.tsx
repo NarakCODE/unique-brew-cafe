@@ -17,8 +17,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
+import { useTranslations } from "next-intl";
 
 export default function StoresPage() {
+  const t = useTranslations("Stores");
   const searchParams = useSearchParams();
   const page = Number(searchParams.get("page")) || 1;
   const limit = Number(searchParams.get("limit")) || 20;
@@ -42,14 +44,11 @@ export default function StoresPage() {
   return (
     <div className="flex h-full flex-1 flex-col space-y-4 md:flex">
       <div className="flex items-end justify-between">
-        <PageHeader
-          title="Stores"
-          description="Manage your stores and view their details."
-        />
+        <PageHeader title={t("title")} description={t("description")} />
         <Button asChild>
           <Link href="/stores/new">
             <Plus />
-            Add New
+            {t("addNew")}
           </Link>
         </Button>
       </div>
@@ -63,14 +62,12 @@ export default function StoresPage() {
             <EmptyMedia variant="icon">
               <StoreIcon className="h-6 w-6" />
             </EmptyMedia>
-            <EmptyTitle>No stores found</EmptyTitle>
-            <EmptyDescription>
-              There are no stores registered in the system yet.
-            </EmptyDescription>
+            <EmptyTitle>{t("noStoresFound")}</EmptyTitle>
+            <EmptyDescription>{t("noStoresDescription")}</EmptyDescription>
           </EmptyHeader>
           <EmptyContent>
             <Button asChild>
-              <Link href="/stores/new">Add Store</Link>
+              <Link href="/stores/new">{t("addStore")}</Link>
             </Button>
           </EmptyContent>
         </Empty>

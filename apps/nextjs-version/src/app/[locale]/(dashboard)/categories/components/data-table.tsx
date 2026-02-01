@@ -34,6 +34,7 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import { Coffee } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
@@ -47,11 +48,12 @@ export function DataTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
+  const t = useTranslations("Categories");
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -92,7 +94,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -111,7 +113,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}
@@ -129,10 +131,9 @@ export function DataTable<TData, TValue>({
                     </EmptyMedia>
                     <EmptyContent>
                       <EmptyHeader>
-                        <EmptyTitle>No categories found</EmptyTitle>
+                        <EmptyTitle>{t("noCategoriesFound")}</EmptyTitle>
                         <EmptyDescription>
-                          Try adjusting your search or filters to find what
-                          you&apos;re looking for.
+                          {t("noCategoriesDescription")}
                         </EmptyDescription>
                       </EmptyHeader>
                     </EmptyContent>

@@ -10,7 +10,9 @@ import { DataTableColumnHeader } from "./data-table-column-header";
 import { Category } from "@/types/category";
 import { DataTableRowActions } from "./data-table-row-actions";
 
-export const columns: ColumnDef<Category>[] = [
+export const getColumns = (
+  t: (key: string) => string,
+): ColumnDef<Category>[] => [
   {
     id: "select",
     header: ({ table }) => (
@@ -38,7 +40,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "name",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Name" />
+      <DataTableColumnHeader column={column} title={t("name")} />
     ),
     cell: ({ row }) => {
       const category = row.original;
@@ -58,7 +60,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "description",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Description" />
+      <DataTableColumnHeader column={column} title={t("descriptionLabel")} />
     ),
     cell: ({ row }) => {
       return (
@@ -71,7 +73,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "displayOrder",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Order" />
+      <DataTableColumnHeader column={column} title={t("order")} />
     ),
     cell: ({ row }) => {
       return (
@@ -84,7 +86,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "isActive",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Status" />
+      <DataTableColumnHeader column={column} title={t("status")} />
     ),
     cell: ({ row }) => {
       const isActive = row.original.isActive;
@@ -94,7 +96,7 @@ export const columns: ColumnDef<Category>[] = [
           variant="secondary"
           className={cn("capitalize", getStatusColor(status))}
         >
-          {status}
+          {status === "active" ? t("active") : t("inactive")}
         </Badge>
       );
     },
@@ -107,7 +109,7 @@ export const columns: ColumnDef<Category>[] = [
   {
     accessorKey: "createdAt",
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Created" />
+      <DataTableColumnHeader column={column} title={t("created")} />
     ),
     cell: ({ row }) => {
       return (

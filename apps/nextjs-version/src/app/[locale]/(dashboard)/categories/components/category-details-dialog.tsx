@@ -16,6 +16,7 @@ import { getStatusColor } from "@/lib/badge-styles";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 
 interface CategoryDetailsDialogProps {
   categoryId: string | null;
@@ -28,6 +29,8 @@ export function CategoryDetailsDialog({
   open,
   onOpenChange,
 }: CategoryDetailsDialogProps) {
+  const t = useTranslations("Categories.details");
+  const tCommon = useTranslations("Categories");
   const { data: category, isLoading: isLoadingCategory } = useCategory(
     categoryId || "",
     open,
@@ -46,10 +49,8 @@ export function CategoryDetailsDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-125">
         <DialogHeader>
-          <DialogTitle>Category Details</DialogTitle>
-          <DialogDescription>
-            View detailed information about this category.
-          </DialogDescription>
+          <DialogTitle>{t("title")}</DialogTitle>
+          <DialogDescription>{t("description")}</DialogDescription>
         </DialogHeader>
 
         {isLoading ? (
@@ -76,14 +77,14 @@ export function CategoryDetailsDialog({
                     getStatusColor(category.isActive ? "active" : "inactive"),
                   )}
                 >
-                  {category.isActive ? "Active" : "Inactive"}
+                  {category.isActive ? tCommon("active") : tCommon("inactive")}
                 </Badge>
               </div>
             </div>
 
             <div className="grid gap-2">
               <h4 className="font-medium text-sm text-muted-foreground">
-                Description
+                {tCommon("descriptionLabel")}
               </h4>
               <p className="text-sm">{category.description}</p>
             </div>
@@ -91,13 +92,13 @@ export function CategoryDetailsDialog({
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-1">
                 <h4 className="font-medium text-sm text-muted-foreground">
-                  Display Order
+                  {t("displayOrder")}
                 </h4>
                 <p className="text-sm">{category.displayOrder}</p>
               </div>
               <div className="grid gap-1">
                 <h4 className="font-medium text-sm text-muted-foreground">
-                  Created At
+                  {tCommon("created")}
                 </h4>
                 <p className="text-sm">
                   {format(new Date(category.createdAt), "PPP")}
@@ -108,7 +109,7 @@ export function CategoryDetailsDialog({
             {category.updatedAt && (
               <div className="grid gap-1">
                 <h4 className="font-medium text-sm text-muted-foreground">
-                  Last Updated
+                  {t("lastUpdated")}
                 </h4>
                 <p className="text-sm">
                   {format(new Date(category.updatedAt), "PPP")}
@@ -120,7 +121,7 @@ export function CategoryDetailsDialog({
             <div className="border-t pt-4 mt-2">
               <h4 className="font-medium text-sm text-muted-foreground mb-3 flex items-center gap-2">
                 <StoreIcon className="h-4 w-4" />
-                Store Information
+                {t("storeInformation")}
               </h4>
 
               {isLoadingStore ? (
@@ -145,28 +146,34 @@ export function CategoryDetailsDialog({
                     </div>
                   ) : null}
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="text-muted-foreground">Name:</span>
+                    <span className="text-muted-foreground">
+                      {t("storeName")}:
+                    </span>
                     <span className="col-span-2 font-medium">{store.name}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="text-muted-foreground">City:</span>
+                    <span className="text-muted-foreground">
+                      {t("storeCity")}:
+                    </span>
                     <span className="col-span-2">{store.city}</span>
                   </div>
                   <div className="grid grid-cols-3 gap-2">
-                    <span className="text-muted-foreground">Phone:</span>
+                    <span className="text-muted-foreground">
+                      {t("storePhone")}:
+                    </span>
                     <span className="col-span-2">{store.phone}</span>
                   </div>
                 </div>
               ) : (
                 <p className="text-sm text-muted-foreground italic">
-                  Store information not available
+                  {t("storeNotAvailable")}
                 </p>
               )}
             </div>
           </div>
         ) : (
           <div className="py-4 text-center text-muted-foreground">
-            Category not found.
+            {t("categoryNotFound")}
           </div>
         )}
       </DialogContent>
