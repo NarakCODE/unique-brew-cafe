@@ -31,8 +31,8 @@ export default function ProductsPage() {
   });
 
   return (
-    <div className="flex h-full flex-1 flex-col space-y-8 md:flex">
-      <div className="flex items-center justify-between">
+    <div className="flex h-full flex-1 flex-col space-y-4 md:flex">
+      <div className="flex items-end justify-between">
         <PageHeader
           title="Products"
           description="Manage your products catalogue."

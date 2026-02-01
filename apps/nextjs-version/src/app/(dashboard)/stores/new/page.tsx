@@ -4,7 +4,7 @@ import { BackBtn } from "@/components/back-btn";
 
 export default function CreateStorePage() {
   return (
-    <div className="flex h-full flex-1 flex-col space-y-8 md:flex">
+    <div className="flex h-full flex-1 flex-col space-y-4 md:flex">
       <BackBtn label="Back to Stores" />{" "}
       <div className="flex items-center justify-between">
         <PageHeader

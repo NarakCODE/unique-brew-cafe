@@ -3,6 +3,7 @@ import "./globals.css";
 
 import { ThemeProvider } from "@/components/theme-provider";
 import { SidebarConfigProvider } from "@/contexts/sidebar-context";
+import { ThemeManagerProvider } from "@/contexts/theme-manager-context";
 import { QueryProvider } from "@/components/providers/query-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { inter } from "@/lib/fonts";
@@ -21,10 +22,12 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} antialiased`}>
       <body className={inter.className}>
         <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
-          <QueryProvider>
-            <SidebarConfigProvider>{children}</SidebarConfigProvider>
-            <Toaster />
-          </QueryProvider>
+          <ThemeManagerProvider>
+            <QueryProvider>
+              <SidebarConfigProvider>{children}</SidebarConfigProvider>
+              <Toaster />
+            </QueryProvider>
+          </ThemeManagerProvider>
         </ThemeProvider>
       </body>
     </html>

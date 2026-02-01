@@ -29,8 +29,8 @@ export default function SupportPage() {
   const faqs = faqsData?.data || [];
 
   return (
-    <div className="flex h-full flex-1 flex-col space-y-8 md:flex p-4">
-      <div className="flex items-center justify-between">
+    <div className="flex h-full flex-1 flex-col space-y-4 md:flex">
+      <div className="flex items-end justify-between">
         <PageHeader
           title="Support"
           description="Manage support tickets and frequently asked questions."
