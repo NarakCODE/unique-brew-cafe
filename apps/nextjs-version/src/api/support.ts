@@ -19,7 +19,7 @@ type TicketListResponse = ApiResponse<{
 type FAQListResponse = ApiResponse<FAQ[]>;
 
 export const getTickets = async (
-  filters?: TicketFilters
+  filters?: TicketFilters,
 ): Promise<TicketListResponse> => {
   const params = new URLSearchParams();
   if (filters?.status) params.append("status", filters.status);
@@ -27,39 +27,39 @@ export const getTickets = async (
   if (filters?.page) params.append("page", filters.page.toString());
   if (filters?.limit) params.append("limit", filters.limit.toString());
 
-  return apiClient.get(`/tickets?${params.toString()}`);
+  return apiClient.get(`/support/tickets?${params.toString()}`);
 };
 
 export const getTicket = async (id: string): Promise<ApiResponse<Ticket>> => {
-  return apiClient.get(`/tickets/${id}`);
+  return apiClient.get(`/support/tickets/${id}`);
 };
 
 export const updateTicketStatus = async (
   id: string,
-  status: TicketStatus
+  status: TicketStatus,
 ): Promise<ApiResponse<Ticket>> => {
-  return apiClient.patch(`/tickets/${id}/status`, { status });
+  return apiClient.patch(`/support/tickets/${id}/status`, { status });
 };
 
 export const getMessages = async (
-  ticketId: string
+  ticketId: string,
 ): Promise<ApiResponse<SupportMessage[]>> => {
-  return apiClient.get(`/tickets/${ticketId}/messages`);
+  return apiClient.get(`/support/tickets/${ticketId}/messages`);
 };
 
 export const addMessage = async (
   ticketId: string,
   message: string,
-  attachments?: string[]
+  attachments?: string[],
 ): Promise<ApiResponse<SupportMessage>> => {
-  return apiClient.post(`/tickets/${ticketId}/messages`, {
+  return apiClient.post(`/support/tickets/${ticketId}/messages`, {
     message,
     attachments,
   });
 };
 
 export const getFAQs = async (
-  filters?: FAQFilters
+  filters?: FAQFilters,
 ): Promise<FAQListResponse> => {
   const params = new URLSearchParams();
   if (filters?.category) params.append("category", filters.category);
@@ -84,7 +84,7 @@ export const updateFAQ = async (
     category: string;
     displayOrder: number;
     isActive: boolean;
-  }>
+  }>,
 ): Promise<ApiResponse<FAQ>> => {
   return apiClient.patch(`/support/faq/${id}`, data);
 };

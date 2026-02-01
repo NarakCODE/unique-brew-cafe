@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   brevoEmailApi,
   getDefaultSender,
@@ -56,11 +57,26 @@ export const sendOtpEmail = async (
       </html>
     `;
 
-    await brevoEmailApi.sendTransacEmail(sendSmtpEmail);
-    console.log(`OTP email sent successfully to ${email}`);
-  } catch (error) {
-    console.error('Failed to send OTP email:', error);
+    console.log(`📤 Attempting to send OTP email to ${email}...`);
+    const response = await brevoEmailApi.sendTransacEmail(sendSmtpEmail);
+    console.log(`✅ OTP email sent successfully to ${email}`, {
+      messageId: (response?.body as any)?.messageId || 'N/A',
+    });
+  } catch (error: any) {
+    console.error('❌ Failed to send OTP email:', {
+      email,
+      error: error?.message || String(error),
+      statusCode: error?.response?.status,
+      statusText: error?.response?.statusText,
+      responseBody: error?.response?.body,
+      stack: error?.stack?.split('\n').slice(0, 3).join('\n'),
+    });
     console.log(`[FALLBACK] OTP Code for ${email}: ${otpCode}`);
+
+    // Re-throw to let caller know email failed
+    throw new Error(
+      `Failed to send OTP email: ${error?.message || 'Unknown error'}`
+    );
   }
 };
 

@@ -1,27 +1,9 @@
 "use client";
 
 import * as React from "react";
-import {
-  LayoutPanelLeft,
-  Mail,
-  CheckSquare,
-  MessageCircle,
-  Calendar,
-  Shield,
-  AlertTriangle,
-  Settings,
-  HelpCircle,
-  CreditCard,
-  LayoutTemplate,
-  Users,
-  Megaphone,
-  Store,
-  ChartBarStacked,
-  Package,
-} from "lucide-react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
+import { useTranslations } from "next-intl";
 import { Logo } from "@/components/logo";
-import { SidebarNotification } from "@/components/sidebar-notification";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -37,205 +19,202 @@ import {
 import { LayoutDashboard } from "./animate-ui/icons/layout-dashboard";
 import { useProfile } from "@/hooks/use-profile";
 
-const data = {
-  user: {
-    name: "ShadcnStore",
-    email: "store@example.com",
-    avatar: "",
-  },
-  navGroups: [
-    {
-      label: "Dashboards",
-      items: [
-        {
-          title: "Dashboard 1",
-          url: "/dashboard",
-          icon: <LayoutDashboard animateOnHover />,
-        },
-        {
-          title: "Dashboard 2",
-          url: "/dashboard-2",
-          icon: LayoutPanelLeft,
-        },
-      ],
-    },
-    {
-      label: "Apps",
-      items: [
-        {
-          title: "Mail",
-          url: "/mail",
-          icon: Mail,
-        },
-        {
-          title: "Tasks",
-          url: "/tasks",
-          icon: CheckSquare,
-        },
-        {
-          title: "Chat",
-          url: "/chat",
-          icon: MessageCircle,
-        },
-        {
-          title: "Calendar",
-          url: "/calendar",
-          icon: Calendar,
-        },
-        {
-          title: "Products",
-          url: "/products",
-          icon: Package,
-        },
-        {
-          title: "Stores",
-          url: "/stores",
-          icon: Store,
-        },
-        {
-          title: "Categories",
-          url: "/categories",
-          icon: ChartBarStacked,
-        },
-        {
-          title: "Users",
-          url: "/users",
-          icon: Users,
-        },
-        {
-          title: "Announcements",
-          url: "/announcements",
-          icon: Megaphone,
-        },
-        {
-          title: "Support",
-          url: "/support",
-          icon: HelpCircle,
-        },
-      ],
-    },
-    {
-      label: "Pages",
-      items: [
-        {
-          title: "Landing",
-          url: "/landing",
-          target: "_blank",
-          icon: LayoutTemplate,
-        },
-        {
-          title: "Auth Pages",
-          url: "#",
-          icon: Shield,
-          items: [
-            {
-              title: "Sign In 1",
-              url: "/sign-in",
-            },
-            {
-              title: "Sign In 2",
-              url: "/sign-in-2",
-            },
-            {
-              title: "Sign In 3",
-              url: "/sign-in-3",
-            },
-            {
-              title: "Sign Up 1",
-              url: "/sign-up",
-            },
-            {
-              title: "Sign Up 2",
-              url: "/sign-up-2",
-            },
-            {
-              title: "Sign Up 3",
-              url: "/sign-up-3",
-            },
-            {
-              title: "Forgot Password 1",
-              url: "/forgot-password",
-            },
-            {
-              title: "Forgot Password 2",
-              url: "/forgot-password-2",
-            },
-            {
-              title: "Forgot Password 3",
-              url: "/forgot-password-3",
-            },
-          ],
-        },
-        {
-          title: "Errors",
-          url: "#",
-          icon: AlertTriangle,
-          items: [
-            {
-              title: "Unauthorized",
-              url: "/errors/unauthorized",
-            },
-            {
-              title: "Forbidden",
-              url: "/errors/forbidden",
-            },
-            {
-              title: "Not Found",
-              url: "/errors/not-found",
-            },
-            {
-              title: "Internal Server Error",
-              url: "/errors/internal-server-error",
-            },
-            {
-              title: "Under Maintenance",
-              url: "/errors/under-maintenance",
-            },
-          ],
-        },
-        {
-          title: "Settings",
-          url: "#",
-          icon: Settings,
-          items: [
-            {
-              title: "User Settings",
-              url: "/settings/user",
-            },
-            {
-              title: "Account Settings",
-              url: "/settings/account",
-            },
-            {
-              title: "Plans & Billing",
-              url: "/settings/billing",
-            },
-            {
-              title: "Appearance",
-              url: "/settings/appearance",
-            },
-            // {
-            //   title: "Notifications",
-            //   url: "/settings/notifications",
-            // },
-            {
-              title: "Connections",
-              url: "/settings/connections",
-            },
-          ],
-        },
-        {
-          title: "Pricing",
-          url: "/pricing",
-          icon: CreditCard,
-        },
-      ],
-    },
-  ],
-};
+// Import Hugeicons
+import {
+  PanelLeftIcon,
+  Package01Icon,
+  Store03Icon,
+  ChartBarLineIcon,
+  UserGroupIcon,
+  Megaphone01Icon,
+  HelpCircleIcon,
+  Shield02Icon,
+  Alert02Icon,
+  Settings05Icon,
+  CreditCardIcon,
+  Layout03Icon,
+} from "@hugeicons/core-free-icons";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const t = useTranslations("Sidebar");
   const { user } = useProfile();
+
+  const data = {
+    user: {
+      name: "ShadcnStore",
+      email: "store@example.com",
+      avatar: "",
+    },
+    navGroups: [
+      {
+        label: t("Dashboards"),
+        items: [
+          {
+            title: t("Dashboard1"),
+            url: "/dashboard",
+            icon: <LayoutDashboard animateOnHover />,
+          },
+          {
+            title: t("Dashboard2"),
+            url: "/dashboard-2",
+            icon: PanelLeftIcon,
+          },
+        ],
+      },
+      {
+        label: t("Apps"),
+        items: [
+          {
+            title: t("Products"),
+            url: "/products",
+            icon: Package01Icon,
+          },
+          {
+            title: t("Stores"),
+            url: "/stores",
+            icon: Store03Icon,
+          },
+          {
+            title: t("Categories"),
+            url: "/categories",
+            icon: ChartBarLineIcon,
+          },
+          {
+            title: t("Users"),
+            url: "/users",
+            icon: UserGroupIcon,
+          },
+          {
+            title: t("Announcements"),
+            url: "/announcements",
+            icon: Megaphone01Icon,
+          },
+          {
+            title: t("Support"),
+            url: "/support",
+            icon: HelpCircleIcon,
+          },
+        ],
+      },
+      {
+        label: t("Pages"),
+        items: [
+          {
+            title: t("Landing"),
+            url: "/landing",
+            target: "_blank",
+            icon: Layout03Icon,
+          },
+          {
+            title: t("AuthPages"),
+            url: "#",
+            icon: Shield02Icon,
+            items: [
+              {
+                title: t("SignIn1"),
+                url: "/sign-in",
+              },
+              {
+                title: t("SignIn2"),
+                url: "/sign-in-2",
+              },
+              {
+                title: t("SignIn3"),
+                url: "/sign-in-3",
+              },
+              {
+                title: t("SignUp1"),
+                url: "/sign-up",
+              },
+              {
+                title: t("SignUp2"),
+                url: "/sign-up-2",
+              },
+              {
+                title: t("SignUp3"),
+                url: "/sign-up-3",
+              },
+              {
+                title: t("ForgotPassword1"),
+                url: "/forgot-password",
+              },
+              {
+                title: t("ForgotPassword2"),
+                url: "/forgot-password-2",
+              },
+              {
+                title: t("ForgotPassword3"),
+                url: "/forgot-password-3",
+              },
+            ],
+          },
+          {
+            title: t("Errors"),
+            url: "#",
+            icon: Alert02Icon,
+            items: [
+              {
+                title: t("Unauthorized"),
+                url: "/errors/unauthorized",
+              },
+              {
+                title: t("Forbidden"),
+                url: "/errors/forbidden",
+              },
+              {
+                title: t("NotFound"),
+                url: "/errors/not-found",
+              },
+              {
+                title: t("InternalServerError"),
+                url: "/errors/internal-server-error",
+              },
+              {
+                title: t("UnderMaintenance"),
+                url: "/errors/under-maintenance",
+              },
+            ],
+          },
+          {
+            title: t("Settings"),
+            url: "#",
+            icon: Settings05Icon,
+            items: [
+              {
+                title: t("UserSettings"),
+                url: "/settings/user",
+              },
+              {
+                title: t("AccountSettings"),
+                url: "/settings/account",
+              },
+              {
+                title: t("PlansBilling"),
+                url: "/settings/billing",
+              },
+              {
+                title: t("Appearance"),
+                url: "/settings/appearance",
+              },
+              // {
+              //   title: "Notifications",
+              //   url: "/settings/notifications",
+              // },
+              {
+                title: t("Connections"),
+                url: "/settings/connections",
+              },
+            ],
+          },
+          {
+            title: t("Pricing"),
+            url: "/pricing",
+            icon: CreditCardIcon,
+          },
+        ],
+      },
+    ],
+  };
 
   const displayUser = user
     ? {
@@ -257,7 +236,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">ShadcnStore</span>
-                  <span className="truncate text-xs">Admin Dashboard</span>
+                  <span className="truncate text-xs">
+                    {t("AdminDashboard")}
+                  </span>
                 </div>
               </Link>
             </SidebarMenuButton>

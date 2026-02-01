@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useMutation } from "@tanstack/react-query"
 import { resendOtp } from "@/api/auth"
 import { toast } from "sonner"
