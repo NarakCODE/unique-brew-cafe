@@ -1,0 +1,14 @@
+{
+  "HomePage": {
+    "title": "សូមស្វាគមន៍មកកាន់ Unique Brew Cafe",
+    "description": "ពិសាកាហ្វេដែលល្អបំផុតនៅក្នុងក្រុង"
+  },
+  "Auth": {
+    "signIn": "ចូលប្រើប្រាស់",
+    "signUp": "ចុះឈ្មោះ"
+  },
+  "Common": {
+    "dashboard": "ផ្ទាំងគ្រប់គ្រង",
+    "settings": "ការកំណត់"
+  }
+}

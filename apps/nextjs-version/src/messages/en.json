@@ -1,0 +1,14 @@
+{
+  "HomePage": {
+    "title": "Welcome to Unique Brew Cafe",
+    "description": "Experience the best coffee in town."
+  },
+  "Auth": {
+    "signIn": "Sign In",
+    "signUp": "Sign Up"
+  },
+  "Common": {
+    "dashboard": "Dashboard",
+    "settings": "Settings"
+  }
+}
