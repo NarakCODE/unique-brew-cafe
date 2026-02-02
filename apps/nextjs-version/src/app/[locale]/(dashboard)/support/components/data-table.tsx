@@ -25,7 +25,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-import { DataTablePagination } from "@/app/(dashboard)/products/components/data-table-pagination";
+import { DataTablePagination } from "@/components/ui/data-table/data-table-pagination";
 // Reusing generic components from products folder if possible, primarily specific to DataTable logic
 // Ideally these should be in src/components/ui/data-table/... but for now they are co-located in products.
 // I will assume simple table rendering here.
@@ -45,7 +45,7 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
+    [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
 
@@ -86,7 +86,7 @@ export function DataTable<TData, TValue>({
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </TableHead>
                   );
@@ -105,7 +105,7 @@ export function DataTable<TData, TValue>({
                     <TableCell key={cell.id}>
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </TableCell>
                   ))}

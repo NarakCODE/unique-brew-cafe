@@ -36,7 +36,7 @@ import {
 } from "@/components/ui/empty";
 import { Package } from "lucide-react";
 
-import { DataTablePagination } from "./data-table-pagination";
+import { DataTablePagination } from "@/components/ui/data-table/data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
 
 interface DataTableProps<TData, TValue> {

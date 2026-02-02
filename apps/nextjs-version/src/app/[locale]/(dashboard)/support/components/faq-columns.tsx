@@ -4,7 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { FAQ } from "@/types/support";
-import { DataTableColumnHeader } from "@/app/(dashboard)/products/components/data-table-column-header";
+import { DataTableColumnHeader } from "@/components/ui/data-table/data-table-column-header";
 import { DataTableRowActions } from "./data-table-row-actions";
 
 export const faqColumns: ColumnDef<FAQ>[] = [
