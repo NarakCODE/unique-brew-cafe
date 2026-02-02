@@ -34,7 +34,6 @@ export function ChartAreaInteractive({
   isLoading,
 }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [timeRange, setTimeRange] = React.useState("90d");
   const t = useTranslations("Dashboard.Chart");
   const format = useFormatter();
