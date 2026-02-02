@@ -5,8 +5,8 @@ import { X, CheckCircle2, XCircle, Star, Package } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { DataTableViewOptions } from "./data-table-view-options";
-import { DataTableFacetedFilter } from "./data-table-faceted-filter";
+import { DataTableViewOptions } from "@/components/ui/data-table/data-table-view-options";
+import { DataTableFacetedFilter } from "@/components/ui/data-table/data-table-faceted-filter";
 
 interface DataTableToolbarProps<TData> {
   table: Table<TData>;
