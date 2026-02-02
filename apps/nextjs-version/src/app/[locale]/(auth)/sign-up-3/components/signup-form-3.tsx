@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Logo } from "@/components/logo";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 
 export function SignupForm3({
@@ -131,9 +131,12 @@ export function SignupForm3({
               </div>
               <div className="text-center text-sm">
                 Already have an account?{" "}
-                <a href="/sign-in-3" className="underline underline-offset-4">
+                <Link
+                  href="/sign-in-3"
+                  className="underline underline-offset-4"
+                >
                   Sign in
-                </a>
+                </Link>
               </div>
             </div>
           </form>

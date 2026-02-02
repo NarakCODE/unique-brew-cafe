@@ -336,7 +336,11 @@ export function ThemeManagerProvider({
     selectedTweakcnTheme,
     importedTheme,
     selectedRadius,
-  ]); // Intentionally omitting apply functions as they are stable
+    applyImportedTheme,
+    applyRadius,
+    applyTheme,
+    applyTweakcnTheme,
+  ]);
 
   const value = {
     selectedTheme,
