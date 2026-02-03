@@ -21,7 +21,7 @@ apiClient.interceptors.request.use(
   },
   (error) => {
     return Promise.reject(error);
-  }
+  },
 );
 
 // Response interceptor for error handling
@@ -58,5 +58,5 @@ apiClient.interceptors.response.use(
     };
 
     return Promise.reject(fallbackError);
-  }
+  },
 );

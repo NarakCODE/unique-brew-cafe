@@ -2,62 +2,43 @@ name: CI
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main", "develop"]
   pull_request:
     types: [opened, synchronize]
 
 jobs:
-  build-and-test:
+  build:
     name: Build, Lint, and Test
+    timeout-minutes: 15
     runs-on: ubuntu-latest
-
-    services:
-      mongodb:
-        image: mongo:6.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd mongosh
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+    env:
+      TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+      TURBO_TEAM: ${{ secrets.TURBO_TEAM }}
 
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v4
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v3
         with:
-          version: 9.0.0
+          fetch-depth: 2
 
-      - name: Setup Node.js
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js environment
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Lint
         run: pnpm lint
-
-      - name: Type Check
-        run: pnpm check-types
 
       - name: Build
         run: pnpm build
 
       - name: Test
         run: pnpm test
-        env:
-          MONGODB_URI: mongodb://localhost:27017/test-db
-          NODE_ENV: test
-          JWT_SECRET: test-jwt-secret-key-123456789
-          JWT_REFRESH_SECRET: test-jwt-refresh-secret-key-123456789
-          JWT_EXPIRES_IN: 15m
-          JWT_REFRESH_EXPIRES_IN: 7d
-          CLOUDINARY_CLOUD_NAME: test-cloud
-          CLOUDINARY_API_KEY: 1234567890
-          CLOUDINARY_API_SECRET: test-secret

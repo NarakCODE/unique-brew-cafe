@@ -13,13 +13,11 @@ export function PageHeader({
 }: PageHeaderProps) {
   return (
     <div className={cn("flex flex-col gap-1", className)} {...props}>
-      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+      <h1 className="text-xl md:text-2xl font-bold tracking-tight text-foreground">
         {title}
       </h1>
       {description && (
-        <p className="text-sm md:text-base text-muted-foreground">
-          {description}
-        </p>
+        <p className="text-sm text-muted-foreground">{description}</p>
       )}
     </div>
   );

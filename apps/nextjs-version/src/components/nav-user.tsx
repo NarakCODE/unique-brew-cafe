@@ -1,10 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { CreditCard, EllipsisVertical, BellDot, CircleUser } from "lucide-react"
-import Link from "next/link"
+import * as React from "react";
+import {
+  CreditCard,
+  EllipsisVertical,
+  BellDot,
+  CircleUser,
+} from "lucide-react";
+import { Link } from "@/i18n/routing";
 
-import { Logo } from "@/components/logo"
+import { Logo } from "@/components/logo";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,29 +18,29 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import { LogOut } from "./animate-ui/icons/log-out"
-import { useBoolean } from "@/hooks/use-boolean"
-import { useLogout } from "@/hooks/use-logout"
+} from "@/components/ui/sidebar";
+import { LogOut } from "./animate-ui/icons/log-out";
+import { useBoolean } from "@/hooks/use-boolean";
+import { useLogout } from "@/hooks/use-logout";
 
 export function NavUser({
   user,
 }: {
   user: {
-    name: string
-    email: string
-    avatar: string
-  }
+    name: string;
+    email: string;
+    avatar: string;
+  };
 }) {
-  const { isMobile } = useSidebar()
-  const { logout } = useLogout()
-  const [value, { setTrue, setFalse }] = useBoolean(false)
+  const { isMobile } = useSidebar();
+  const { logout } = useLogout();
+  const [value, { setTrue, setFalse }] = useBoolean(false);
 
   return (
     <SidebarMenu>
@@ -112,5 +117,5 @@ export function NavUser({
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }
