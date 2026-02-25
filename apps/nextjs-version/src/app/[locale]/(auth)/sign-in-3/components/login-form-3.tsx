@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/password-input";
 import { Logo } from "@/components/logo";
 import { Link } from "@/i18n/routing";
 import Image from "next/image";
@@ -56,9 +57,8 @@ export function LoginForm3({
                     {t("forgotPassword")}
                   </Link>
                 </div>
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   defaultValue="password"
                   required
                 />

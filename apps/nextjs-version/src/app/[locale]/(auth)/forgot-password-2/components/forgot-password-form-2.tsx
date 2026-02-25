@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PasswordInput } from "@/components/password-input";
 import {
   useForgotPassword,
   useResetPassword,
@@ -19,6 +20,8 @@ import {
 } from "@/components/ui/input-otp";
 import { useRouter, Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
+
+const OTP_LENGTH = 6;
 
 export function ForgotPasswordForm2({
   className,
@@ -41,6 +44,34 @@ export function ForgotPasswordForm2({
 
   const isPending = isForgotPending || isVerifyPending || isResetPending;
 
+  const submitOtpVerification = (code: string) => {
+    verifyOtp(
+      { email, otpCode: code },
+      {
+        onSuccess: () => {
+          toast.success(t("otpVerifiedSuccess"));
+          setStep(3);
+        },
+        onError: (error) => {
+          toast.error(error.response?.data?.message || t("invalidOtp"));
+        },
+      },
+    );
+  };
+
+  const handleOtpChange = (value: string) => {
+    setOtpCode(value);
+
+    if (
+      step === 2 &&
+      value.length === OTP_LENGTH &&
+      !isVerifyPending &&
+      email.trim()
+    ) {
+      submitOtpVerification(value);
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
@@ -60,18 +91,7 @@ export function ForgotPasswordForm2({
         },
       );
     } else if (step === 2) {
-      verifyOtp(
-        { email, otpCode },
-        {
-          onSuccess: (response) => {
-            toast.success(t("otpVerifiedSuccess"));
-            setStep(3);
-          },
-          onError: (error) => {
-            toast.error(error.response?.data?.message || t("invalidOtp"));
-          },
-        },
-      );
+      submitOtpVerification(otpCode);
     } else if (step === 3) {
       if (newPassword !== confirmPassword) {
         toast.error(t("validation.passwordMismatch"));
@@ -82,7 +102,7 @@ export function ForgotPasswordForm2({
         {
           onSuccess: (response) => {
             toast.success(response.message);
-            router.push("/sign-in-2");
+            router.push("/sign-in");
           },
           onError: (error) => {
             toast.error(
@@ -133,9 +153,9 @@ export function ForgotPasswordForm2({
             <Label htmlFor="otp">{t("otpLabel")}</Label>
             <div className="flex justify-center">
               <InputOTP
-                maxLength={6}
+                maxLength={OTP_LENGTH}
                 value={otpCode}
-                onChange={(value) => setOtpCode(value)}
+                onChange={handleOtpChange}
                 disabled={isPending}
               >
                 <InputOTPGroup>
@@ -155,9 +175,8 @@ export function ForgotPasswordForm2({
           <>
             <div className="grid gap-3">
               <Label htmlFor="newPassword">{t("newPasswordLabel")}</Label>
-              <Input
+              <PasswordInput
                 id="newPassword"
-                type="password"
                 placeholder={t("newPasswordPlaceholder")}
                 required
                 value={newPassword}
@@ -167,9 +186,8 @@ export function ForgotPasswordForm2({
             </div>
             <div className="grid gap-3">
               <Label htmlFor="confirmPassword">{t("confirmPassword")}</Label>
-              <Input
+              <PasswordInput
                 id="confirmPassword"
-                type="password"
                 placeholder={t("confirmPasswordPlaceholder")}
                 required
                 value={confirmPassword}
@@ -193,7 +211,7 @@ export function ForgotPasswordForm2({
       </div>
       <div className="text-center text-sm">
         {t("rememberPassword")}{" "}
-        <Link href="/sign-in-2" className="underline underline-offset-4">
+        <Link href="/sign-in" className="underline underline-offset-4">
           {t("backToSignIn")}
         </Link>
       </div>

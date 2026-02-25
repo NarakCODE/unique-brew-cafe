@@ -8,6 +8,7 @@ import { useLogin } from "@/hooks/use-login";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/password-input";
 import {
   Form,
   FormControl,
@@ -39,6 +40,17 @@ export function LoginForm2({
       localStorage.setItem("user", JSON.stringify(data.data.user));
       router.push("/dashboard");
     },
+    onError: (error) => {
+      const message = error.message || t("somethingWentWrong");
+      form.setError("email", {
+        type: "server",
+        message,
+      });
+      form.setError("password", {
+        type: "server",
+        message,
+      });
+    },
   });
 
   const form = useForm<LoginFormValues>({
@@ -50,6 +62,8 @@ export function LoginForm2({
   });
 
   function onSubmit(data: LoginFormValues) {
+    form.clearErrors("email");
+    form.clearErrors("password");
     login(data);
   }
 
@@ -96,7 +110,7 @@ export function LoginForm2({
                   </Link>
                 </div>
                 <FormControl>
-                  <Input id="password" type="password" {...field} />
+                  <PasswordInput id="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

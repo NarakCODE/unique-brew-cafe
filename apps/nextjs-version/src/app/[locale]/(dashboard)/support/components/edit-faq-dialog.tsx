@@ -51,6 +51,19 @@ interface EditFAQDialogProps {
 
 export function EditFAQDialog({ open, onOpenChange, faq }: EditFAQDialogProps) {
   const { mutate: updateFAQ, isPending } = useUpdateFAQ();
+  const normalizeCategory = (value?: string) => {
+    const normalized = value?.trim().toLowerCase();
+    const allowed = [
+      "general",
+      "order",
+      "payment",
+      "account",
+      "technical",
+      "other",
+    ];
+    return normalized && allowed.includes(normalized) ? normalized : "general";
+  };
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -67,7 +80,7 @@ export function EditFAQDialog({ open, onOpenChange, faq }: EditFAQDialogProps) {
       form.reset({
         question: faq.question,
         answer: faq.answer,
-        category: faq.category,
+        category: normalizeCategory(faq.category),
         displayOrder: faq.displayOrder,
         isActive: faq.isActive,
       });
@@ -137,7 +150,7 @@ export function EditFAQDialog({ open, onOpenChange, faq }: EditFAQDialogProps) {
                   <FormLabel>Category</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger>
