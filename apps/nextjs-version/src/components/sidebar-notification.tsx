@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { X } from "lucide-react"
+import { Link } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { APP_NAME, ApplicationLogo } from "./application-logo"
@@ -33,22 +34,22 @@ export function SidebarNotification() {
             />
             <div>
               Welcome to{" "}
-              <a 
-                href="/landing" 
+              <Link
+                href="/landing"
                 className="text-primary hover:underline"
               >
                 {APP_NAME}
-              </a>
+              </Link>
             </div>
           </h3>
           <p className="text-sm text-muted-foreground dark:text-neutral-400 leading-relaxed">
             Explore our premium Shadcn UI{" "}
-            <a 
-              href="/landing" 
+            <Link
+              href="/landing"
               className="text-primary underline"
             >
               storefront
-            </a>{" "}
+            </Link>{" "}
             to build your next project faster.
           </p>
         </div>

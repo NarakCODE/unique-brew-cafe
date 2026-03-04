@@ -6,6 +6,7 @@ import { z } from "zod"
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Link } from "@/i18n/routing"
 import {
   Form,
   FormControl,
@@ -110,13 +111,13 @@ export function LandingFooter() {
           {/* Brand Column */}
           <div className="col-span-4 lg:col-span-2 max-w-2xl">
             <div className="flex items-center space-x-2 mb-4 max-lg:justify-center">
-              <a href="/landing" className="cursor-pointer" rel="noreferrer">
+              <Link href="/landing" className="cursor-pointer">
                 <ApplicationLogo
                   iconSize={32}
                   name={APP_NAME}
                   nameClassName="font-bold text-xl"
                 />
-              </a>
+              </Link>
             </div>
             <p className="text-muted-foreground mb-6 max-lg:text-center max-lg:flex max-lg:justify-center">
               Accelerating web development with curated blocks, templates, landing pages, and admin dashboards designed for modern developers.
