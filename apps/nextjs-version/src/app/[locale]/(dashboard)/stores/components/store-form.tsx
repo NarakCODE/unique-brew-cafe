@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { StoreFormValues, storeSchema } from "@/lib/validations/store";
@@ -33,6 +33,8 @@ import {
   Link2,
   Link2Off,
   RefreshCw,
+  Clock3,
+  Copy,
   Wifi,
   ParkingMeter,
   Armchair,
@@ -76,6 +78,16 @@ const DAYS = [
   "saturday",
   "sunday",
 ] as const;
+
+const DAY_LABELS: Record<(typeof DAYS)[number], { full: string; short: string }> = {
+  monday: { full: "Monday", short: "Mon" },
+  tuesday: { full: "Tuesday", short: "Tue" },
+  wednesday: { full: "Wednesday", short: "Wed" },
+  thursday: { full: "Thursday", short: "Thu" },
+  friday: { full: "Friday", short: "Fri" },
+  saturday: { full: "Saturday", short: "Sat" },
+  sunday: { full: "Sunday", short: "Sun" },
+};
 
 interface StoreFormProps {
   initialData?: Store;
@@ -228,6 +240,75 @@ export function StoreForm({ initialData }: StoreFormProps) {
   });
 
   const watchName = form.watch("name");
+  const watchedOpeningHours = form.watch("openingHours");
+  const previousHoursRef = useRef(
+    DAYS.reduce(
+      (acc, day) => {
+        acc[day] = defaultValues.openingHours?.[day] ?? {
+          open: "09:00",
+          close: "22:00",
+        };
+        return acc;
+      },
+      {} as Record<(typeof DAYS)[number], { open: string; close: string }>,
+    ),
+  );
+
+  const applyHoursToDays = (
+    source: { open: string; close: string },
+    targetDays: readonly (typeof DAYS)[number][],
+  ) => {
+    targetDays.forEach((day) => {
+      form.setValue(`openingHours.${day}.open`, source.open, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      form.setValue(`openingHours.${day}.close`, source.close, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    });
+  };
+
+  const isDayClosed = (day: (typeof DAYS)[number]) => {
+    const hours = watchedOpeningHours?.[day];
+    return !hours?.open || !hours?.close;
+  };
+
+  const toggleDayClosed = (day: (typeof DAYS)[number], closed: boolean) => {
+    const current = form.getValues(`openingHours.${day}`);
+
+    if (closed) {
+      if (current?.open && current?.close) {
+        previousHoursRef.current[day] = {
+          open: current.open,
+          close: current.close,
+        };
+      }
+      form.setValue(`openingHours.${day}.open`, "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      form.setValue(`openingHours.${day}.close`, "", {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+      return;
+    }
+
+    const restore = previousHoursRef.current[day] ?? {
+      open: "09:00",
+      close: "22:00",
+    };
+    form.setValue(`openingHours.${day}.open`, restore.open, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+    form.setValue(`openingHours.${day}.close`, restore.close, {
+      shouldDirty: true,
+      shouldValidate: true,
+    });
+  };
 
   useEffect(() => {
     if (isSlugAuto && watchName) {
@@ -643,39 +724,171 @@ export function StoreForm({ initialData }: StoreFormProps) {
             <Card>
               <CardHeader>
                 <CardTitle>Opening Hours</CardTitle>
+                <CardDescription>
+                  Set daily opening and closing times. Use quick actions to
+                  copy hours across days.
+                </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3">
+              <CardContent className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const monday = form.getValues("openingHours.monday");
+                      applyHoursToDays(monday, DAYS);
+                    }}
+                  >
+                    <Copy className="mr-2 h-4 w-4" />
+                    Copy Monday to all
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const weekdayHours = form.getValues("openingHours.monday");
+                      applyHoursToDays(weekdayHours, DAYS.slice(0, 5));
+                    }}
+                  >
+                    Weekdays = Monday
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() =>
+                      applyHoursToDays(
+                        { open: "09:00", close: "22:00" },
+                        DAYS,
+                      )
+                    }
+                  >
+                    <Clock3 className="mr-2 h-4 w-4" />
+                    Reset 09:00-22:00
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
                   {DAYS.map((day) => (
-                    <div key={day} className="space-y-2 rounded-md border p-3">
-                      <FormLabel className="capitalize">{day}</FormLabel>
-                      <div className="flex items-center gap-2">
+                    <div
+                      key={day}
+                      className="rounded-lg border p-3 md:p-4 bg-card/40"
+                    >
+                      {(() => {
+                        const closed = isDayClosed(day);
+                        return (
+                      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[140px_1fr_1fr_auto] lg:items-end">
+                        <div className="space-y-0.5">
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-medium">
+                              {DAY_LABELS[day].full}
+                            </p>
+                            {closed && (
+                              <Badge variant="secondary" className="h-5 px-1.5">
+                                Closed
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-xs text-muted-foreground">
+                              {DAY_LABELS[day].short}
+                            </p>
+                            <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                              <Checkbox
+                                checked={closed}
+                                onCheckedChange={(checked) =>
+                                  toggleDayClosed(day, checked === true)
+                                }
+                              />
+                              Closed
+                            </label>
+                          </div>
+                        </div>
+
                         <FormField
                           control={form.control as any}
                           name={`openingHours.${day}.open`}
                           render={({ field }) => (
-                            <FormItem className="flex-1 space-y-0">
+                            <FormItem className="space-y-1">
+                              <FormLabel
+                                htmlFor={`opening-hours-${day}-open`}
+                                className="text-xs font-normal text-muted-foreground"
+                              >
+                                Open
+                              </FormLabel>
                               <FormControl>
-                                <Input type="time" {...field} className="h-8" />
+                                <Input
+                                  id={`opening-hours-${day}-open`}
+                                  type="time"
+                                  {...field}
+                                  className="h-9"
+                                  disabled={closed}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                    if (e.target.value) {
+                                      previousHoursRef.current[day].open =
+                                        e.target.value;
+                                    }
+                                  }}
+                                />
                               </FormControl>
                             </FormItem>
                           )}
                         />
-                        <span className="text-xs text-muted-foreground">
-                          to
-                        </span>
+
                         <FormField
                           control={form.control as any}
                           name={`openingHours.${day}.close`}
                           render={({ field }) => (
-                            <FormItem className="flex-1 space-y-0">
+                            <FormItem className="space-y-1">
+                              <FormLabel
+                                htmlFor={`opening-hours-${day}-close`}
+                                className="text-xs font-normal text-muted-foreground"
+                              >
+                                Close
+                              </FormLabel>
                               <FormControl>
-                                <Input type="time" {...field} className="h-8" />
+                                <Input
+                                  id={`opening-hours-${day}-close`}
+                                  type="time"
+                                  {...field}
+                                  className="h-9"
+                                  disabled={closed}
+                                  onChange={(e) => {
+                                    field.onChange(e);
+                                    if (e.target.value) {
+                                      previousHoursRef.current[day].close =
+                                        e.target.value;
+                                    }
+                                  }}
+                                />
                               </FormControl>
                             </FormItem>
                           )}
                         />
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="justify-start lg:justify-center"
+                          onClick={() => {
+                            const hours = form.getValues(`openingHours.${day}`);
+                            const otherDays = DAYS.filter((d) => d !== day);
+                            applyHoursToDays(hours, otherDays);
+                          }}
+                          disabled={closed}
+                        >
+                          <Copy className="mr-2 h-4 w-4 lg:mr-0" />
+                          <span className="lg:sr-only">
+                            Copy {DAY_LABELS[day].full} to other days
+                          </span>
+                        </Button>
                       </div>
+                        );
+                      })()}
                     </div>
                   ))}
                 </div>

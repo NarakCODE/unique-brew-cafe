@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --filter=./apps/nextjs-version --filter=./apps/backend",
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
     "test": "turbo run test",

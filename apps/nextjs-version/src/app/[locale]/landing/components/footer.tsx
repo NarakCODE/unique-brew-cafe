@@ -6,6 +6,7 @@ import { z } from "zod"
 import { Separator } from '@/components/ui/separator'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Link } from "@/i18n/routing"
 import {
   Form,
   FormControl,
@@ -13,7 +14,7 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form"
-import { Logo } from '@/components/logo'
+import { APP_NAME, ApplicationLogo } from '@/components/application-logo'
 import { Github, Twitter, Linkedin, Youtube, Heart } from 'lucide-react'
 
 const newsletterSchema = z.object({
@@ -110,10 +111,13 @@ export function LandingFooter() {
           {/* Brand Column */}
           <div className="col-span-4 lg:col-span-2 max-w-2xl">
             <div className="flex items-center space-x-2 mb-4 max-lg:justify-center">
-              <a href="https://shadcnstore.com" target='_blank' className="flex items-center space-x-2 cursor-pointer" rel="noreferrer">
-                <Logo size={32} />
-                <span className="font-bold text-xl">ShadcnStore</span>
-              </a>
+              <Link href="/landing" className="cursor-pointer">
+                <ApplicationLogo
+                  iconSize={32}
+                  name={APP_NAME}
+                  nameClassName="font-bold text-xl"
+                />
+              </Link>
             </div>
             <p className="text-muted-foreground mb-6 max-lg:text-center max-lg:flex max-lg:justify-center">
               Accelerating web development with curated blocks, templates, landing pages, and admin dashboards designed for modern developers.
@@ -210,7 +214,7 @@ export function LandingFooter() {
               <Heart className="h-4 w-4 text-red-500 fill-current" />
               <span>by</span>
               <a href="https://shadcnstore.com" target='_blank' className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer" rel="noreferrer">
-                ShadcnStore
+                {APP_NAME}
               </a>
             </div>
             <span className="hidden sm:inline">•</span>

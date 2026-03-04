@@ -3,7 +3,7 @@
 import { ChevronRight, type LucideIcon } from "lucide-react";
 import { Link, usePathname } from "@/i18n/routing";
 import React from "react";
-import { HugeiconsIcon } from "@hugeicons/react";
+import { HugeiconsIcon, type IconSvgElement } from "@hugeicons/react";
 
 import {
   Collapsible,
@@ -24,7 +24,11 @@ import {
 type IconType =
   | LucideIcon
   | React.ReactElement
-  | readonly (readonly [string, { readonly [key: string]: string | number }])[]; // Hugeicon object type from core-free-icons
+  | IconSvgElement;
+
+function isHugeIcon(icon: IconType): icon is IconSvgElement {
+  return !React.isValidElement(icon) && typeof icon !== "function";
+}
 
 export function NavMain({
   label,
@@ -90,14 +94,15 @@ export function NavMain({
                         ) : typeof item.icon === "function" ? (
                           // Case 2: It's a Lucide icon component
                           <item.icon />
-                        ) : (
+                        ) : isHugeIcon(item.icon) ? (
                           // Case 3: It's a Hugeicon object
                           <HugeiconsIcon
-                            icon={item.icon as any}
+                            icon={item.icon}
                             size={20}
                             strokeWidth={1.5}
                           />
-                        ))}{" "}
+                        ) : null
+                        )}{" "}
                       <span>{item.title}</span>
                       <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
                     </SidebarMenuButton>
@@ -156,13 +161,13 @@ export function NavMain({
                         )
                       ) : typeof item.icon === "function" ? (
                         <item.icon />
-                      ) : (
+                      ) : isHugeIcon(item.icon) ? (
                         <HugeiconsIcon
-                          icon={item.icon as any}
+                          icon={item.icon}
                           size={20}
                           strokeWidth={1.5}
                         />
-                      ))}
+                      ) : null)}
                     <span>{item.title}</span>
                   </Link>
                 </SidebarMenuButton>

@@ -11,6 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/password-input";
 import {
   Form,
   FormControl,
@@ -149,8 +150,7 @@ export default function AccountSettings() {
                   <FormItem>
                     <FormLabel>Current Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Enter current password"
                         {...field}
                       />
@@ -166,8 +166,7 @@ export default function AccountSettings() {
                   <FormItem>
                     <FormLabel>New Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Enter new password"
                         {...field}
                       />
@@ -183,8 +182,7 @@ export default function AccountSettings() {
                   <FormItem>
                     <FormLabel>Confirm New Password</FormLabel>
                     <FormControl>
-                      <Input
-                        type="password"
+                      <PasswordInput
                         placeholder="Confirm new password"
                         {...field}
                       />
@@ -262,8 +260,7 @@ export default function AccountSettings() {
                         <FormItem>
                           <FormLabel>Confirm Password</FormLabel>
                           <FormControl>
-                            <Input
-                              type="password"
+                            <PasswordInput
                               placeholder="Enter your password to confirm"
                               {...field}
                             />
