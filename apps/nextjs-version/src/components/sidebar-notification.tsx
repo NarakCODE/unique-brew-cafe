@@ -2,9 +2,10 @@
 
 import * as React from "react"
 import { X } from "lucide-react"
+import { Link } from "@/i18n/routing"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
-import { Logo } from "./logo"
+import { APP_NAME, ApplicationLogo } from "./application-logo"
 
 export function SidebarNotification() {
   const [isVisible, setIsVisible] = React.useState(true)
@@ -26,29 +27,29 @@ export function SidebarNotification() {
         
         <div className="pr-6">
           <h3 className="flex items-center gap-3 font-semibold text-neutral-900 dark:text-neutral-100 mb-2 mt-1">
-            <Logo size={42} className="-mt-1" />
+            <ApplicationLogo
+              showText={false}
+              iconSize={42}
+              iconClassName="-mt-1"
+            />
             <div>
               Welcome to{" "}
-              <a 
-                href="https://shadcnstore.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
+              <Link
+                href="/landing"
                 className="text-primary hover:underline"
               >
-                ShadcnStore
-              </a>
+                {APP_NAME}
+              </Link>
             </div>
           </h3>
           <p className="text-sm text-muted-foreground dark:text-neutral-400 leading-relaxed">
             Explore our premium Shadcn UI{" "}
-            <a 
-              href="https://shadcnstore.com/blocks" 
-              target="_blank" 
-              rel="noopener noreferrer"
+            <Link
+              href="/landing"
               className="text-primary underline"
             >
-              blocks
-            </a>{" "}
+              storefront
+            </Link>{" "}
             to build your next project faster.
           </p>
         </div>

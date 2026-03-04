@@ -3,7 +3,7 @@
 import * as React from "react";
 import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
-import { Logo } from "@/components/logo";
+import { APP_NAME, ApplicationLogo } from "@/components/application-logo";
 
 import { NavMain } from "@/components/nav-main";
 import { NavUser } from "@/components/nav-user";
@@ -41,7 +41,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const data = {
     user: {
-      name: "ShadcnStore",
+      name: APP_NAME,
       email: "store@example.com",
       avatar: "",
     },
@@ -91,8 +91,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           },
           {
             title: t("Support"),
-            url: "/support",
+            url: "#",
             icon: HelpCircleIcon,
+            items: [
+              {
+                title: t("Tickets"),
+                url: "/support/tickets",
+              },
+              {
+                title: t("FAQ"),
+                url: "/support/faq",
+              },
+            ],
           },
         ],
       },
@@ -231,15 +241,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                  <Logo size={24} className="text-current" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">ShadcnStore</span>
-                  <span className="truncate text-xs">
-                    {t("AdminDashboard")}
-                  </span>
-                </div>
+                <ApplicationLogo
+                  className="w-full"
+                  name={APP_NAME}
+                  subtitle={t("AdminDashboard")}
+                  iconSize={24}
+                  iconWrapperClassName="flex aspect-square size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground"
+                  iconClassName="text-current"
+                  nameClassName="font-medium text-sm"
+                  subtitleClassName="text-xs"
+                />
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>

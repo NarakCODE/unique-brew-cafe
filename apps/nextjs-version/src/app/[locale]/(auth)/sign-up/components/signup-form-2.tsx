@@ -3,6 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/password-input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -130,7 +131,7 @@ export function SignupForm2({
               <FormItem className="grid gap-2">
                 <FormLabel>{t("passwordLabel")}</FormLabel>
                 <FormControl>
-                  <Input id="password" type="password" {...field} />
+                  <PasswordInput id="password" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -143,7 +144,7 @@ export function SignupForm2({
               <FormItem className="grid gap-2">
                 <FormLabel>{t("confirmPassword")}</FormLabel>
                 <FormControl>
-                  <Input id="confirmPassword" type="password" {...field} />
+                  <PasswordInput id="confirmPassword" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

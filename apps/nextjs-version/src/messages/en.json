@@ -45,6 +45,8 @@
     "Users": "Users",
     "Announcements": "Announcements",
     "Support": "Support",
+    "Tickets": "Tickets",
+    "FAQ": "FAQ",
     "Landing": "Landing",
     "AuthPages": "Auth Pages",
     "SignIn1": "Sign In 1",
@@ -240,6 +242,32 @@
     "noStoresFound": "No stores found",
     "noStoresDescription": "There are no stores registered in the system yet.",
     "addStore": "Add Store"
+  },
+  "Categories": {
+    "title": "Categories",
+    "description": "Manage your product categories.",
+    "noCategoriesFound": "No categories found",
+    "noCategoriesDescription": "There are no product categories in the system yet.",
+    "createCategory": "Create Category",
+    "name": "Name",
+    "descriptionLabel": "Description",
+    "order": "Order",
+    "status": "Status",
+    "created": "Created",
+    "active": "Active",
+    "inactive": "Inactive",
+    "details": {
+      "title": "Category Details",
+      "description": "View detailed information about this category.",
+      "displayOrder": "Display Order",
+      "lastUpdated": "Last Updated",
+      "storeInformation": "Store Information",
+      "storeName": "Name",
+      "storeCity": "City",
+      "storePhone": "Phone",
+      "storeNotAvailable": "Store information is not available",
+      "categoryNotFound": "Category not found."
+    }
   },
   "Common": {
     "dashboard": "Dashboard",

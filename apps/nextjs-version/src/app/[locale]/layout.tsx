@@ -36,23 +36,17 @@ export default async function LocaleLayout({ children, params }: Props) {
   const messages = await getMessages();
 
   return (
-    <html
-      lang={locale}
-      className={`${inter.variable} antialiased`}
-      suppressHydrationWarning
-    >
-      <body className={inter.className}>
-        <NextIntlClientProvider messages={messages}>
-          <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
-            <ThemeManagerProvider>
-              <QueryProvider>
-                <SidebarConfigProvider>{children}</SidebarConfigProvider>
-                <Toaster />
-              </QueryProvider>
-            </ThemeManagerProvider>
-          </ThemeProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <div className={`${inter.variable} ${inter.className} antialiased`}>
+      <NextIntlClientProvider messages={messages}>
+        <ThemeProvider defaultTheme="system" storageKey="nextjs-ui-theme">
+          <ThemeManagerProvider>
+            <QueryProvider>
+              <SidebarConfigProvider>{children}</SidebarConfigProvider>
+              <Toaster />
+            </QueryProvider>
+          </ThemeManagerProvider>
+        </ThemeProvider>
+      </NextIntlClientProvider>
+    </div>
   );
 }

@@ -1,16 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
 import { Command as CommandPrimitive } from "cmdk";
 import {
   Search,
   LayoutPanelLeft,
   LayoutDashboard,
+  Package,
+  Store,
+  Users,
   Mail,
   CheckSquare,
   MessageCircle,
   Calendar,
+  Megaphone,
+  LifeBuoy,
+  Tag,
   Shield,
   AlertTriangle,
   Settings,
@@ -20,11 +25,15 @@ import {
   Bell,
   Link2,
   Palette,
+  Home,
+  CupSoda,
   type LucideIcon,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
+import { useRouter } from "@/i18n/routing";
 
 const Command = React.forwardRef<
   React.ElementRef<typeof CommandPrimitive>,
@@ -128,134 +137,146 @@ interface CommandSearchProps {
 export function CommandSearch({ open, onOpenChange }: CommandSearchProps) {
   const router = useRouter();
   const commandRef = React.useRef<HTMLDivElement>(null);
+  const t = useTranslations("Sidebar");
 
   const searchItems: SearchItem[] = [
+    { title: "Home", url: "/", group: t("Pages"), icon: Home },
     // Dashboards
     {
-      title: "Dashboard 1",
+      title: t("Dashboard1"),
       url: "/dashboard",
-      group: "Dashboards",
+      group: t("Dashboards"),
       icon: LayoutDashboard,
     },
     {
-      title: "Dashboard 2",
+      title: t("Dashboard2"),
       url: "/dashboard-2",
-      group: "Dashboards",
+      group: t("Dashboards"),
       icon: LayoutPanelLeft,
     },
 
     // Apps
-    { title: "Mail", url: "/mail", group: "Apps", icon: Mail },
-    { title: "Tasks", url: "/tasks", group: "Apps", icon: CheckSquare },
-    { title: "Chat", url: "/chat", group: "Apps", icon: MessageCircle },
-    { title: "Calendar", url: "/calendar", group: "Apps", icon: Calendar },
+    { title: t("Products"), url: "/products", group: t("Apps"), icon: Package },
+    { title: t("Stores"), url: "/stores", group: t("Apps"), icon: Store },
+    { title: t("Categories"), url: "/categories", group: t("Apps"), icon: Tag },
+    { title: t("Users"), url: "/users", group: t("Apps"), icon: Users },
+    {
+      title: t("Announcements"),
+      url: "/announcements",
+      group: t("Apps"),
+      icon: Megaphone,
+    },
+    { title: t("Support"), url: "/support", group: t("Apps"), icon: LifeBuoy },
+    { title: "Mail", url: "/mail", group: t("Apps"), icon: Mail },
+    { title: "Tasks", url: "/tasks", group: t("Apps"), icon: CheckSquare },
+    { title: "Chat", url: "/chat", group: t("Apps"), icon: MessageCircle },
+    { title: "Calendar", url: "/calendar", group: t("Apps"), icon: Calendar },
 
     // Auth Pages
-    { title: "Sign In 1", url: "/sign-in", group: "Auth Pages", icon: Shield },
+    { title: t("SignIn1"), url: "/sign-in", group: t("AuthPages"), icon: Shield },
+    { title: t("SignIn3"), url: "/sign-in-3", group: t("AuthPages"), icon: Shield },
+    { title: t("SignUp1"), url: "/sign-up", group: t("AuthPages"), icon: Shield },
+    { title: t("SignUp3"), url: "/sign-up-3", group: t("AuthPages"), icon: Shield },
     {
-      title: "Sign In 2",
-      url: "/sign-in-2",
-      group: "Auth Pages",
+      title: t("ForgotPassword1"),
+      url: "/forgot-password",
+      group: t("AuthPages"),
       icon: Shield,
     },
     {
-      title: "Sign Up 1",
-      url: "/auth/sign-up",
-      group: "Auth Pages",
+      title: t("ForgotPassword2"),
+      url: "/forgot-password-2",
+      group: t("AuthPages"),
       icon: Shield,
     },
     {
-      title: "Sign Up 2",
-      url: "/auth/sign-up-2",
-      group: "Auth Pages",
+      title: t("ForgotPassword3"),
+      url: "/forgot-password-3",
+      group: t("AuthPages"),
       icon: Shield,
     },
+    { title: "Verify OTP", url: "/verify-otp", group: t("AuthPages"), icon: Shield },
     {
-      title: "Forgot Password 1",
-      url: "/auth/forgot-password",
-      group: "Auth Pages",
-      icon: Shield,
-    },
-    {
-      title: "Forgot Password 2",
-      url: "/auth/forgot-password-2",
-      group: "Auth Pages",
+      title: "Register Success",
+      url: "/register-success",
+      group: t("AuthPages"),
       icon: Shield,
     },
 
     // Errors
     {
-      title: "Unauthorized",
+      title: t("Unauthorized"),
       url: "/errors/unauthorized",
-      group: "Errors",
+      group: t("Errors"),
       icon: AlertTriangle,
     },
     {
-      title: "Forbidden",
+      title: t("Forbidden"),
       url: "/errors/forbidden",
-      group: "Errors",
+      group: t("Errors"),
       icon: AlertTriangle,
     },
     {
-      title: "Not Found",
+      title: t("NotFound"),
       url: "/errors/not-found",
-      group: "Errors",
+      group: t("Errors"),
       icon: AlertTriangle,
     },
     {
-      title: "Internal Server Error",
+      title: t("InternalServerError"),
       url: "/errors/internal-server-error",
-      group: "Errors",
+      group: t("Errors"),
       icon: AlertTriangle,
     },
     {
-      title: "Under Maintenance",
+      title: t("UnderMaintenance"),
       url: "/errors/under-maintenance",
-      group: "Errors",
+      group: t("Errors"),
       icon: AlertTriangle,
     },
 
     // Settings
     {
-      title: "User Settings",
+      title: t("UserSettings"),
       url: "/settings/user",
-      group: "Settings",
+      group: t("Settings"),
       icon: User,
     },
     {
-      title: "Account Settings",
+      title: t("AccountSettings"),
       url: "/settings/account",
-      group: "Settings",
+      group: t("Settings"),
       icon: Settings,
     },
     {
-      title: "Plans & Billing",
+      title: t("PlansBilling"),
       url: "/settings/billing",
-      group: "Settings",
+      group: t("Settings"),
       icon: CreditCard,
     },
     {
-      title: "Appearance",
+      title: t("Appearance"),
       url: "/settings/appearance",
-      group: "Settings",
+      group: t("Settings"),
       icon: Palette,
     },
     {
       title: "Notifications",
       url: "/settings/notifications",
-      group: "Settings",
+      group: t("Settings"),
       icon: Bell,
     },
     {
-      title: "Connections",
+      title: t("Connections"),
       url: "/settings/connections",
-      group: "Settings",
+      group: t("Settings"),
       icon: Link2,
     },
 
     // Pages
-    { title: "FAQs", url: "/faqs", group: "Pages", icon: HelpCircle },
-    { title: "Pricing", url: "/pricing", group: "Pages", icon: CreditCard },
+    { title: t("Landing"), url: "/landing", group: t("Pages"), icon: CupSoda },
+    { title: "FAQs", url: "/faqs", group: t("Pages"), icon: HelpCircle },
+    { title: t("Pricing"), url: "/pricing", group: t("Pages"), icon: CreditCard },
   ];
 
   const groupedItems = searchItems.reduce(
