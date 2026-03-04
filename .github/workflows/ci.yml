@@ -17,16 +17,16 @@ jobs:
 
     steps:
       - name: Check out code
-        uses: https://github.com/actions/checkout@v4
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2
 
-      - uses: https://github.com/pnpm/action-setup@v4.2.0
+      - uses: pnpm/action-setup@v4.2.0
         with:
           version: 9
 
       - name: Setup Node.js environment
-        uses: https://github.com/actions/setup-node@v4
+        uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: "pnpm"
