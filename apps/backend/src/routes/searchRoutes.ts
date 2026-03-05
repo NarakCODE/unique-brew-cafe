@@ -18,13 +18,13 @@ const router: Router = express.Router();
 
 /**
  * Public search endpoint
- * GET /search?query=coffee&type=all
+ * GET /search?q=coffee&type=all
  */
 router.get('/', validate(searchQuerySchema), search);
 
 /**
  * Get autocomplete suggestions
- * GET /search/suggestions?query=cof
+ * GET /search/suggestions?q=cof
  */
 router.get('/suggestions', validate(searchSuggestionsSchema), getSuggestions);
 

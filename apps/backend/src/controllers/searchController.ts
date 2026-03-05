@@ -6,12 +6,13 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 
 /**
  * Search for stores and/or products
- * GET /search?query=coffee&type=all&city=Phnom Penh
+ * GET /search?q=coffee&type=all&city=Phnom Penh
  */
 export const search = asyncHandler(async (req: Request, res: Response) => {
   const {
-    query,
+    q,
     type = 'all',
+    limit,
     city,
     categoryId,
     minPrice,
@@ -19,7 +20,7 @@ export const search = asyncHandler(async (req: Request, res: Response) => {
     isAvailable,
   } = req.query;
 
-  if (!query || typeof query !== 'string') {
+  if (!q || typeof q !== 'string') {
     throw new BadRequestError('Search query is required');
   }
 
@@ -43,16 +44,17 @@ export const search = asyncHandler(async (req: Request, res: Response) => {
   };
 
   const results = await searchService.search(
-    query,
+    q,
     type as 'store' | 'product' | 'all',
-    filters
+    filters,
+    limit ? parseInt(limit as string, 10) : undefined
   );
 
   // Save search to history if user is authenticated
   if (req.userId) {
     await searchService.saveSearch(
       req.userId,
-      query,
+      q,
       type as 'store' | 'product' | 'all',
       results.totalResults
     );
@@ -65,13 +67,13 @@ export const search = asyncHandler(async (req: Request, res: Response) => {
 
 /**
  * Get autocomplete suggestions
- * GET /search/suggestions?query=cof
+ * GET /search/suggestions?q=cof
  */
 export const getSuggestions = asyncHandler(
   async (req: Request, res: Response) => {
-    const { query, limit = '10' } = req.query;
+    const { q, limit = '10' } = req.query;
 
-    if (!query || typeof query !== 'string') {
+    if (!q || typeof q !== 'string') {
       throw new BadRequestError('Search query is required');
     }
 
@@ -80,7 +82,7 @@ export const getSuggestions = asyncHandler(
       throw new BadRequestError('Limit must be between 1 and 20');
     }
 
-    const suggestions = await searchService.getSuggestions(query, limitNum);
+    const suggestions = await searchService.getSuggestions(q, limitNum);
 
     res
       .status(200)

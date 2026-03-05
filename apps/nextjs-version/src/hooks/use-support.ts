@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import {
   getTickets,
   getTicket,
@@ -20,6 +25,7 @@ export function useTickets(filters?: TicketFilters) {
   return useQuery({
     queryKey: ["tickets", filters],
     queryFn: () => getTickets(filters),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -89,6 +95,7 @@ export function useFAQs(filters?: FAQFilters) {
   return useQuery({
     queryKey: ["faqs", filters],
     queryFn: () => getFAQs(filters),
+    placeholderData: keepPreviousData,
   });
 }
 

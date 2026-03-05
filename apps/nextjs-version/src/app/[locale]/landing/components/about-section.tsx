@@ -4,30 +4,32 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { CardDecorator } from '@/components/ui/card-decorator'
-import { Github, Code, Palette, Layout, Crown } from 'lucide-react'
+import Link from 'next/link'
+import { APP_NAME } from '@/components/application-logo'
+import { Icons8Icon, type Icons8Name } from '@/components/landing/icons8-icon'
 
 const values = [
   {
-    icon: Code,
-    title: 'Developer First',
-    description: 'Every component is built with the developer experience in mind, ensuring clean code and easy integration.'
+    icon: "coffee",
+    title: 'Quality Beans',
+    description: 'We source the finest Arabica beans from sustainable farms around the world.'
   },
   {
-    icon: Palette,
-    title: 'Design Excellence',
-    description: 'We maintain the highest design standards, following shadcn/ui principles and modern UI patterns.'
+    icon: "leaf",
+    title: 'Expert Roasting',
+    description: 'Our master roasters bring out the unique flavors and aromas in every single batch.'
   },
   {
-    icon: Layout,
-    title: 'Production Ready',
-    description: 'Battle-tested components used in real applications with proven performance and reliability across different environments.'
+    icon: "heart",
+    title: 'Artisanal Prep',
+    description: 'Each cup is handcrafted with precision and passion by our highly skilled baristas.'
   },
   {
-    icon: Crown,
-    title: 'Premium Quality',
-    description: 'Hand-crafted with attention to detail and performance optimization, ensuring exceptional user experience and accessibility.'
+    icon: "store",
+    title: 'Community First',
+    description: 'We create warm, inviting spaces where people can connect, work, and share stories.'
   }
-]
+] as { icon: Icons8Name; title: string; description: string }[]
 
 export function AboutSection() {
   return (
@@ -36,14 +38,15 @@ export function AboutSection() {
         {/* Section Header */}
         <div className="mx-auto max-w-4xl text-center mb-16">
           <Badge variant="outline" className="mb-4">
-            About ShadcnStore
+            About {APP_NAME}
           </Badge>
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-6">
-            Built for developers, by developers
+            Brewing Excellence, One Cup at a Time
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            We&apos;re passionate about creating the best marketplace for shadcn/ui components and templates.
-            Our mission is to accelerate development and help developers build beautiful admin interfaces faster.
+          <p className="text-lg text-muted-foreground mb-8 text-pretty">
+            At {APP_NAME}, we believe coffee is more than just a morning routine—it&apos;s a craft.
+            Founded with a passion for exceptional taste and community, we meticulously source our beans
+            and perfect our techniques to ensure every visit is an experience worth savoring.
           </p>
         </div>
 
@@ -54,7 +57,7 @@ export function AboutSection() {
               <CardContent className='p-8'>
                 <div className='flex flex-col items-center text-center'>
                   <CardDecorator>
-                    <value.icon className='h-6 w-6' aria-hidden />
+                    <Icons8Icon name={value.icon} size={24} />
                   </CardDecorator>
                   <h3 className='mt-6 font-medium text-balance'>{value.title}</h3>
                   <p className='text-muted-foreground mt-3 text-sm'>{value.description}</p>
@@ -67,19 +70,18 @@ export function AboutSection() {
         {/* Call to Action */}
         <div className="mt-16 text-center">
           <div className="flex items-center justify-center gap-2 mb-6">
-            <span className="text-muted-foreground">❤️ Made with love for the developer community</span>
+            <span className="text-muted-foreground">☕ Join our journey to the perfect brew</span>
           </div>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="cursor-pointer" asChild>
-              <a href="https://github.com/silicondeck/shadcn-dashboard-landing-template" target="_blank" rel="noopener noreferrer">
-                <Github className="mr-2 h-4 w-4" />
-                Star on GitHub
-              </a>
+              <Link href="/auth/sign-up">
+                Start Your Coffee Order
+              </Link>
             </Button>
             <Button size="lg" variant="outline" className="cursor-pointer" asChild>
-              <a href="https://discord.com/invite/XEQhPc9a6p" target="_blank" rel="noopener noreferrer">
-                Join Discord Community
-              </a>
+              <Link href="#contact">
+                Get in Touch
+              </Link>
             </Button>
           </div>
         </div>

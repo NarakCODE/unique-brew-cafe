@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getStores } from "@/api/store";
 import { StoreFilters } from "@/types/store";
 import { ApiErrorResponse } from "@/types/api";
@@ -7,6 +7,7 @@ export function useStores(filters?: StoreFilters) {
   const query = useQuery({
     queryKey: ["stores", filters],
     queryFn: () => getStores(filters),
+    placeholderData: keepPreviousData,
   });
 
   return {

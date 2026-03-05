@@ -6,6 +6,7 @@ import { z } from "zod"
 import { useSearchParams, useRouter } from "next/navigation"
 import { useEffect } from "react"
 import { cn } from "@/lib/utils"
+import { parseVerifyOtpQuery } from "@/lib/query-schemas"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -41,7 +42,7 @@ type OtpFormValues = z.infer<typeof otpFormSchema>
 
 export function OtpForm({ className, ...props }: React.ComponentProps<"div">) {
   const searchParams = useSearchParams()
-  const email = searchParams.get("email")
+  const { email } = parseVerifyOtpQuery(searchParams)
   const router = useRouter()
   const { verifyOtp, isLoading } = useVerifyOtp()
   const { resendOtp, isLoading: isResending } = useResendOtp()

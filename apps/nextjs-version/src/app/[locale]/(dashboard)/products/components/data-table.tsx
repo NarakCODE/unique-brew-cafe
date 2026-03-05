@@ -34,10 +34,12 @@ import {
   EmptyMedia,
   EmptyTitle,
 } from "@/components/ui/empty";
-import { Package } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CreateProductDialog } from "./create-product-dialog";
 
 import { DataTablePagination } from "@/components/ui/data-table/data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
+import Image from "next/image";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -125,17 +127,27 @@ export function DataTable<TData, TValue>({
                   colSpan={columns.length}
                   className="h-24 text-center"
                 >
-                  <Empty className="py-14 border-0">
-                    <EmptyMedia>
-                      <Package className="text-muted-foreground size-10" />
-                    </EmptyMedia>
+                  <Empty className="min-h-[55vh] border border-dashed bg-card/40">
+                    <EmptyHeader>
+                      <EmptyMedia className="w-full">
+                        <Image
+                          src="/errors/empty-data.svg"
+                          alt="No products found"
+                          width={960}
+                          height={540}
+                          className="aspect-video w-full max-w-lg rounded-xl object-contain opacity-20"
+                          priority
+                        />
+                      </EmptyMedia>
+                      <EmptyTitle>{t("noResults")}</EmptyTitle>
+                      <EmptyDescription>
+                        {t("noResultsDescription")}
+                      </EmptyDescription>
+                    </EmptyHeader>
                     <EmptyContent>
-                      <EmptyHeader>
-                        <EmptyTitle>{t("noResults")}</EmptyTitle>
-                        <EmptyDescription>
-                          {t("noResultsDescription")}
-                        </EmptyDescription>
-                      </EmptyHeader>
+                      <CreateProductDialog>
+                        <Button size="sm">{t("createProduct")}</Button>
+                      </CreateProductDialog>
                     </EmptyContent>
                   </Empty>
                 </TableCell>

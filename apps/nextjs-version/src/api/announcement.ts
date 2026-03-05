@@ -14,6 +14,11 @@ export const getAnnouncements = async (): Promise<GetAnnouncementsResponse> => {
   return apiClient.get("/announcements/all?isPublished=true");
 };
 
+export const getPublicAnnouncements =
+  async (): Promise<GetAnnouncementsResponse> => {
+    return apiClient.get("/announcements");
+  };
+
 export const getAnnouncement = async (
   id: string
 ): Promise<GetAnnouncementResponse> => {
@@ -43,4 +48,12 @@ export const togglePublishAnnouncement = async (
   id: string
 ): Promise<TogglePublishAnnouncementResponse> => {
   return apiClient.patch(`/announcements/${id}/publish`);
+};
+
+export const trackAnnouncementView = async (id: string): Promise<void> => {
+  await apiClient.post(`/announcements/${id}/view`);
+};
+
+export const trackAnnouncementClick = async (id: string): Promise<void> => {
+  await apiClient.post(`/announcements/${id}/click`);
 };

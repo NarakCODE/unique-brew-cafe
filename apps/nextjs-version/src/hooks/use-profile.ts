@@ -20,6 +20,7 @@ export function useProfile() {
     queryKey: ["profile"],
     queryFn: getProfile,
     retry: false,
+    staleTime: 5 * 60 * 1000,
   });
 
   return {

@@ -4,15 +4,17 @@ import {
   SalesReportResponse,
   ProductPerformanceResponse,
 } from "@/types/report";
+import { buildQueryString, withQuery } from "@/lib/search-params";
 
 export const getDashboardStats = async (filters?: {
   startDate?: string;
   endDate?: string;
 }): Promise<DashboardStatsResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.startDate) params.append("startDate", filters.startDate);
-  if (filters?.endDate) params.append("endDate", filters.endDate);
-  return apiClient.get(`/reports/dashboard?${params.toString()}`);
+  const query = buildQueryString({
+    startDate: filters?.startDate,
+    endDate: filters?.endDate,
+  });
+  return apiClient.get(withQuery("/reports/dashboard", query));
 };
 
 export const getSalesReport = async (filters?: {
@@ -20,19 +22,21 @@ export const getSalesReport = async (filters?: {
   endDate?: string;
   groupBy?: "day" | "month";
 }): Promise<SalesReportResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.startDate) params.append("startDate", filters.startDate);
-  if (filters?.endDate) params.append("endDate", filters.endDate);
-  if (filters?.groupBy) params.append("groupBy", filters.groupBy);
-  return apiClient.get(`/reports/sales?${params.toString()}`);
+  const query = buildQueryString({
+    startDate: filters?.startDate,
+    endDate: filters?.endDate,
+    groupBy: filters?.groupBy,
+  });
+  return apiClient.get(withQuery("/reports/sales", query));
 };
 
 export const getProductPerformance = async (filters?: {
   startDate?: string;
   endDate?: string;
 }): Promise<ProductPerformanceResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.startDate) params.append("startDate", filters.startDate);
-  if (filters?.endDate) params.append("endDate", filters.endDate);
-  return apiClient.get(`/reports/products?${params.toString()}`);
+  const query = buildQueryString({
+    startDate: filters?.startDate,
+    endDate: filters?.endDate,
+  });
+  return apiClient.get(withQuery("/reports/products", query));
 };

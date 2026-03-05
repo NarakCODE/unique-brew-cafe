@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { useTranslations } from "next-intl";
 import {
   getProduct,
@@ -18,6 +23,7 @@ export function useProducts(filters?: ProductFilters) {
   const query = useQuery({
     queryKey: ["products", filters],
     queryFn: () => getAdminProducts(filters),
+    placeholderData: keepPreviousData,
   });
 
   return {

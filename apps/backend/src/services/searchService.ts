@@ -46,7 +46,8 @@ class SearchService {
   async search(
     query: string,
     type: 'store' | 'product' | 'all' = 'all',
-    filters?: SearchFilters
+    filters?: SearchFilters,
+    limit: number = 20
   ): Promise<SearchResults> {
     const results: SearchResults = {
       totalResults: 0,
@@ -67,7 +68,7 @@ class SearchService {
         score: { $meta: 'textScore' },
       })
         .sort({ score: { $meta: 'textScore' } })
-        .limit(20)
+        .limit(limit)
         .lean();
 
       results.stores = stores.map((store) => ({
@@ -117,7 +118,7 @@ class SearchService {
         score: { $meta: 'textScore' },
       })
         .sort({ score: { $meta: 'textScore' } })
-        .limit(20)
+        .limit(limit)
         .lean();
 
       results.products = products.map((product) => ({

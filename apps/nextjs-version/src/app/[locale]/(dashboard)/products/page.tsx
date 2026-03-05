@@ -18,13 +18,12 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { CreateProductDialog } from "./components/create-product-dialog";
 import { useTranslations } from "next-intl";
+import { parseDashboardProductsQuery } from "@/lib/query-schemas";
 
 export default function ProductsPage() {
   const t = useTranslations("Products");
   const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page")) || 1;
-  const limit = Number(searchParams.get("limit")) || 20;
-  const search = searchParams.get("search") || undefined;
+  const { page, limit, search } = parseDashboardProductsQuery(searchParams);
 
   const { products, isLoading } = useProducts({
     page,
