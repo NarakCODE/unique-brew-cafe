@@ -1,9 +1,9 @@
 "use client"
 
-import { Star, Quote } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { APP_NAME } from '@/components/application-logo'
+import { Icons8Icon } from '@/components/landing/icons8-icon'
 
 const testimonials = [
   {
@@ -51,13 +51,17 @@ export function TestimonialsSection() {
                 {/* Rating */}
                 <div className="flex gap-1 mb-6">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-4 h-4 fill-primary text-primary" />
+                    <Icons8Icon key={i} name="star" size={16} />
                   ))}
                 </div>
 
                 {/* Quote */}
                 <div className="relative mb-8">
-                  <Quote className="absolute -top-4 -left-4 w-8 h-8 text-primary/10 -z-0" />
+                  <Icons8Icon
+                    name="quote"
+                    size={32}
+                    className="absolute -top-4 -left-4 -z-0 opacity-20"
+                  />
                   <p className="text-foreground italic leading-relaxed relative z-10">
                     "{testimonial.quote}"
                   </p>

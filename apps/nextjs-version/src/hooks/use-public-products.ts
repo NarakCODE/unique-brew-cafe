@@ -19,6 +19,7 @@ export function usePublicProducts(filters?: ProductFilters) {
     isLoading: query.isLoading,
     error: query.error as ApiErrorResponse | null,
     isError: query.isError,
+    refetch: query.refetch,
   };
 }
 

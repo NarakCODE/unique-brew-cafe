@@ -13,7 +13,11 @@ export const apiClient = axios.create({
 // Request interceptor to add Authorization header
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem("accessToken");
+    if (typeof window === "undefined") {
+      return config;
+    }
+
+    const accessToken = window.localStorage.getItem("accessToken");
     if (accessToken) {
       config.headers.Authorization = `Bearer ${accessToken}`;
     }

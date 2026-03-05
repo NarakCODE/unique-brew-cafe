@@ -1,41 +1,36 @@
 "use client"
 
-import {
-  MapPin,
-  Coffee,
-  Users,
-  Star
-} from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { DotPattern } from '@/components/dot-pattern'
+import { Icons8Icon, type Icons8Name } from '@/components/landing/icons8-icon'
 
 
 const stats = [
   {
-    icon: MapPin,
+    icon: "map-pin",
     value: '12',
     label: 'Stores',
     description: 'Across the country'
   },
   {
-    icon: Coffee,
+    icon: "coffee",
     value: '25+',
     label: 'Varieties',
     description: 'Artisanal brews'
   },
   {
-    icon: Users,
+    icon: "users",
     value: '50K+',
     label: 'Customers',
     description: 'Happy coffee lovers'
   },
   {
-    icon: Star,
+    icon: "star",
     value: '4.9',
     label: 'Rating',
     description: 'Customer satisfaction'
   }
-]
+] as { icon: Icons8Name; value: string; label: string; description: string }[]
 
 export function StatsSection() {
   return (
@@ -55,7 +50,7 @@ export function StatsSection() {
               <CardContent className="p-6">
                 <div className="flex justify-center mb-4">
                   <div className="p-3 bg-primary/10 rounded-xl">
-                    <stat.icon className="h-6 w-6 text-primary" />
+                    <Icons8Icon name={stat.icon} size={24} />
                   </div>
                 </div>
                 <div className="space-y-1">

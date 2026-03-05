@@ -4,32 +4,32 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { CardDecorator } from '@/components/ui/card-decorator'
-import { Coffee, Leaf, Heart, Store } from 'lucide-react'
 import Link from 'next/link'
 import { APP_NAME } from '@/components/application-logo'
+import { Icons8Icon, type Icons8Name } from '@/components/landing/icons8-icon'
 
 const values = [
   {
-    icon: Coffee,
+    icon: "coffee",
     title: 'Quality Beans',
     description: 'We source the finest Arabica beans from sustainable farms around the world.'
   },
   {
-    icon: Leaf,
+    icon: "leaf",
     title: 'Expert Roasting',
     description: 'Our master roasters bring out the unique flavors and aromas in every single batch.'
   },
   {
-    icon: Heart,
+    icon: "heart",
     title: 'Artisanal Prep',
     description: 'Each cup is handcrafted with precision and passion by our highly skilled baristas.'
   },
   {
-    icon: Store,
+    icon: "store",
     title: 'Community First',
     description: 'We create warm, inviting spaces where people can connect, work, and share stories.'
   }
-]
+] as { icon: Icons8Name; title: string; description: string }[]
 
 export function AboutSection() {
   return (
@@ -57,7 +57,7 @@ export function AboutSection() {
               <CardContent className='p-8'>
                 <div className='flex flex-col items-center text-center'>
                   <CardDecorator>
-                    <value.icon className='h-6 w-6' aria-hidden />
+                    <Icons8Icon name={value.icon} size={24} />
                   </CardDecorator>
                   <h3 className='mt-6 font-medium text-balance'>{value.title}</h3>
                   <p className='text-muted-foreground mt-3 text-sm'>{value.description}</p>

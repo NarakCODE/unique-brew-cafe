@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent } from '@/components/ui/card'
 import { CardDecorator } from '@/components/ui/card-decorator'
-import { Github, Linkedin, Globe } from 'lucide-react'
+import { Icons8Icon } from '@/components/landing/icons8-icon'
 
 
 const team = [
@@ -181,7 +181,7 @@ export function TeamSection() {
                         rel="noopener noreferrer"
                         aria-label={`${member.name} LinkedIn`}
                       >
-                        <Linkedin className="h-4 w-4" />
+                        <Icons8Icon name="linkedin" size={16} />
                       </a>
                     </Button>
                     <Button
@@ -196,7 +196,7 @@ export function TeamSection() {
                         rel="noopener noreferrer"
                         aria-label={`${member.name} GitHub`}
                       >
-                        <Github className="h-4 w-4" />
+                        <Icons8Icon name="github" size={16} />
                       </a>
                     </Button>
                     <Button
@@ -211,7 +211,7 @@ export function TeamSection() {
                         rel="noopener noreferrer"
                         aria-label={`${member.name} Website`}
                       >
-                        <Globe className="h-4 w-4" />
+                        <Icons8Icon name="globe" size={16} />
                       </a>
                     </Button>
                   </div>

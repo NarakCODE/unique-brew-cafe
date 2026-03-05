@@ -3,6 +3,7 @@ export interface Announcement {
   title: string;
   description: string;
   actionType: "none" | "promo_code" | "deep_link" | "external_url";
+  actionValue?: string;
   priority: number;
   targetAudience: string;
   userTierFilter: string[];

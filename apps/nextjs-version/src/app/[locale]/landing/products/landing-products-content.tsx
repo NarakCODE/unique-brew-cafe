@@ -2,49 +2,166 @@
 
 import React from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { LandingNavbar } from "../components/navbar";
 import { LandingFooter } from "../components/footer";
 import { ProductCard } from "./components/product-card";
 import { ProductGridSkeleton } from "./components/product-grid-skeleton";
 import { Icons8Icon } from "./components/icons8-icon";
 import { usePublicProducts } from "@/hooks/use-public-products";
+import { usePublicCategories } from "@/hooks/use-public-categories";
 import { ProductFilters } from "@/types/product";
+import {
+  parseLandingProductsQuery,
+  type LandingProductSort,
+  writeLandingProductsQuery,
+  type LandingProductsQueryUpdate,
+} from "@/lib/query-schemas";
+
+const SORT_OPTIONS = [
+  {
+    value: "recommended",
+    label: "Recommended",
+    sortBy: "displayOrder",
+    sortOrder: "asc" as const,
+  },
+  {
+    value: "newest",
+    label: "Newest",
+    sortBy: "createdAt",
+    sortOrder: "desc" as const,
+  },
+  {
+    value: "price-asc",
+    label: "Price: Low to High",
+    sortBy: "basePrice",
+    sortOrder: "asc" as const,
+  },
+  {
+    value: "price-desc",
+    label: "Price: High to Low",
+    sortBy: "basePrice",
+    sortOrder: "desc" as const,
+  },
+  {
+    value: "name-asc",
+    label: "Name: A-Z",
+    sortBy: "name",
+    sortOrder: "asc" as const,
+  },
+];
+
+function isLandingProductSort(value: string): value is LandingProductSort {
+  return SORT_OPTIONS.some((option) => option.value === value);
+}
+
+function getSortValue(value: LandingProductSort) {
+  return SORT_OPTIONS.find((option) => option.value === value) ?? SORT_OPTIONS[0];
+}
 
 export function LandingProductsContent() {
-  const [search, setSearch] = React.useState("");
-  const [debouncedSearch, setDebouncedSearch] = React.useState("");
-  const [page, setPage] = React.useState(1);
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const parsedQuery = parseLandingProductsQuery(searchParams);
+  const qParam = parsedQuery.q;
+  const categoryParam = parsedQuery.category;
+  const pageParam = parsedQuery.page;
+  const sortConfig = getSortValue(parsedQuery.sort);
+  const selectedSort = sortConfig.value;
+  const selectedCategory = categoryParam || "all";
+
+  const [searchInput, setSearchInput] = React.useState(qParam);
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedSearch(search);
-      setPage(1);
+    setSearchInput(qParam);
+  }, [qParam]);
+
+  const updateParams = React.useCallback(
+    (updates: LandingProductsQueryUpdate) => {
+      const query = writeLandingProductsQuery(searchParams, updates);
+      router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
+
+  React.useEffect(() => {
+    const timer = window.setTimeout(() => {
+      const nextValue = searchInput.trim();
+      if (nextValue === qParam) return;
+
+      updateParams({
+        q: nextValue || null,
+        page: 1,
+      });
     }, 400);
 
-    return () => clearTimeout(timer);
-  }, [search]);
+    return () => window.clearTimeout(timer);
+  }, [qParam, searchInput, updateParams]);
 
   const filters: ProductFilters = {
-    page,
+    page: pageParam,
     limit: 12,
-    ...(debouncedSearch ? { search: debouncedSearch } : {}),
+    ...(qParam ? { search: qParam } : {}),
+    ...(selectedCategory !== "all" ? { categoryId: selectedCategory } : {}),
+    ...(sortConfig.sortBy
+      ? { sortBy: sortConfig.sortBy, sortOrder: sortConfig.sortOrder }
+      : {}),
   };
 
-  const { products, pagination, isLoading, isError } =
-    usePublicProducts(filters);
+  const {
+    products,
+    pagination,
+    isLoading: isProductsLoading,
+    isError: isProductsError,
+    refetch: refetchProducts,
+  } = usePublicProducts(filters);
+  const {
+    categories,
+    isLoading: isCategoriesLoading,
+    isError: isCategoriesError,
+    refetch: refetchCategories,
+  } = usePublicCategories();
 
   const featuredCount = products.filter((product) => product.isFeatured).length;
-  const bestSellerCount = products.filter(
-    (product) => product.isBestSelling,
-  ).length;
+  const bestSellerCount = products.filter((product) => product.isBestSelling).length;
+
   const pageRangeLabel = pagination
     ? `${(pagination.page - 1) * pagination.limit + 1}-${Math.min(
         pagination.page * pagination.limit,
         pagination.total,
       )}`
     : "0-0";
+
+  const hasActiveFilters = Boolean(qParam) || selectedCategory !== "all";
+  const isLoading = isProductsLoading;
+  const isError = isProductsError;
+
+  const resetAllFilters = () => {
+    setSearchInput("");
+    updateParams({
+      q: null,
+      category: null,
+      sort: null,
+      page: null,
+    });
+  };
+
+  const setPage = (page: number) => {
+    updateParams({
+      page: page <= 1 ? null : page,
+    });
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -69,8 +186,7 @@ export function LandingProductsContent() {
                 </h1>
                 <p className="max-w-2xl text-pretty text-muted-foreground md:text-lg">
                   Browse signature coffees, bakery picks, and all-day bites.
-                  Quick search, clear categories, and product details are built in
-                  so ordering feels effortless.
+                  Search, sort, and filter with shareable links for faster ordering.
                 </p>
               </div>
 
@@ -88,17 +204,17 @@ export function LandingProductsContent() {
                     id="product-search"
                     type="search"
                     placeholder="Search drinks, pastries, categories..."
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
                     className="h-12 border-0 bg-transparent pl-11 pr-10 text-base shadow-none focus-visible:ring-0"
                     aria-label="Search products"
                   />
-                  {search && (
+                  {searchInput && (
                     <Button
                       variant="ghost"
                       size="icon"
                       className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full"
-                      onClick={() => setSearch("")}
+                      onClick={() => setSearchInput("")}
                       aria-label="Clear search"
                     >
                       <Icons8Icon name="close" size={16} />
@@ -106,41 +222,77 @@ export function LandingProductsContent() {
                   )}
                 </div>
               </div>
+
+              <div className="flex flex-col gap-3 md:flex-row">
+                <Select
+                  value={selectedSort}
+                  onValueChange={(value) =>
+                    updateParams({
+                      sort:
+                        value === "recommended" || !isLandingProductSort(value)
+                          ? null
+                          : value,
+                      page: 1,
+                    })
+                  }
+                >
+                  <SelectTrigger className="h-11 w-full md:max-w-xs">
+                    <SelectValue placeholder="Sort by" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {SORT_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    className="h-11 md:w-auto"
+                    onClick={resetAllFilters}
+                  >
+                    Clear all filters
+                  </Button>
+                )}
+              </div>
             </div>
 
             <aside className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
               <div className="rounded-2xl border bg-card/95 p-4 shadow-sm">
                 <p className="mb-2 text-xs tracking-[0.16em] text-muted-foreground">
-                  ON THIS PAGE
+                  RESULTS
                 </p>
                 <p className="text-3xl font-semibold [font-family:Georgia,ui-serif,serif]">
                   {isLoading ? "..." : pagination?.total ?? products.length}
                 </p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Icons8Icon name="coffee" size={14} className="opacity-80" />
-                  total menu items
+                  products matched
                 </p>
               </div>
 
               <div className="rounded-2xl border bg-card/95 p-4 shadow-sm">
                 <p className="text-xs tracking-[0.16em] text-muted-foreground">
-                  HIGHLIGHTS
+                  FEATURED
                 </p>
                 <p className="mt-2 text-xl font-semibold">{featuredCount}</p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Icons8Icon name="fire" size={14} className="opacity-80" />
-                  featured picks
+                  highlighted picks
                 </p>
               </div>
 
               <div className="rounded-2xl border bg-card/95 p-4 shadow-sm">
                 <p className="text-xs tracking-[0.16em] text-muted-foreground">
-                  TRENDING NOW
+                  BEST SELLERS
                 </p>
                 <p className="mt-2 text-xl font-semibold">{bestSellerCount}</p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Icons8Icon name="clock" size={14} className="opacity-80" />
-                  best sellers
+                  trending items
                 </p>
               </div>
             </aside>
@@ -149,25 +301,69 @@ export function LandingProductsContent() {
       </section>
 
       <main className="container mx-auto flex-1 px-4 py-10 sm:px-6 lg:px-8">
-        {!isLoading && pagination && (
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-            <p className="rounded-full border bg-muted/40 px-3 py-1 text-sm text-muted-foreground">
-              {pagination.total === 0
-                ? "No products found"
-                : `Showing ${pageRangeLabel} of ${pagination.total} items`}
-            </p>
-
-            {debouncedSearch && (
+        <div className="mb-6 flex flex-col gap-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant={selectedCategory === "all" ? "default" : "outline"}
+              size="sm"
+              className="rounded-full"
+              onClick={() => updateParams({ category: null, page: 1 })}
+            >
+              All Categories
+            </Button>
+            {categories.map((category) => (
+              <Button
+                key={category.id}
+                variant={selectedCategory === category.id ? "default" : "outline"}
+                size="sm"
+                className="rounded-full"
+                onClick={() =>
+                  updateParams({
+                    category: category.id,
+                    page: 1,
+                  })
+                }
+              >
+                {category.name}
+              </Button>
+            ))}
+            {isCategoriesLoading && (
+              <span className="px-2 py-1 text-xs text-muted-foreground">
+                Loading categories...
+              </span>
+            )}
+            {isCategoriesError && !isCategoriesLoading && (
               <Button
                 variant="ghost"
-                className="h-8 rounded-full px-3 text-sm"
-                onClick={() => setSearch("")}
+                size="sm"
+                className="h-8 rounded-full px-3 text-xs"
+                onClick={() => refetchCategories()}
               >
-                Clear filter: {debouncedSearch}
+                Retry categories
               </Button>
             )}
           </div>
-        )}
+
+          {!isLoading && pagination && (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <p className="rounded-full border bg-muted/40 px-3 py-1 text-sm text-muted-foreground">
+                {pagination.total === 0
+                  ? "No products found"
+                  : `Showing ${pageRangeLabel} of ${pagination.total} items`}
+              </p>
+
+              {qParam && (
+                <Button
+                  variant="ghost"
+                  className="h-8 rounded-full px-3 text-sm"
+                  onClick={() => updateParams({ q: null, page: 1 })}
+                >
+                  Clear search: {qParam}
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
 
         {isLoading && <ProductGridSkeleton count={8} />}
 
@@ -176,18 +372,21 @@ export function LandingProductsContent() {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
               <Icons8Icon name="coffee" size={24} />
             </div>
-            <h2 className="text-lg font-semibold">Something went wrong</h2>
+            <h2 className="text-lg font-semibold">Could not load products</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              We could not load the menu right now. Please refresh and try
-              again.
+              There was a problem loading your current filters. Try again or
+              clear filters.
             </p>
-            <Button
-              variant="outline"
-              className="mt-4"
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </Button>
+            <div className="mt-4 flex justify-center gap-2">
+              <Button variant="outline" onClick={() => refetchProducts()}>
+                Retry Products
+              </Button>
+              {hasActiveFilters && (
+                <Button variant="ghost" onClick={resetAllFilters}>
+                  Clear Filters
+                </Button>
+              )}
+            </div>
           </div>
         )}
 
@@ -212,21 +411,15 @@ export function LandingProductsContent() {
             <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full border bg-background">
               <Icons8Icon name="search" size={22} className="opacity-70" />
             </div>
-            <h2 className="text-xl font-semibold">No items match</h2>
+            <h2 className="text-xl font-semibold">No products matched</h2>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
-              {debouncedSearch
-                ? `No results for "${debouncedSearch}". Try another keyword.`
-                : "No products are available right now."}
+              Try a different search, category, or sort option.
             </p>
-            {debouncedSearch && (
-              <Button
-                variant="outline"
-                className="mt-4"
-                onClick={() => setSearch("")}
-              >
-                Reset Search
+            <div className="mt-4">
+              <Button variant="outline" onClick={resetAllFilters}>
+                Reset Filters
               </Button>
-            )}
+            </div>
           </div>
         )}
 
@@ -239,7 +432,7 @@ export function LandingProductsContent() {
               variant="outline"
               size="sm"
               disabled={!pagination.hasPrev}
-              onClick={() => setPage((prev) => Math.max(1, prev - 1))}
+              onClick={() => setPage(Math.max(1, pagination.page - 1))}
               className="gap-1"
               aria-label="Previous page"
             >
@@ -283,9 +476,7 @@ export function LandingProductsContent() {
               variant="outline"
               size="sm"
               disabled={!pagination.hasNext}
-              onClick={() =>
-                setPage((prev) => Math.min(pagination.pages, prev + 1))
-              }
+              onClick={() => setPage(Math.min(pagination.pages, pagination.page + 1))}
               className="gap-1"
               aria-label="Next page"
             >

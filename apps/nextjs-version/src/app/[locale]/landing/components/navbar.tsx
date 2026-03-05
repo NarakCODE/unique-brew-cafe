@@ -2,16 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  Menu,
-  LayoutDashboard,
-  ChevronDown,
-  X,
-  Moon,
-  Sun,
-  Coffee,
-  ShoppingCart
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -34,6 +24,7 @@ import {
 } from "@/components/ui/collapsible";
 import { APP_NAME, ApplicationLogo } from "@/components/application-logo";
 import { MegaMenu } from "@/components/landing/mega-menu";
+import { Icons8Icon } from "@/components/landing/icons8-icon";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useTheme } from "@/hooks/use-theme";
 
@@ -42,6 +33,7 @@ const navigationItems = [
   { name: "Menu", href: "#pricing", hasMegaMenu: true },
   { name: "About", href: "#about" },
   { name: "Features", href: "#features" },
+  { name: "Stores", href: "#stores" },
   { name: "FAQ", href: "#faq" },
   { name: "Contact", href: "#contact" },
 ];
@@ -57,7 +49,7 @@ const menuItems = [
   { name: "Sustainability", href: "#" },
   { name: "Rewards", href: "#" },
   { title: "Support" },
-  { name: "Store Locator", href: "#" },
+  { name: "Store Locator", href: "#stores" },
   { name: "FAQs", href: "#faq" },
   { name: "Contact", href: "#contact" },
 ];
@@ -139,7 +131,7 @@ export function LandingNavbar() {
           </Button>
           <Button asChild className="cursor-pointer">
             <Link href="/auth/sign-up">
-              <ShoppingCart className="h-4 w-4 mr-2" />
+              <Icons8Icon name="shopping-cart" size={16} className="mr-2" />
               Order Online
             </Link>
           </Button>
@@ -149,7 +141,7 @@ export function LandingNavbar() {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="xl:hidden">
             <Button variant="ghost" size="icon" className="cursor-pointer">
-              <Menu className="h-5 w-5" />
+              <Icons8Icon name="menu" size={20} />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
@@ -176,8 +168,16 @@ export function LandingNavbar() {
                       }
                       className="cursor-pointer h-8 w-8"
                     >
-                      <Moon className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                      <Sun className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                      <Icons8Icon
+                        name="moon"
+                        size={16}
+                        className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+                      />
+                      <Icons8Icon
+                        name="sun"
+                        size={16}
+                        className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+                      />
                     </Button>
                     <Button
                       variant="ghost"
@@ -185,7 +185,7 @@ export function LandingNavbar() {
                       onClick={() => setIsOpen(false)}
                       className="cursor-pointer h-8 w-8"
                     >
-                      <X className="h-4 w-4" />
+                      <Icons8Icon name="close" size={16} />
                     </Button>
                   </div>
                 </div>
@@ -203,8 +203,10 @@ export function LandingNavbar() {
                         >
                           <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 text-base font-medium rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer">
                             {item.name}
-                            <ChevronDown
-                              className={`h-4 w-4 transition-transform ${solutionsOpen ? "rotate-180" : ""}`}
+                            <Icons8Icon
+                              name="chevron-down"
+                              size={16}
+                              className={`transition-transform ${solutionsOpen ? "rotate-180" : ""}`}
                             />
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pl-4 space-y-1">
@@ -269,7 +271,7 @@ export function LandingNavbar() {
                     className="w-full cursor-pointer"
                   >
                     <Link href="/dashboard">
-                      <LayoutDashboard className="size-4" />
+                      <Icons8Icon name="dashboard" size={16} />
                       Admin Dashboard
                     </Link>
                   </Button>

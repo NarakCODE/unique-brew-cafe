@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { APP_NAME, ApplicationLogo } from '@/components/application-logo'
-import { Instagram, Facebook, Twitter, Linkedin, Coffee } from 'lucide-react'
+import { Icons8Icon, type Icons8Name } from '@/components/landing/icons8-icon'
 
 const newsletterSchema = z.object({
   email: z.string().email({
@@ -39,7 +39,7 @@ const footerLinks = {
   support: [
     { name: 'Help Center', href: '#faq' },
     { name: 'Contact Us', href: '#contact' },
-    { name: 'Store Locator', href: '#' },
+    { name: 'Store Locator', href: '#stores' },
     { name: 'Gift Cards', href: '#' },
   ],
   legal: [
@@ -51,11 +51,11 @@ const footerLinks = {
 }
 
 const socialLinks = [
-  { name: 'Instagram', href: '#', icon: Instagram },
-  { name: 'Facebook', href: '#', icon: Facebook },
-  { name: 'Twitter', href: '#', icon: Twitter },
-  { name: 'LinkedIn', href: '#', icon: Linkedin },
-]
+  { name: 'Instagram', href: '#', icon: "instagram" },
+  { name: 'Facebook', href: '#', icon: "facebook" },
+  { name: 'Twitter', href: '#', icon: "twitter-x" },
+  { name: 'LinkedIn', href: '#', icon: "linkedin" },
+] as { name: string; href: string; icon: Icons8Name }[]
 
 export function LandingFooter() {
   const form = useForm<z.infer<typeof newsletterSchema>>({
@@ -129,7 +129,7 @@ export function LandingFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <social.icon className="h-5 w-5" />
+                    <Icons8Icon name={social.icon} size={20} />
                   </a>
                 </Button>
               ))}
@@ -209,7 +209,7 @@ export function LandingFooter() {
           <div className="flex flex-col sm:flex-row items-center gap-2 text-muted-foreground text-xs">
             <div className="flex items-center gap-1.5">
               <span>Brewed with</span>
-              <Coffee className="h-3.5 w-3.5 text-primary fill-current" />
+              <Icons8Icon name="coffee" size={14} />
               <span>by</span>
               <span className="font-semibold text-foreground">
                 {APP_NAME}

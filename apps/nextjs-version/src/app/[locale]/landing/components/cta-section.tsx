@@ -1,10 +1,10 @@
 "use client"
 
 import Link from 'next/link'
-import { ShoppingCart, Smartphone, Coffee } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { APP_NAME } from '@/components/application-logo'
+import { Icons8Icon } from '@/components/landing/icons8-icon'
 
 export function CTASection() {
   return (
@@ -16,7 +16,7 @@ export function CTASection() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl text-center">
           <Badge className="mb-6 px-4 py-1.5 rounded-full bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
-            <Coffee className="w-3.5 h-3.5 mr-2 inline" />
+            <Icons8Icon name="coffee" size={14} className="mr-2" />
             Special App-Only Offer
           </Badge>
 
@@ -30,15 +30,19 @@ export function CTASection() {
           </p>
 
           <div className="flex flex-col gap-5 sm:flex-row sm:justify-center">
-            <Button size="xl" className="text-lg px-10 h-14 cursor-pointer group shadow-lg shadow-primary/20" asChild>
+            <Button size="lg" className="text-lg px-10 h-14 cursor-pointer group shadow-lg shadow-primary/20" asChild>
               <Link href="/auth/sign-up">
                 Order Online Now
-                <ShoppingCart className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <Icons8Icon
+                  name="shopping-cart"
+                  size={20}
+                  className="ml-2 group-hover:translate-x-1 transition-transform"
+                />
               </Link>
             </Button>
-            <Button variant="outline" size="xl" className="text-lg px-10 h-14 cursor-pointer bg-background/50 backdrop-blur-sm" asChild>
+            <Button variant="outline" size="lg" className="text-lg px-10 h-14 cursor-pointer bg-background/50 backdrop-blur-sm" asChild>
               <Link href="#">
-                <Smartphone className="mr-2 h-5 w-5" />
+                <Icons8Icon name="smartphone" size={20} className="mr-2" />
                 Download Our App
               </Link>
             </Button>

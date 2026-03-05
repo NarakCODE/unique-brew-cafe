@@ -1,19 +1,13 @@
 "use client"
 
-import {
-  Coffee,
-  Heart,
-  Leaf,
-  Store,
-  MapPin,
-  Utensils,
-  Zap,
-  Star,
-  Gift,
-  Smartphone,
-  Info,
-  HelpCircle
-} from 'lucide-react'
+import { Icons8Icon, type Icons8Name } from "@/components/landing/icons8-icon";
+
+interface MenuItem {
+  title: string;
+  description: string;
+  icon: Icons8Name;
+  href: string;
+}
 
 const menuSections = [
   {
@@ -22,25 +16,25 @@ const menuSections = [
       {
         title: 'Espresso Bar',
         description: 'Handcrafted lattes, cappuccinos & more',
-        icon: Coffee,
+        icon: "coffee",
         href: '#pricing'
       },
       {
         title: 'Tea & Refreshers',
         description: 'Premium teas and fruit-infused drinks',
-        icon: Zap,
+        icon: "lightning",
         href: '#pricing'
       },
       {
         title: 'Bakery & Food',
         description: 'Fresh pastries and delicious bites',
-        icon: Utensils,
+        icon: "food",
         href: '#pricing'
       },
       {
         title: 'Seasonal Specials',
         description: 'Limited-time flavors you will love',
-        icon: Star,
+        icon: "star",
         href: '#pricing'
       }
     ]
@@ -51,25 +45,25 @@ const menuSections = [
       {
         title: 'Our Story',
         description: 'Brewing excellence since 2024',
-        icon: Info,
+        icon: "info",
         href: '#about'
       },
       {
         title: 'Sustainability',
         description: 'Our commitment to ethical coffee',
-        icon: Leaf,
+        icon: "leaf",
         href: '#'
       },
       {
         title: 'Brew Club Rewards',
         description: 'Earn points on every single sip',
-        icon: Gift,
+        icon: "gift",
         href: '#'
       },
       {
         title: 'Mobile App',
         description: 'Order ahead and skip the line',
-        icon: Smartphone,
+        icon: "smartphone",
         href: '#'
       }
     ]
@@ -80,30 +74,30 @@ const menuSections = [
       {
         title: 'Store Locator',
         description: 'Find a Unique Brew Cafe near you',
-        icon: MapPin,
-        href: '#'
+        icon: "map-pin",
+        href: '#stores'
       },
       {
         title: 'Help & FAQs',
         description: 'Answers to your common questions',
-        icon: HelpCircle,
+        icon: "help",
         href: '#faq'
       },
       {
         title: 'Contact Us',
         description: 'Get in touch with our team',
-        icon: Store,
+        icon: "store",
         href: '#contact'
       },
       {
         title: 'Join Our Team',
         description: 'Careers at Unique Brew Cafe',
-        icon: Heart,
+        icon: "heart",
         href: '#'
       }
     ]
   }
-]
+] as { title: string; items: MenuItem[] }[];
 
 export function MegaMenu() {
   return (
@@ -125,7 +119,11 @@ export function MegaMenu() {
                   className="group block space-y-1 lg:space-y-2 hover:bg-accent rounded-md p-2 lg:p-3 -mx-2 lg:-mx-3 transition-colors my-0"
                 >
                   <div className="flex items-center gap-2 lg:gap-3">
-                    <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <Icons8Icon
+                      name={item.icon}
+                      size={16}
+                      className="opacity-75 group-hover:opacity-100 transition-opacity"
+                    />
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                       {item.title}
                     </span>

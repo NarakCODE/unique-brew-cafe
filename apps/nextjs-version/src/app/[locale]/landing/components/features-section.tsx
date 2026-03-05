@@ -1,16 +1,10 @@
 "use client"
 
+import Link from 'next/link'
 import {
-  Clock,
-  Zap,
-  Gift,
-  ArrowRight,
-  MapPin,
-  Coffee,
-  Smartphone,
-  ShieldCheck,
-  Star
-} from 'lucide-react'
+  Icons8Icon,
+  type Icons8Name,
+} from '@/components/landing/icons8-icon'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Image3D } from '@/components/image-3d'
@@ -18,49 +12,49 @@ import { APP_NAME } from '@/components/application-logo'
 
 const mainFeatures = [
   {
-    icon: Clock,
+    icon: "clock",
     title: 'Order Ahead',
     description: 'Skip the line and have your coffee ready when you arrive.'
   },
   {
-    icon: Gift,
+    icon: "gift",
     title: 'Loyalty Rewards',
     description: 'Earn points on every purchase and redeem for free drinks.'
   },
   {
-    icon: Coffee,
+    icon: "coffee",
     title: 'Handcrafted Quality',
     description: 'Every drink is prepared with care by our expert baristas.'
   },
   {
-    icon: Zap,
+    icon: "lightning",
     title: 'Instant Reorder',
     description: 'Your favorite morning brew is just one tap away.'
   }
-]
+] as { icon: Icons8Name; title: string; description: string }[]
 
 const secondaryFeatures = [
   {
-    icon: MapPin,
+    icon: "map-pin",
     title: 'Store Locator',
     description: 'Find the nearest cafe with real-time status and hours.'
   },
   {
-    icon: Smartphone,
+    icon: "smartphone",
     title: 'Mobile Wallet',
     description: 'Secure, fast payments directly from our mobile app.'
   },
   {
-    icon: Star,
+    icon: "star",
     title: 'Exclusive Offers',
     description: 'Get member-only access to new seasonal flavors and deals.'
   },
   {
-    icon: ShieldCheck,
+    icon: "shield",
     title: 'Contactless Service',
     description: 'Safe and convenient ordering for your peace of mind.'
   }
-]
+] as { icon: Icons8Name; title: string; description: string }[]
 
 export function FeaturesSection() {
   return (
@@ -101,7 +95,7 @@ export function FeaturesSection() {
               {mainFeatures.map((feature, index) => (
                 <li key={index} className="group hover:bg-accent/5 flex items-start gap-3 p-2 rounded-lg transition-colors">
                   <div className="mt-0.5 flex shrink-0 items-center justify-center">
-                    <feature.icon className="size-5 text-primary" aria-hidden="true" />
+                    <Icons8Icon name={feature.icon} size={20} />
                   </div>
                   <div>
                     <h3 className="text-foreground font-medium">{feature.title}</h3>
@@ -113,10 +107,10 @@ export function FeaturesSection() {
 
             <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
               <Button size="lg" className="cursor-pointer">
-                <a href="/auth/sign-up" className='flex items-center'>
+                <Link href="/auth/sign-up" className='flex items-center'>
                   Order Now
-                  <ArrowRight className="ms-2 size-4" aria-hidden="true" />
-                </a>
+                  <Icons8Icon name="right" size={16} className="ms-2" />
+                </Link>
               </Button>
               <Button size="lg" variant="outline" className="cursor-pointer">
                 <a href="#about">
@@ -144,7 +138,7 @@ export function FeaturesSection() {
               {secondaryFeatures.map((feature, index) => (
                 <li key={index} className="group hover:bg-accent/5 flex items-start gap-3 p-2 rounded-lg transition-colors">
                   <div className="mt-0.5 flex shrink-0 items-center justify-center">
-                    <feature.icon className="size-5 text-primary" aria-hidden="true" />
+                    <Icons8Icon name={feature.icon} size={20} />
                   </div>
                   <div>
                     <h3 className="text-foreground font-medium">{feature.title}</h3>
@@ -156,10 +150,10 @@ export function FeaturesSection() {
 
             <div className="flex flex-col sm:flex-row gap-4 pe-4 pt-2">
               <Button size="lg" className="cursor-pointer">
-                <a href="/auth/sign-up" className='flex items-center'>
+                <Link href="/auth/sign-up" className='flex items-center'>
                   Join Rewards
-                  <ArrowRight className="ms-2 size-4" aria-hidden="true" />
-                </a>
+                  <Icons8Icon name="right" size={16} className="ms-2" />
+                </Link>
               </Button>
               <Button size="lg" variant="outline" className="cursor-pointer">
                 <a href="#contact">

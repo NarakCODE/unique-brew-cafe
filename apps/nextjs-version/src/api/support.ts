@@ -8,6 +8,7 @@ import {
   SupportMessage,
 } from "@/types/support";
 import { ApiResponse } from "@/types/api";
+import { buildQueryString, withQuery } from "@/lib/search-params";
 
 type TicketListResponse = ApiResponse<{
   tickets: Ticket[];
@@ -21,13 +22,14 @@ type FAQListResponse = ApiResponse<FAQ[]>;
 export const getTickets = async (
   filters?: TicketFilters,
 ): Promise<TicketListResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.status) params.append("status", filters.status);
-  if (filters?.category) params.append("category", filters.category);
-  if (filters?.page) params.append("page", filters.page.toString());
-  if (filters?.limit) params.append("limit", filters.limit.toString());
+  const query = buildQueryString({
+    status: filters?.status,
+    category: filters?.category,
+    page: filters?.page,
+    limit: filters?.limit,
+  });
 
-  return apiClient.get(`/support/tickets?${params.toString()}`);
+  return apiClient.get(withQuery("/support/tickets", query));
 };
 
 export const getTicket = async (id: string): Promise<ApiResponse<Ticket>> => {
@@ -61,10 +63,11 @@ export const addMessage = async (
 export const getFAQs = async (
   filters?: FAQFilters,
 ): Promise<FAQListResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.category) params.append("category", filters.category);
+  const query = buildQueryString({
+    category: filters?.category,
+  });
 
-  return apiClient.get(`/support/faq?${params.toString()}`);
+  return apiClient.get(withQuery("/support/faq", query));
 };
 
 export const createFAQ = async (data: {

@@ -37,11 +37,15 @@ export const description = "An interactive area chart";
 interface ChartAreaInteractiveProps {
   data?: SalesReportItem[];
   isLoading?: boolean;
+  isRefreshing?: boolean;
+  onRefresh?: () => void;
 }
 
 export function ChartAreaInteractive({
   data = [],
   isLoading,
+  isRefreshing = false,
+  onRefresh,
 }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("90d");
@@ -123,10 +127,13 @@ export function ChartAreaInteractive({
                 variant="outline"
                 size="sm"
                 className="cursor-pointer"
-                onClick={() => window.location.reload()}
+                onClick={onRefresh}
+                disabled={!onRefresh || isRefreshing}
               >
-                <RefreshCw className="mr-2 h-4 w-4" />
-                Refresh
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                {isRefreshing ? "Refreshing..." : "Refresh"}
               </Button>
             </EmptyContent>
           </Empty>

@@ -16,14 +16,12 @@ import {
 } from "@/components/ui/empty";
 import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
+import { parseDashboardUsersQuery } from "@/lib/query-schemas";
 
 export default function UsersPage() {
   const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page")) || 1;
-  const limit = Number(searchParams.get("limit")) || 20;
-  const search = searchParams.get("search") || undefined;
-  const status = searchParams.get("status") || undefined;
-  const role = searchParams.get("role") || undefined;
+  const { page, limit, search, status, role } =
+    parseDashboardUsersQuery(searchParams);
 
   const { users, isLoading } = useUsers({
     page,

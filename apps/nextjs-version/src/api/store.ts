@@ -8,41 +8,42 @@ import {
   GetPickupTimesResponse,
   GetStoreHoursResponse,
 } from "@/types/store";
+import { buildQueryString, withQuery } from "@/lib/search-params";
 
 export const getStores = async (
   filters?: StoreFilters
 ): Promise<GetStoresResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.search) params.append("search", filters.search);
-  if (filters?.page) params.append("page", filters.page.toString());
-  if (filters?.limit) params.append("limit", filters.limit.toString());
-  if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder);
-  if (filters?.isActive !== undefined)
-    params.append("isActive", filters.isActive.toString());
-  if (filters?.city) params.append("city", filters.city);
+  const query = buildQueryString({
+    search: filters?.search,
+    page: filters?.page,
+    limit: filters?.limit,
+    sortOrder: filters?.sortOrder,
+    isActive: filters?.isActive,
+    city: filters?.city,
+  });
 
   return apiClient.get(
-    `/stores/admin/all?${params.toString()}`
+    withQuery("/stores/admin/all", query)
   ) as Promise<GetStoresResponse>;
 };
 
 export const getPublicStores = async (
   filters?: PublicStoreFilters
 ): Promise<GetStoresResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.city) params.append("city", filters.city);
-  if (filters?.latitude !== undefined)
-    params.append("latitude", filters.latitude.toString());
-  if (filters?.longitude !== undefined)
-    params.append("longitude", filters.longitude.toString());
-  if (filters?.radius !== undefined)
-    params.append("radius", filters.radius.toString());
-  if (filters?.page) params.append("page", filters.page.toString());
-  if (filters?.limit) params.append("limit", filters.limit.toString());
-  if (filters?.sortBy) params.append("sortBy", filters.sortBy);
-  if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder);
+  const query = buildQueryString({
+    city: filters?.city,
+    latitude: filters?.latitude,
+    longitude: filters?.longitude,
+    radius: filters?.radius,
+    page: filters?.page,
+    limit: filters?.limit,
+    sortBy: filters?.sortBy,
+    sortOrder: filters?.sortOrder,
+  });
 
-  return apiClient.get(`/stores?${params.toString()}`) as Promise<GetStoresResponse>;
+  return apiClient.get(
+    withQuery("/stores", query)
+  ) as Promise<GetStoresResponse>;
 };
 
 export const getStore = async (id: string): Promise<Store> => {

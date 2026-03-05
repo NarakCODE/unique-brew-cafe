@@ -4,33 +4,33 @@ import {
   SearchResponse,
   SearchSuggestionsResponse,
 } from "@/types/search";
+import { buildQueryString, withQuery } from "@/lib/search-params";
 
 export const searchPublic = async (
   filters: SearchQueryFilters
 ): Promise<SearchResponse> => {
-  const params = new URLSearchParams();
-  params.append("q", filters.q);
-  if (filters.type) params.append("type", filters.type);
-  if (filters.limit !== undefined) params.append("limit", filters.limit.toString());
-  if (filters.city) params.append("city", filters.city);
-  if (filters.categoryId) params.append("categoryId", filters.categoryId);
-  if (filters.minPrice !== undefined)
-    params.append("minPrice", filters.minPrice.toString());
-  if (filters.maxPrice !== undefined)
-    params.append("maxPrice", filters.maxPrice.toString());
-  if (filters.isAvailable !== undefined)
-    params.append("isAvailable", filters.isAvailable.toString());
+  const query = buildQueryString({
+    q: filters.q,
+    type: filters.type,
+    limit: filters.limit,
+    city: filters.city,
+    categoryId: filters.categoryId,
+    minPrice: filters.minPrice,
+    maxPrice: filters.maxPrice,
+    isAvailable: filters.isAvailable,
+  });
 
-  return apiClient.get(`/search?${params.toString()}`);
+  return apiClient.get(withQuery("/search", query));
 };
 
 export const getSearchSuggestions = async (
   q: string,
   limit?: number
 ): Promise<SearchSuggestionsResponse> => {
-  const params = new URLSearchParams();
-  params.append("q", q);
-  if (limit !== undefined) params.append("limit", limit.toString());
+  const query = buildQueryString({
+    q,
+    limit,
+  });
 
-  return apiClient.get(`/search/suggestions?${params.toString()}`);
+  return apiClient.get(withQuery("/search/suggestions", query));
 };

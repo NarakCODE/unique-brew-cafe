@@ -6,18 +6,20 @@ import {
   UpdateUserStatusRequest,
   UpdateUserStatusResponse,
 } from "@/types/user";
+import { buildQueryString, withQuery } from "@/lib/search-params";
 
 export const getUsers = async (
   filters?: UserFilters
 ): Promise<GetUsersResponse> => {
-  const params = new URLSearchParams();
-  if (filters?.role) params.append("role", filters.role);
-  if (filters?.status) params.append("status", filters.status);
-  if (filters?.search) params.append("search", filters.search);
-  if (filters?.page) params.append("page", filters.page.toString());
-  if (filters?.limit) params.append("limit", filters.limit.toString());
+  const query = buildQueryString({
+    role: filters?.role,
+    status: filters?.status,
+    search: filters?.search,
+    page: filters?.page,
+    limit: filters?.limit,
+  });
 
-  return apiClient.get(`/users?${params.toString()}`);
+  return apiClient.get(withQuery("/users", query));
 };
 
 export const getUser = async (userId: string): Promise<GetUserResponse> => {

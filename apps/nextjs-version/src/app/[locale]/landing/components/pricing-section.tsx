@@ -27,11 +27,11 @@ export function PricingSection() {
         .filter((product) => {
           const categoryId =
             typeof product.categoryId === "object"
-              ? (product.categoryId._id || product.categoryId.id)
+              ? product.categoryId._id
               : product.categoryId
           const mappedCategoryId =
             typeof product.category === "object"
-              ? (product.category._id || product.category.id)
+              ? product.category._id
               : undefined
 
           return categoryId === category.id || mappedCategoryId === category.id

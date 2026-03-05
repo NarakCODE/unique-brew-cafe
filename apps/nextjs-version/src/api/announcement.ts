@@ -49,3 +49,11 @@ export const togglePublishAnnouncement = async (
 ): Promise<TogglePublishAnnouncementResponse> => {
   return apiClient.patch(`/announcements/${id}/publish`);
 };
+
+export const trackAnnouncementView = async (id: string): Promise<void> => {
+  await apiClient.post(`/announcements/${id}/view`);
+};
+
+export const trackAnnouncementClick = async (id: string): Promise<void> => {
+  await apiClient.post(`/announcements/${id}/click`);
+};
