@@ -1,92 +1,61 @@
 "use client"
 
-import { ArrowRight, TrendingUp, Package, Github } from 'lucide-react'
+import Link from 'next/link'
+import { ShoppingCart, Smartphone, Coffee } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
+import { APP_NAME } from '@/components/application-logo'
 
 export function CTASection() {
   return (
-    <section className='py-16 lg:py-24 bg-muted/80'>
-      <div className='container mx-auto px-4 lg:px-8'>
-        <div className='mx-auto max-w-4xl'>
-          <div className='text-center'>
-            <div className='space-y-8'>
-              {/* Badge and Stats */}
-              <div className='flex flex-col items-center gap-4'>
-                <Badge variant='outline' className='flex items-center gap-2'>
-                  <TrendingUp className='size-3' />
-                  Productivity Suite
-                </Badge>
+    <section className="py-24 sm:py-32 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute inset-0 -z-10 bg-primary/5 dark:bg-primary/10" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/20 blur-[120px] rounded-full -z-10 opacity-30" />
 
-                <div className='text-muted-foreground flex items-center gap-4 text-sm'>
-                  <span className='flex items-center gap-1'>
-                    <div className='size-2 rounded-full bg-green-500' />
-                    150+ Blocks
-                  </span>
-                  <Separator orientation='vertical' className='!h-4' />
-                  <span>25K+ Downloads</span>
-                  <Separator orientation='vertical' className='!h-4' />
-                  <span>4.9★ Rating</span>
-                </div>
-              </div>
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-4xl text-center">
+          <Badge className="mb-6 px-4 py-1.5 rounded-full bg-primary/10 text-primary border-primary/20 hover:bg-primary/20 transition-colors">
+            <Coffee className="w-3.5 h-3.5 mr-2 inline" />
+            Special App-Only Offer
+          </Badge>
 
-              {/* Main Content */}
-              <div className='space-y-6'>
-                <h1 className='text-4xl font-bold tracking-tight text-balance sm:text-5xl lg:text-6xl'>
-                  Supercharge your team&apos;s
-                  <span className='flex sm:inline-flex justify-center'>
-                    <span className='relative mx-2'>
-                      <span className='bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent'>
-                        performance
-                      </span>
-                      <div className='absolute start-0 -bottom-2 h-1 w-full bg-gradient-to-r from-primary/30 to-secondary/30' />
-                    </span>
-                    today
-                  </span>
-                </h1>
+          <h2 className="text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl mb-8">
+            Ready to Savor the Perfect Cup?
+          </h2>
 
-                <p className='text-muted-foreground mx-auto max-w-2xl text-balance lg:text-xl'>
-                  Stop building from scratch. Get production-ready components, templates and dashboards
-                  that integrate seamlessly with your shadcn/ui projects.
-                </p>
-              </div>
+          <p className="mx-auto mb-12 max-w-2xl text-lg text-muted-foreground sm:text-xl leading-relaxed">
+            Join thousands of coffee lovers who trust {APP_NAME} for their daily brew.
+            Start earning rewards today and get 20% off your first order!
+          </p>
 
-              {/* CTA Buttons */}
-              <div className='flex flex-col justify-center gap-4 sm:flex-row sm:gap-6'>
-                <Button size='lg' className='cursor-pointer px-8 py-6 text-lg font-medium' asChild>
-                  <a href='https://shadcnstore.com/blocks' target='_blank' rel='noopener noreferrer'>
-                    <Package className='me-2 size-5' />
-                    Browse Components
-                  </a>
-                </Button>
-                <Button variant='outline' size='lg' className='cursor-pointer px-8 py-6 text-lg font-medium group' asChild>
-                  <a href='https://github.com/silicondeck/shadcn-dashboard-landing-template' target='_blank' rel='noopener noreferrer'>
-                    <Github className='me-2 size-5' />
-                    View on GitHub
-                    <ArrowRight className='ms-2 size-4 transition-transform group-hover:translate-x-1' />
-                  </a>
-                </Button>
-              </div>
+          <div className="flex flex-col gap-5 sm:flex-row sm:justify-center">
+            <Button size="xl" className="text-lg px-10 h-14 cursor-pointer group shadow-lg shadow-primary/20" asChild>
+              <Link href="/auth/sign-up">
+                Order Online Now
+                <ShoppingCart className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </Button>
+            <Button variant="outline" size="xl" className="text-lg px-10 h-14 cursor-pointer bg-background/50 backdrop-blur-sm" asChild>
+              <Link href="#">
+                <Smartphone className="mr-2 h-5 w-5" />
+                Download Our App
+              </Link>
+            </Button>
+          </div>
 
-              {/* Trust Indicators */}
-              <div className='text-muted-foreground flex flex-wrap items-center justify-center gap-6 text-sm'>
-                <div className='flex items-center gap-2'>
-                    <div className='size-2 rounded-full bg-green-600 dark:bg-green-400 me-1' />
-
-                  <span>Free components available</span>
-                </div>
-                <div className='flex items-center gap-2'>
-                    <div className='size-2 rounded-full bg-blue-600 dark:bg-blue-400 me-1' />
-
-                  <span>Commercial license included</span>
-                </div>
-                <div className='flex items-center gap-2'>
-                    <div className='size-2 rounded-full bg-purple-600 dark:bg-purple-400 me-1' />
-
-                  <span>Regular updates & support</span>
-                </div>
-              </div>
+          <div className="mt-12 flex items-center justify-center gap-8 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              Free First Drink
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              Earn Rewards
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary" />
+              Exclusive Access
             </div>
           </div>
         </div>

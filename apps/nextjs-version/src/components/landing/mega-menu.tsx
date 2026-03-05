@@ -1,104 +1,105 @@
 "use client"
 
 import {
-  Shield,
-  BarChart3,
-  Database,
-  Building2,
-  Rocket,
-  Settings,
+  Coffee,
+  Heart,
+  Leaf,
+  Store,
+  MapPin,
+  Utensils,
   Zap,
-  Package,
-  Layout,
-  Crown,
-  Palette
+  Star,
+  Gift,
+  Smartphone,
+  Info,
+  HelpCircle
 } from 'lucide-react'
 
 const menuSections = [
   {
-    title: 'Browse Products',
+    title: 'Our Menu',
     items: [
       {
-        title: 'Free Blocks',
-        description: 'Essential UI components and sections',
-        icon: Package,
-        href: '#free-blocks'
+        title: 'Espresso Bar',
+        description: 'Handcrafted lattes, cappuccinos & more',
+        icon: Coffee,
+        href: '#pricing'
       },
       {
-        title: 'Premium Templates',
-        description: 'Complete page templates and layouts',
-        icon: Crown,
-        href: '#premium-templates'
-      },
-      {
-        title: 'Admin Dashboards',
-        description: 'Full-featured dashboard solutions',
-        icon: BarChart3,
-        href: '#admin-dashboards'
-      },
-      {
-        title: 'Landing Pages',
-        description: 'Marketing and product landing templates',
-        icon: Layout,
-        href: '#landing-pages'
-      }
-    ]
-  },
-  {
-    title: 'Categories',
-    items: [
-      {
-        title: 'E-commerce',
-        description: 'Online store admin panels and components',
-        icon: Building2,
-        href: '#ecommerce'
-      },
-      {
-        title: 'SaaS Dashboards',
-        description: 'Application admin interfaces',
-        icon: Rocket,
-        href: '#saas-dashboards'
-      },
-      {
-        title: 'Analytics',
-        description: 'Data visualization and reporting templates',
-        icon: BarChart3,
-        href: '#analytics'
-      },
-      {
-        title: 'Authentication',
-        description: 'Login, signup, and user management pages',
-        icon: Shield,
-        href: '#authentication'
-      }
-    ]
-  },
-  {
-    title: 'Resources',
-    items: [
-      {
-        title: 'Documentation',
-        description: 'Integration guides and setup instructions',
-        icon: Database,
-        href: '#docs'
-      },
-      {
-        title: 'Component Showcase',
-        description: 'Interactive preview of all components',
-        icon: Palette,
-        href: '#showcase'
-      },
-      {
-        title: 'GitHub Repository',
-        description: 'Open source foundation and community',
-        icon: Settings,
-        href: '#github'
-      },
-      {
-        title: 'Design System',
-        description: 'shadcn/ui standards and customization',
+        title: 'Tea & Refreshers',
+        description: 'Premium teas and fruit-infused drinks',
         icon: Zap,
-        href: '#design-system'
+        href: '#pricing'
+      },
+      {
+        title: 'Bakery & Food',
+        description: 'Fresh pastries and delicious bites',
+        icon: Utensils,
+        href: '#pricing'
+      },
+      {
+        title: 'Seasonal Specials',
+        description: 'Limited-time flavors you will love',
+        icon: Star,
+        href: '#pricing'
+      }
+    ]
+  },
+  {
+    title: 'Experience',
+    items: [
+      {
+        title: 'Our Story',
+        description: 'Brewing excellence since 2024',
+        icon: Info,
+        href: '#about'
+      },
+      {
+        title: 'Sustainability',
+        description: 'Our commitment to ethical coffee',
+        icon: Leaf,
+        href: '#'
+      },
+      {
+        title: 'Brew Club Rewards',
+        description: 'Earn points on every single sip',
+        icon: Gift,
+        href: '#'
+      },
+      {
+        title: 'Mobile App',
+        description: 'Order ahead and skip the line',
+        icon: Smartphone,
+        href: '#'
+      }
+    ]
+  },
+  {
+    title: 'Support',
+    items: [
+      {
+        title: 'Store Locator',
+        description: 'Find a Unique Brew Cafe near you',
+        icon: MapPin,
+        href: '#'
+      },
+      {
+        title: 'Help & FAQs',
+        description: 'Answers to your common questions',
+        icon: HelpCircle,
+        href: '#faq'
+      },
+      {
+        title: 'Contact Us',
+        description: 'Get in touch with our team',
+        icon: Store,
+        href: '#contact'
+      },
+      {
+        title: 'Join Our Team',
+        description: 'Careers at Unique Brew Cafe',
+        icon: Heart,
+        href: '#'
       }
     ]
   }

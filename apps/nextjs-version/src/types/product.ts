@@ -39,6 +39,12 @@ export interface ProductFilters {
   categoryId?: string;
   isAvailable?: boolean;
   isFeatured?: boolean;
+  isBestSelling?: boolean;
+  tags?: string | string[];
+  minPrice?: number;
+  maxPrice?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }
 
 export interface Pagination {

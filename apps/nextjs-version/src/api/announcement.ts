@@ -14,6 +14,11 @@ export const getAnnouncements = async (): Promise<GetAnnouncementsResponse> => {
   return apiClient.get("/announcements/all?isPublished=true");
 };
 
+export const getPublicAnnouncements =
+  async (): Promise<GetAnnouncementsResponse> => {
+    return apiClient.get("/announcements");
+  };
+
 export const getAnnouncement = async (
   id: string
 ): Promise<GetAnnouncementResponse> => {

@@ -1,8 +1,8 @@
 "use client"
 
 import {
-  Package,
-  Download,
+  MapPin,
+  Coffee,
   Users,
   Star
 } from 'lucide-react'
@@ -12,28 +12,28 @@ import { DotPattern } from '@/components/dot-pattern'
 
 const stats = [
   {
-    icon: Package,
-    value: '500+',
-    label: 'Components',
-    description: 'Ready-to-use blocks'
+    icon: MapPin,
+    value: '12',
+    label: 'Stores',
+    description: 'Across the country'
   },
   {
-    icon: Download,
-    value: '25K+',
-    label: 'Downloads',
-    description: 'Trusted worldwide'
+    icon: Coffee,
+    value: '25+',
+    label: 'Varieties',
+    description: 'Artisanal brews'
   },
   {
     icon: Users,
-    value: '10K+',
-    label: 'Developers',
-    description: 'Active community'
+    value: '50K+',
+    label: 'Customers',
+    description: 'Happy coffee lovers'
   },
   {
     icon: Star,
     value: '4.9',
     label: 'Rating',
-    description: 'User satisfaction'
+    description: 'Customer satisfaction'
   }
 ]
 

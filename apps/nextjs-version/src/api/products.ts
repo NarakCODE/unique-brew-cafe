@@ -19,6 +19,18 @@ export const getProducts = async (
     params.append("isAvailable", filters.isAvailable.toString());
   if (filters?.isFeatured !== undefined)
     params.append("isFeatured", filters.isFeatured.toString());
+  if (filters?.isBestSelling !== undefined)
+    params.append("isBestSelling", filters.isBestSelling.toString());
+  if (filters?.tags) {
+    const tags = Array.isArray(filters.tags) ? filters.tags : [filters.tags];
+    tags.forEach((tag) => params.append("tags", tag));
+  }
+  if (filters?.minPrice !== undefined)
+    params.append("minPrice", filters.minPrice.toString());
+  if (filters?.maxPrice !== undefined)
+    params.append("maxPrice", filters.maxPrice.toString());
+  if (filters?.sortBy) params.append("sortBy", filters.sortBy);
+  if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder);
 
   return apiClient.get(`/products?${params.toString()}`);
 };
@@ -35,6 +47,18 @@ export const getAdminProducts = async (
     params.append("isAvailable", filters.isAvailable.toString());
   if (filters?.isFeatured !== undefined)
     params.append("isFeatured", filters.isFeatured.toString());
+  if (filters?.isBestSelling !== undefined)
+    params.append("isBestSelling", filters.isBestSelling.toString());
+  if (filters?.tags) {
+    const tags = Array.isArray(filters.tags) ? filters.tags : [filters.tags];
+    tags.forEach((tag) => params.append("tags", tag));
+  }
+  if (filters?.minPrice !== undefined)
+    params.append("minPrice", filters.minPrice.toString());
+  if (filters?.maxPrice !== undefined)
+    params.append("maxPrice", filters.maxPrice.toString());
+  if (filters?.sortBy) params.append("sortBy", filters.sortBy);
+  if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder);
 
   return apiClient.get(`/products/admin/all?${params.toString()}`);
 };

@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { APP_NAME, ApplicationLogo } from '@/components/application-logo'
-import { Github, Twitter, Linkedin, Youtube, Heart } from 'lucide-react'
+import { Instagram, Facebook, Twitter, Linkedin, Coffee } from 'lucide-react'
 
 const newsletterSchema = z.object({
   email: z.string().email({
@@ -24,37 +24,37 @@ const newsletterSchema = z.object({
 })
 
 const footerLinks = {
-  product: [
-    { name: 'Features', href: '#features' },
-    { name: 'Pricing', href: '#pricing' },
-    { name: 'API', href: '#api' },
-    { name: 'Documentation', href: '#docs' },
+  menu: [
+    { name: 'Coffee & Espresso', href: '#pricing' },
+    { name: 'Tea & Refreshers', href: '#pricing' },
+    { name: 'Bakery & Food', href: '#pricing' },
+    { name: 'Seasonal Specials', href: '#pricing' },
   ],
   company: [
-    { name: 'About', href: '#about' },
-    { name: 'Blog', href: '#blog' },
-    { name: 'Careers', href: '#careers' },
-    { name: 'Press', href: '#press' },
+    { name: 'Our Story', href: '#about' },
+    { name: 'Careers', href: '#' },
+    { name: 'Sustainability', href: '#' },
+    { name: 'News', href: '#' },
   ],
-  resources: [
-    { name: 'Help Center', href: '#help' },
-    { name: 'Community', href: '#community' },
-    { name: 'Guides', href: '#guides' },
-    { name: 'Webinars', href: '#webinars' },
+  support: [
+    { name: 'Help Center', href: '#faq' },
+    { name: 'Contact Us', href: '#contact' },
+    { name: 'Store Locator', href: '#' },
+    { name: 'Gift Cards', href: '#' },
   ],
   legal: [
-    { name: 'Privacy', href: '#privacy' },
-    { name: 'Terms', href: '#terms' },
-    { name: 'Security', href: '#security' },
-    { name: 'Status', href: '#status' },
+    { name: 'Privacy Policy', href: '#' },
+    { name: 'Terms of Service', href: '#' },
+    { name: 'Accessibility', href: '#' },
+    { name: 'Cookie Policy', href: '#' },
   ],
 }
 
 const socialLinks = [
+  { name: 'Instagram', href: '#', icon: Instagram },
+  { name: 'Facebook', href: '#', icon: Facebook },
   { name: 'Twitter', href: '#', icon: Twitter },
-  { name: 'GitHub', href: 'https://github.com/silicondeck/shadcn-dashboard-landing-template', icon: Github },
   { name: 'LinkedIn', href: '#', icon: Linkedin },
-  { name: 'YouTube', href: '#', icon: Youtube },
 ]
 
 export function LandingFooter() {
@@ -66,9 +66,7 @@ export function LandingFooter() {
   })
 
   function onSubmit(values: z.infer<typeof newsletterSchema>) {
-    // Here you would typically send the email to your newsletter service
     console.log(values)
-    // Show success message and reset form
     form.reset()
   }
 
@@ -78,9 +76,9 @@ export function LandingFooter() {
         {/* Newsletter Section */}
         <div className="mb-16">
           <div className="mx-auto max-w-2xl text-center">
-            <h3 className="text-2xl font-bold mb-4">Stay updated</h3>
+            <h3 className="text-2xl font-bold mb-4">Join the Brew Club</h3>
             <p className="text-muted-foreground mb-6">
-              Get the latest updates, articles, and resources sent to your inbox weekly.
+              Subscribe to get 20% off your next order and stay updated on new flavors and exclusive offers.
             </p>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-2 max-w-md mx-auto sm:flex-row">
@@ -92,7 +90,7 @@ export function LandingFooter() {
                       <FormControl>
                         <Input
                           type="email"
-                          placeholder="Enter your email"
+                          placeholder="your@email.com"
                           {...field}
                         />
                       </FormControl>
@@ -100,7 +98,7 @@ export function LandingFooter() {
                     </FormItem>
                   )}
                 />
-                <Button type="submit" className="cursor-pointer">Subscribe</Button>
+                <Button type="submit" className="cursor-pointer px-8">Join Now</Button>
               </form>
             </Form>
           </div>
@@ -119,19 +117,19 @@ export function LandingFooter() {
                 />
               </Link>
             </div>
-            <p className="text-muted-foreground mb-6 max-lg:text-center max-lg:flex max-lg:justify-center">
-              Accelerating web development with curated blocks, templates, landing pages, and admin dashboards designed for modern developers.
+            <p className="text-muted-foreground mb-6 max-lg:text-center max-lg:flex max-lg:justify-center text-sm leading-relaxed">
+              At {APP_NAME}, we&apos;re dedicated to brewing happiness, one cup at a time. Join our community of coffee enthusiasts and experience the perfect blend of tradition and convenience.
             </p>
             <div className="flex space-x-4 max-lg:justify-center">
               {socialLinks.map((social) => (
-                <Button key={social.name} variant="ghost" size="icon" asChild>
+                <Button key={social.name} variant="ghost" size="icon" asChild className="hover:text-primary transition-colors">
                   <a
                     href={social.href}
                     aria-label={social.name}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    <social.icon className="h-4 w-4" />
+                    <social.icon className="h-5 w-5" />
                   </a>
                 </Button>
               ))}
@@ -140,13 +138,13 @@ export function LandingFooter() {
 
           {/* Links Columns */}
           <div className='max-md:col-span-2 lg:col-span-1'>
-            <h4 className="font-semibold mb-4">Product</h4>
+            <h4 className="font-semibold mb-4">Our Menu</h4>
             <ul className="space-y-3">
-              {footerLinks.product.map((link) => (
+              {footerLinks.menu.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     {link.name}
                   </a>
@@ -156,13 +154,13 @@ export function LandingFooter() {
           </div>
 
           <div className='max-md:col-span-2 lg:col-span-1'>
-            <h4 className="font-semibold mb-4">Company</h4>
+            <h4 className="font-semibold mb-4">Experience</h4>
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     {link.name}
                   </a>
@@ -172,13 +170,13 @@ export function LandingFooter() {
           </div>
 
           <div className='max-md:col-span-2 lg:col-span-1'>
-            <h4 className="font-semibold mb-4">Resources</h4>
+            <h4 className="font-semibold mb-4">Support</h4>
             <ul className="space-y-3">
-              {footerLinks.resources.map((link) => (
+              {footerLinks.support.map((link) => (
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     {link.name}
                   </a>
@@ -194,7 +192,7 @@ export function LandingFooter() {
                 <li key={link.name}>
                   <a
                     href={link.href}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     {link.name}
                   </a>
@@ -207,28 +205,28 @@ export function LandingFooter() {
         <Separator className="my-8" />
 
         {/* Bottom Footer */}
-        <div className="flex flex-col lg:flex-row justify-between items-center gap-2">
-          <div className="flex flex-col sm:flex-row items-center gap-2 text-muted-foreground text-sm">
-            <div className="flex items-center gap-1">
-              <span>Made with</span>
-              <Heart className="h-4 w-4 text-red-500 fill-current" />
+        <div className="flex flex-col lg:flex-row justify-between items-center gap-4">
+          <div className="flex flex-col sm:flex-row items-center gap-2 text-muted-foreground text-xs">
+            <div className="flex items-center gap-1.5">
+              <span>Brewed with</span>
+              <Coffee className="h-3.5 w-3.5 text-primary fill-current" />
               <span>by</span>
-              <a href="https://shadcnstore.com" target='_blank' className="font-semibold text-foreground hover:text-primary transition-colors cursor-pointer" rel="noreferrer">
+              <span className="font-semibold text-foreground">
                 {APP_NAME}
-              </a>
+              </span>
             </div>
             <span className="hidden sm:inline">•</span>
-            <span>© {new Date().getFullYear()} for the developer community</span>
+            <span>© {new Date().getFullYear()} All rights reserved.</span>
           </div>
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground mt-4 md:mt-0">
-            <a href="#privacy" className="hover:text-foreground transition-colors">
-              Privacy Policy
+          <div className="flex items-center space-x-6 text-xs text-muted-foreground">
+            <a href="#" className="hover:text-primary transition-colors">
+              Privacy
             </a>
-            <a href="#terms" className="hover:text-foreground transition-colors">
-              Terms of Service
+            <a href="#" className="hover:text-primary transition-colors">
+              Terms
             </a>
-            <a href="#cookies" className="hover:text-foreground transition-colors">
-              Cookie Policy
+            <a href="#" className="hover:text-primary transition-colors">
+              Cookies
             </a>
           </div>
         </div>

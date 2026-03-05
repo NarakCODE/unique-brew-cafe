@@ -1,191 +1,148 @@
 "use client"
 
-import { Check } from 'lucide-react'
+import Link from "next/link"
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
-import { useState } from 'react'
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
+import { APP_NAME } from '@/components/application-logo'
+import { usePublicCategories } from '@/hooks/use-public-categories'
+import { usePublicProducts } from '@/hooks/use-public-products'
 
-const plans = [
-  {
-    name: 'Free',
-    description: 'Perfect for getting started with essential components',
-    monthlyPrice: 0,
-    yearlyPrice: 0,
-    features: [
-      'Access to 50+ free components',
-      'Basic dashboard templates',
-      'Community support',
-      'GitHub repository access',
-      'Documentation and guides'
-    ],
-    cta: 'Get Started',
-    popular: false
-  },
-  {
-    name: 'Pro',
-    description: 'For developers who need premium templates and components',
-    monthlyPrice: 19,
-    yearlyPrice: 15,
-    features: [
-      'Premium template collection',
-      'Advanced dashboard layouts',
-      'Priority support',
-      'Commercial use license',
-      'Early access to new releases',
-      'Figma design files',
-      'Custom component requests',
-      'Direct developer access',
-      'Exclusive design resources'
-    ],
-    cta: 'Get Started',
-    popular: true,
-    includesPrevious: 'All Free features, plus'
-  },
-  {
-    name: 'Lifetime',
-    description: 'One-time payment for lifetime access to everything',
-    monthlyPrice: 299,
-    yearlyPrice: 299,
-    features: [
-      'Lifetime updates and support',
-      'Private Discord channel',
-      'No recurring fees ever',
-      'Future template access',
-      'VIP support priority',
-      'Exclusive beta features'
-    ],
-    cta: 'Get Started',
-    popular: false,
-    includesPrevious: 'All Pro features, plus'
-  }
-]
+function formatPrice(price: number, currency: string) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: currency || "USD",
+  }).format(price ?? 0)
+}
 
 export function PricingSection() {
-  const [isYearly, setIsYearly] = useState(false)
+  const { categories, isLoading: categoriesLoading } = usePublicCategories()
+  const { products, isLoading: productsLoading } = usePublicProducts({ limit: 36 })
+
+  const isLoading = categoriesLoading || productsLoading
+
+  const sections = categories
+    .map((category) => {
+      const items = products
+        .filter((product) => {
+          const categoryId =
+            typeof product.categoryId === "object"
+              ? (product.categoryId._id || product.categoryId.id)
+              : product.categoryId
+          const mappedCategoryId =
+            typeof product.category === "object"
+              ? (product.category._id || product.category.id)
+              : undefined
+
+          return categoryId === category.id || mappedCategoryId === category.id
+        })
+        .slice(0, 4)
+
+      return {
+        id: category.id,
+        slug: category.slug,
+        name: category.name,
+        description: category.description,
+        items,
+        hasFeatured: items.some((item) => item.isFeatured),
+      }
+    })
+    .filter((section) => section.items.length > 0)
+    .slice(0, 3)
 
   return (
-    <section id="pricing" className="py-24 sm:py-32 bg-muted/40">
+    <section id="pricing" className="py-24 sm:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
-        <div className="mx-auto max-w-2xl text-center mb-12">
-          <Badge variant="outline" className="mb-4">Pricing Plans</Badge>
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl mb-4">
-            Choose your plan
+        <div className="mx-auto mb-16 max-w-2xl text-center">
+          <Badge variant="outline" className="mb-4">Our Menu Highlights</Badge>
+          <h2 className="mb-4 text-3xl font-bold tracking-tight sm:text-4xl">
+            Curated Brews & Bites
           </h2>
-          <p className="text-lg text-muted-foreground mb-8">
-            Start building with our free components or upgrade to Pro for access to premium templates and advanced features.
-          </p>
-
-          {/* Billing Toggle */}
-          <div className="flex items-center justify-center mb-2">
-            <ToggleGroup
-              type="single"
-              value={isYearly ? "yearly" : "monthly"}
-              onValueChange={(value) => setIsYearly(value === "yearly")}
-              className="bg-secondary text-secondary-foreground border-none rounded-full p-1 cursor-pointer shadow-none"
-            >
-              <ToggleGroupItem
-                value="monthly"
-                className="data-[state=on]:bg-background data-[state=on]:border-border border-transparent border px-6 !rounded-full data-[state=on]:text-foreground hover:bg-transparent cursor-pointer transition-colors"
-              >
-                Monthly
-              </ToggleGroupItem>
-              <ToggleGroupItem
-                value="yearly"
-                className="data-[state=on]:bg-background data-[state=on]:border-border border-transparent border px-6 !rounded-full data-[state=on]:text-foreground hover:bg-transparent cursor-pointer transition-colors"
-              >
-                Annually
-              </ToggleGroupItem>
-            </ToggleGroup>
-          </div>
-
-          <p className="text-sm text-muted-foreground">
-            <span className="text-primary font-semibold">Save 20%</span> On Annual Billing
+          <p className="text-lg text-muted-foreground">
+            From our signature espresso to artisan pastries, discover the flavors that make {APP_NAME} unique.
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="mx-auto max-w-6xl">
-          <div className="rounded-xl border">
-            <div className="grid lg:grid-cols-3">
-              {plans.map((plan, index) => (
-                <div
-                  key={index}
-                  className={`p-8 grid grid-rows-subgrid row-span-4 gap-6 ${
-                    plan.popular
-                      ? 'my-2 mx-4 rounded-xl bg-card border-transparent shadow-xl ring-1 ring-foreground/10 backdrop-blur'
-                      : ''
-                  }`}
-                >
-                  {/* Plan Header */}
-                  <div>
-                    <div className="text-lg font-medium tracking-tight mb-2">{plan.name}</div>
-                    <div className="text-muted-foreground text-balance text-sm">{plan.description}</div>
-                  </div>
-
-                  {/* Pricing */}
-                  <div>
-                    <div className="text-4xl font-bold mb-1">
-                      {plan.name === 'Lifetime' ? (
-                        `$${plan.monthlyPrice}`
-                      ) : plan.name === 'Free' ? (
-                        '$0'
-                      ) : (
-                        `$${isYearly ? plan.yearlyPrice : plan.monthlyPrice}`
-                      )}
-                    </div>
-                    <div className="text-muted-foreground text-sm">
-                      {plan.name === 'Lifetime' ? 'One-time payment' : 'Per month'}
-                    </div>
-                  </div>
-
-                  {/* CTA Button */}
-                  <div>
-                    <Button
-                      className={`w-full cursor-pointer my-2 ${
-                        plan.popular
-                          ? 'shadow-md border-[0.5px] border-white/25 shadow-black/20 bg-primary ring-1 ring-primary/15 text-primary-foreground hover:bg-primary/90'
-                          : 'shadow-sm shadow-black/15 border border-transparent bg-background ring-1 ring-foreground/10 hover:bg-muted/50'
-                      }`}
-                      variant={plan.popular ? 'default' : 'secondary'}
-                    >
-                      {plan.cta}
-                    </Button>
-                  </div>
-
-                  {/* Features */}
-                  <div>
-                    <ul role="list" className="space-y-3 text-sm">
-                      {plan.includesPrevious && (
-                        <li className="flex items-center gap-3 font-medium">
-                          {plan.includesPrevious}:
-                        </li>
-                      )}
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-center gap-3">
-                          <Check className="text-muted-foreground size-4 flex-shrink-0" strokeWidth={2.5} />
-                          <span>{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              ))}
-            </div>
+        {isLoading && (
+          <div className="rounded-2xl border bg-card p-10 text-center text-muted-foreground">
+            Loading today&apos;s featured menu...
           </div>
-        </div>
+        )}
 
-        {/* Enterprise Note */}
+        {!isLoading && sections.length > 0 && (
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            {sections.map((section, index) => (
+              <Card
+                key={section.id}
+                className={`relative flex flex-col overflow-hidden transition-all duration-300 hover:shadow-xl ${
+                  index === 0 || section.hasFeatured
+                    ? 'border-primary shadow-md lg:scale-[1.03] z-10'
+                    : 'border-border'
+                }`}
+              >
+                {(index === 0 || section.hasFeatured) && (
+                  <div className="absolute right-0 top-0">
+                    <div className="rounded-bl-lg bg-primary px-3 py-1 text-[10px] font-bold uppercase tracking-widest text-primary-foreground">
+                      Popular Picks
+                    </div>
+                  </div>
+                )}
+
+                <CardHeader className="px-8 pb-6 pt-8">
+                  <div className="mb-2 inline-flex w-fit rounded-full border bg-muted/40 px-2.5 py-0.5 text-xs text-muted-foreground">
+                    {section.name}
+                  </div>
+                  <h3 className="text-xl font-bold">{section.name}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {section.description || `Top selections from our ${section.name.toLowerCase()} menu.`}
+                  </p>
+                </CardHeader>
+
+                <CardContent className="flex-1 px-8">
+                  <ul className="space-y-4">
+                    {section.items.map((item) => (
+                      <li key={item._id || item.id} className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-foreground">
+                            {item.name}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {item.isFeatured ? 'Featured item' : 'Daily menu'}
+                          </p>
+                        </div>
+                        <span className="shrink-0 text-sm font-semibold">
+                          {formatPrice(item.basePrice, item.currency)}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+
+                <CardFooter className="p-8 pt-4">
+                  <Button className="w-full" variant="outline" asChild>
+                    <Link href={`/landing/products?categoryId=${section.id}`}>
+                      Explore {section.name}
+                    </Link>
+                  </Button>
+                </CardFooter>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {!isLoading && sections.length === 0 && (
+          <div className="rounded-2xl border border-dashed bg-card p-10 text-center text-muted-foreground">
+            No menu highlights available right now.
+          </div>
+        )}
+
         <div className="mt-16 text-center">
-          <p className="text-muted-foreground">
-            Need custom components or have questions? {' '}
-            <Button variant="link" className="p-0 h-auto cursor-pointer" asChild>
-              <a href="#contact">
-                Contact our team
-              </a>
-            </Button>
-          </p>
+          <p className="mb-4 text-muted-foreground">Want to see our full selection?</p>
+          <Button variant="link" size="lg" asChild>
+            <Link href="/landing/products" className="inline-flex items-center font-semibold">
+              View Full Menu
+            </Link>
+          </Button>
         </div>
       </div>
     </section>

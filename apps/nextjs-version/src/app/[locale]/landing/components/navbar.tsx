@@ -4,12 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Menu,
-  Github,
   LayoutDashboard,
   ChevronDown,
   X,
   Moon,
   Sun,
+  Coffee,
+  ShoppingCart
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -38,31 +39,27 @@ import { useTheme } from "@/hooks/use-theme";
 
 const navigationItems = [
   { name: "Home", href: "#hero" },
+  { name: "Menu", href: "#pricing", hasMegaMenu: true },
+  { name: "About", href: "#about" },
   { name: "Features", href: "#features" },
-  { name: "Solutions", href: "#features", hasMegaMenu: true },
-  { name: "Team", href: "#team" },
-  { name: "Pricing", href: "#pricing" },
   { name: "FAQ", href: "#faq" },
   { name: "Contact", href: "#contact" },
 ];
 
-// Solutions menu items for mobile
-const solutionsItems = [
-  { title: "Browse Products" },
-  { name: "Free Blocks", href: "#free-blocks" },
-  { name: "Premium Templates", href: "#premium-templates" },
-  { name: "Admin Dashboards", href: "#admin-dashboards" },
-  { name: "Landing Pages", href: "#landing-pages" },
-  { title: "Categories" },
-  { name: "E-commerce", href: "#ecommerce" },
-  { name: "SaaS Dashboards", href: "#saas-dashboards" },
-  { name: "Analytics", href: "#analytics" },
-  { name: "Authentication", href: "#authentication" },
-  { title: "Resources" },
-  { name: "Documentation", href: "#docs" },
-  { name: "Component Showcase", href: "#showcase" },
-  { name: "GitHub Repository", href: "#github" },
-  { name: "Design System", href: "#design-system" },
+// Solutions menu items for mobile (renamed to menuItems)
+const menuItems = [
+  { title: "Our Menu" },
+  { name: "Espresso Bar", href: "#pricing" },
+  { name: "Tea & Refreshers", href: "#pricing" },
+  { name: "Bakery & Food", href: "#pricing" },
+  { title: "Experience" },
+  { name: "Our Story", href: "#about" },
+  { name: "Sustainability", href: "#" },
+  { name: "Rewards", href: "#" },
+  { title: "Support" },
+  { name: "Store Locator", href: "#" },
+  { name: "FAQs", href: "#faq" },
+  { name: "Contact", href: "#contact" },
 ];
 
 // Smooth scroll function
@@ -137,32 +134,14 @@ export function LandingNavbar() {
         {/* Desktop CTA */}
         <div className="hidden xl:flex items-center space-x-2">
           <ModeToggle variant="ghost" />
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="cursor-pointer"
-          >
-            <a
-              href="https://github.com/silicondeck/shadcn-dashboard-landing-template"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub Repository"
-            >
-              <Github className="h-5 w-5" />
-            </a>
-          </Button>
-          <Button variant="outline" asChild className="cursor-pointer">
-            <Link href="/dashboard" target="_blank" rel="noopener noreferrer">
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              Dashboard
-            </Link>
-          </Button>
           <Button variant="ghost" asChild className="cursor-pointer">
             <Link href="/sign-in">Sign In</Link>
           </Button>
           <Button asChild className="cursor-pointer">
-            <Link href="/auth/sign-up">Get Started</Link>
+            <Link href="/auth/sign-up">
+              <ShoppingCart className="h-4 w-4 mr-2" />
+              Order Online
+            </Link>
           </Button>
         </div>
 
@@ -203,21 +182,6 @@ export function LandingNavbar() {
                     <Button
                       variant="ghost"
                       size="icon"
-                      asChild
-                      className="cursor-pointer h-8 w-8"
-                    >
-                      <a
-                        href="https://github.com/silicondeck/shadcn-dashboard-landing-template"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="GitHub Repository"
-                      >
-                        <Github className="h-4 w-4" />
-                      </a>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
                       onClick={() => setIsOpen(false)}
                       className="cursor-pointer h-8 w-8"
                     >
@@ -244,7 +208,7 @@ export function LandingNavbar() {
                             />
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pl-4 space-y-1">
-                            {solutionsItems.map((solution, index) =>
+                            {menuItems.map((solution, index) =>
                               solution.title ? (
                                 <div
                                   key={`title-${index}`}
@@ -306,7 +270,7 @@ export function LandingNavbar() {
                   >
                     <Link href="/dashboard">
                       <LayoutDashboard className="size-4" />
-                      Dashboard
+                      Admin Dashboard
                     </Link>
                   </Button>
 
@@ -320,7 +284,7 @@ export function LandingNavbar() {
                       <Link href="/sign-in">Sign In</Link>
                     </Button>
                     <Button asChild size="lg" className="cursor-pointer">
-                      <Link href="/auth/sign-up">Get Started</Link>
+                      <Link href="/auth/sign-up">Order Now</Link>
                     </Button>
                   </div>
                 </div>

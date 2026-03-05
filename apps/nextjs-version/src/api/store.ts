@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import {
   GetStoresResponse,
+  PublicStoreFilters,
   StoreFilters,
   Store,
   CreateStorePayload,
@@ -23,6 +24,25 @@ export const getStores = async (
   return apiClient.get(
     `/stores/admin/all?${params.toString()}`
   ) as Promise<GetStoresResponse>;
+};
+
+export const getPublicStores = async (
+  filters?: PublicStoreFilters
+): Promise<GetStoresResponse> => {
+  const params = new URLSearchParams();
+  if (filters?.city) params.append("city", filters.city);
+  if (filters?.latitude !== undefined)
+    params.append("latitude", filters.latitude.toString());
+  if (filters?.longitude !== undefined)
+    params.append("longitude", filters.longitude.toString());
+  if (filters?.radius !== undefined)
+    params.append("radius", filters.radius.toString());
+  if (filters?.page) params.append("page", filters.page.toString());
+  if (filters?.limit) params.append("limit", filters.limit.toString());
+  if (filters?.sortBy) params.append("sortBy", filters.sortBy);
+  if (filters?.sortOrder) params.append("sortOrder", filters.sortOrder);
+
+  return apiClient.get(`/stores?${params.toString()}`) as Promise<GetStoresResponse>;
 };
 
 export const getStore = async (id: string): Promise<Store> => {
