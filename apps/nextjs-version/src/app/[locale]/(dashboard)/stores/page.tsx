@@ -18,19 +18,13 @@ import { Button } from "@/components/ui/button";
 import { PageHeader } from "@/components/page-header";
 import { TableSkeleton } from "@/components/ui/table-skeleton";
 import { useTranslations } from "next-intl";
+import { parseDashboardStoresQuery } from "@/lib/query-schemas";
 
 export default function StoresPage() {
   const t = useTranslations("Stores");
   const searchParams = useSearchParams();
-  const page = Number(searchParams.get("page")) || 1;
-  const limit = Number(searchParams.get("limit")) || 20;
-  const search = searchParams.get("search") || undefined;
-  const sortOrder =
-    (searchParams.get("sortOrder") as "asc" | "desc") || undefined;
-  const isActive = searchParams.get("isActive")
-    ? searchParams.get("isActive") === "true"
-    : undefined;
-  const city = searchParams.get("city") || undefined;
+  const { page, limit, search, sortOrder, isActive, city } =
+    parseDashboardStoresQuery(searchParams);
 
   const { stores, pagination, isLoading } = useStores({
     page,

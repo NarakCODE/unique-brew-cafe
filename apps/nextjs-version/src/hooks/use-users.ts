@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  keepPreviousData,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 import { getUsers, getUser, updateUserStatus } from "@/api/user";
 import { UserFilters, UpdateUserStatusRequest } from "@/types/user";
 import { ApiErrorResponse } from "@/types/api";
@@ -7,6 +12,7 @@ export function useUsers(filters?: UserFilters) {
   const query = useQuery({
     queryKey: ["users", filters],
     queryFn: () => getUsers(filters),
+    placeholderData: keepPreviousData,
   });
 
   return {

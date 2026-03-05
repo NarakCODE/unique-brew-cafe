@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import {
   getDashboardStats,
   getSalesReport,
@@ -15,11 +15,13 @@ export function useDashboardStats(filters?: DateFilters) {
   const query = useQuery({
     queryKey: ["dashboard-stats", filters],
     queryFn: () => getDashboardStats(filters),
+    placeholderData: keepPreviousData,
   });
 
   return {
     stats: query.data?.data,
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error: query.error as ApiErrorResponse | null,
     refetch: query.refetch,
     isError: query.isError,
@@ -32,11 +34,13 @@ export function useSalesReport(
   const query = useQuery({
     queryKey: ["sales-report", filters],
     queryFn: () => getSalesReport(filters),
+    placeholderData: keepPreviousData,
   });
 
   return {
     sales: query.data?.data ?? [],
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error: query.error as ApiErrorResponse | null,
     refetch: query.refetch,
     isError: query.isError,
@@ -47,11 +51,13 @@ export function useProductPerformance(filters?: DateFilters) {
   const query = useQuery({
     queryKey: ["product-performance", filters],
     queryFn: () => getProductPerformance(filters),
+    placeholderData: keepPreviousData,
   });
 
   return {
     products: query.data?.data ?? [],
     isLoading: query.isLoading,
+    isFetching: query.isFetching,
     error: query.error as ApiErrorResponse | null,
     refetch: query.refetch,
     isError: query.isError,

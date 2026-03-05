@@ -2,7 +2,8 @@ export interface Announcement {
   id: string;
   title: string;
   description: string;
-  actionType: "none" | "link" | "route";
+  actionType: "none" | "promo_code" | "deep_link" | "external_url";
+  actionValue?: string;
   priority: number;
   targetAudience: string;
   userTierFilter: string[];

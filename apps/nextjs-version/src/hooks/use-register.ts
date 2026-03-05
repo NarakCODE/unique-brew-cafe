@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { RegisterPayload, RegisterResponse } from "@/types/auth"
+import { writeVerifyOtpQuery } from "@/lib/query-schemas"
 
 interface UseRegisterOptions {
   onSuccess?: (data: RegisterResponse) => void
@@ -47,9 +48,10 @@ export function useRegister(options?: UseRegisterOptions) {
           sessionStorage.setItem("registrationData", JSON.stringify(payload))
         }
 
-        const params = new URLSearchParams()
-        params.set("email", registerResponse.data.email)
-        router.push(`/verify-otp?${params.toString()}`)
+        const query = writeVerifyOtpQuery({
+          email: registerResponse.data.email,
+        })
+        router.push(`/verify-otp?${query}`)
       }
 
       return registerResponse

@@ -1,9 +1,9 @@
 "use client"
 
 import Image from 'next/image'
-import { ArrowRight } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { Icons8Icon } from '@/components/landing/icons8-icon'
 
 const blogs = [
     {
@@ -80,7 +80,7 @@ export function BlogSection() {
                     className="inline-flex items-center gap-2 text-primary hover:underline cursor-pointer"
                   >
                     Learn More
-                    <ArrowRight className="size-4" />
+                    <Icons8Icon name="right" size={16} />
                   </a>
                 </div>
               </CardContent>

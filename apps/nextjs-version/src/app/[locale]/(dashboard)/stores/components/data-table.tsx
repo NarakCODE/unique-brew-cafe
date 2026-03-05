@@ -38,6 +38,11 @@ import { Store } from "lucide-react";
 
 import { DataTablePagination } from "./data-table-pagination";
 import { DataTableToolbar } from "./data-table-toolbar";
+import {
+  getBooleanParam,
+  getStringParam,
+  writeDashboardStoresQuery,
+} from "../../_lib/search-params";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -62,17 +67,16 @@ export function DataTable<TData, TValue>({
   // Create query string helper
   const createQueryString = React.useCallback(
     (params: Record<string, string | number | null>) => {
-      const newSearchParams = new URLSearchParams(searchParams.toString());
-
-      for (const [key, value] of Object.entries(params)) {
-        if (value === null) {
-          newSearchParams.delete(key);
-        } else {
-          newSearchParams.set(key, String(value));
-        }
-      }
-
-      return newSearchParams.toString();
+      return writeDashboardStoresQuery(searchParams, {
+        search: typeof params.search === "string" ? params.search : undefined,
+        city: typeof params.city === "string" ? params.city : undefined,
+        isActive:
+          typeof params.isActive === "string"
+            ? params.isActive === "true"
+            : null,
+        page: typeof params.page === "number" ? params.page : undefined,
+        limit: typeof params.limit === "number" ? params.limit : undefined,
+      });
     },
     [searchParams],
   );
@@ -85,17 +89,17 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
     () => {
       const filters: ColumnFiltersState = [];
-      const search = searchParams.get("search");
+      const search = getStringParam(searchParams, "search");
       if (search) {
         filters.push({ id: "name", value: search });
       }
-      const city = searchParams.get("city");
+      const city = getStringParam(searchParams, "city");
       if (city) {
         filters.push({ id: "city", value: city });
       }
-      const isActive = searchParams.get("isActive");
-      if (isActive) {
-        filters.push({ id: "isActive", value: [isActive] });
+      const isActive = getBooleanParam(searchParams, "isActive");
+      if (typeof isActive === "boolean") {
+        filters.push({ id: "isActive", value: [String(isActive)] });
       }
       return filters;
     },
@@ -106,34 +110,29 @@ export function DataTable<TData, TValue>({
   // Sync filters to URL
   React.useEffect(() => {
     const timeout = setTimeout(() => {
-      const params = new URLSearchParams(searchParams.toString());
       let hasChanged = false;
 
       // Handle 'name' -> 'search'
       const nameFilter = columnFilters.find((f) => f.id === "name");
-      const currentSearch = params.get("search");
+      const currentSearch = searchParams.get("search");
       if (nameFilter?.value && String(nameFilter.value) !== currentSearch) {
-        params.set("search", String(nameFilter.value));
         hasChanged = true;
       } else if (!nameFilter?.value && currentSearch) {
-        params.delete("search");
         hasChanged = true;
       }
 
       // Handle 'city'
       const cityFilter = columnFilters.find((f) => f.id === "city");
-      const currentCity = params.get("city");
+      const currentCity = searchParams.get("city");
       if (cityFilter?.value && String(cityFilter.value) !== currentCity) {
-        params.set("city", String(cityFilter.value));
         hasChanged = true;
       } else if (!cityFilter?.value && currentCity) {
-        params.delete("city");
         hasChanged = true;
       }
 
       // Handle 'isActive'
       const isActiveFilter = columnFilters.find((f) => f.id === "isActive");
-      const currentIsActive = params.get("isActive");
+      const currentIsActive = searchParams.get("isActive");
       const newIsActive =
         isActiveFilter?.value &&
         Array.isArray(isActiveFilter.value) &&
@@ -142,17 +141,18 @@ export function DataTable<TData, TValue>({
           : null;
 
       if (newIsActive !== currentIsActive) {
-        if (newIsActive) {
-          params.set("isActive", newIsActive);
-        } else {
-          params.delete("isActive");
-        }
         hasChanged = true;
       }
 
       if (hasChanged) {
-        params.set("page", "1"); // Reset page when filters change
-        router.push(`${pathname}?${params.toString()}`);
+        const query = writeDashboardStoresQuery(searchParams, {
+          search: nameFilter?.value ? String(nameFilter.value) : null,
+          city: cityFilter?.value ? String(cityFilter.value) : null,
+          isActive:
+            typeof newIsActive === "string" ? newIsActive === "true" : null,
+          page: 1,
+        });
+        router.push(`${pathname}?${query}`);
       }
     }, 300);
 

@@ -2,15 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import {
-  Menu,
-  Github,
-  LayoutDashboard,
-  ChevronDown,
-  X,
-  Moon,
-  Sun,
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -33,36 +24,34 @@ import {
 } from "@/components/ui/collapsible";
 import { APP_NAME, ApplicationLogo } from "@/components/application-logo";
 import { MegaMenu } from "@/components/landing/mega-menu";
+import { Icons8Icon } from "@/components/landing/icons8-icon";
 import { ModeToggle } from "@/components/mode-toggle";
 import { useTheme } from "@/hooks/use-theme";
 
 const navigationItems = [
   { name: "Home", href: "#hero" },
+  { name: "Menu", href: "#pricing", hasMegaMenu: true },
+  { name: "About", href: "#about" },
   { name: "Features", href: "#features" },
-  { name: "Solutions", href: "#features", hasMegaMenu: true },
-  { name: "Team", href: "#team" },
-  { name: "Pricing", href: "#pricing" },
+  { name: "Stores", href: "#stores" },
   { name: "FAQ", href: "#faq" },
   { name: "Contact", href: "#contact" },
 ];
 
-// Solutions menu items for mobile
-const solutionsItems = [
-  { title: "Browse Products" },
-  { name: "Free Blocks", href: "#free-blocks" },
-  { name: "Premium Templates", href: "#premium-templates" },
-  { name: "Admin Dashboards", href: "#admin-dashboards" },
-  { name: "Landing Pages", href: "#landing-pages" },
-  { title: "Categories" },
-  { name: "E-commerce", href: "#ecommerce" },
-  { name: "SaaS Dashboards", href: "#saas-dashboards" },
-  { name: "Analytics", href: "#analytics" },
-  { name: "Authentication", href: "#authentication" },
-  { title: "Resources" },
-  { name: "Documentation", href: "#docs" },
-  { name: "Component Showcase", href: "#showcase" },
-  { name: "GitHub Repository", href: "#github" },
-  { name: "Design System", href: "#design-system" },
+// Solutions menu items for mobile (renamed to menuItems)
+const menuItems = [
+  { title: "Our Menu" },
+  { name: "Espresso Bar", href: "#pricing" },
+  { name: "Tea & Refreshers", href: "#pricing" },
+  { name: "Bakery & Food", href: "#pricing" },
+  { title: "Experience" },
+  { name: "Our Story", href: "#about" },
+  { name: "Sustainability", href: "#" },
+  { name: "Rewards", href: "#" },
+  { title: "Support" },
+  { name: "Store Locator", href: "#stores" },
+  { name: "FAQs", href: "#faq" },
+  { name: "Contact", href: "#contact" },
 ];
 
 // Smooth scroll function
@@ -137,32 +126,14 @@ export function LandingNavbar() {
         {/* Desktop CTA */}
         <div className="hidden xl:flex items-center space-x-2">
           <ModeToggle variant="ghost" />
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="cursor-pointer"
-          >
-            <a
-              href="https://github.com/silicondeck/shadcn-dashboard-landing-template"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="GitHub Repository"
-            >
-              <Github className="h-5 w-5" />
-            </a>
-          </Button>
-          <Button variant="outline" asChild className="cursor-pointer">
-            <Link href="/dashboard" target="_blank" rel="noopener noreferrer">
-              <LayoutDashboard className="h-4 w-4 mr-2" />
-              Dashboard
-            </Link>
-          </Button>
           <Button variant="ghost" asChild className="cursor-pointer">
             <Link href="/sign-in">Sign In</Link>
           </Button>
           <Button asChild className="cursor-pointer">
-            <Link href="/auth/sign-up">Get Started</Link>
+            <Link href="/auth/sign-up">
+              <Icons8Icon name="shopping-cart" size={16} className="mr-2" />
+              Order Online
+            </Link>
           </Button>
         </div>
 
@@ -170,7 +141,7 @@ export function LandingNavbar() {
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild className="xl:hidden">
             <Button variant="ghost" size="icon" className="cursor-pointer">
-              <Menu className="h-5 w-5" />
+              <Icons8Icon name="menu" size={20} />
               <span className="sr-only">Toggle menu</span>
             </Button>
           </SheetTrigger>
@@ -197,23 +168,16 @@ export function LandingNavbar() {
                       }
                       className="cursor-pointer h-8 w-8"
                     >
-                      <Moon className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                      <Sun className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                      className="cursor-pointer h-8 w-8"
-                    >
-                      <a
-                        href="https://github.com/silicondeck/shadcn-dashboard-landing-template"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        aria-label="GitHub Repository"
-                      >
-                        <Github className="h-4 w-4" />
-                      </a>
+                      <Icons8Icon
+                        name="moon"
+                        size={16}
+                        className="rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0"
+                      />
+                      <Icons8Icon
+                        name="sun"
+                        size={16}
+                        className="absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100"
+                      />
                     </Button>
                     <Button
                       variant="ghost"
@@ -221,7 +185,7 @@ export function LandingNavbar() {
                       onClick={() => setIsOpen(false)}
                       className="cursor-pointer h-8 w-8"
                     >
-                      <X className="h-4 w-4" />
+                      <Icons8Icon name="close" size={16} />
                     </Button>
                   </div>
                 </div>
@@ -239,12 +203,14 @@ export function LandingNavbar() {
                         >
                           <CollapsibleTrigger className="flex items-center justify-between w-full px-4 py-3 text-base font-medium rounded-lg transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer">
                             {item.name}
-                            <ChevronDown
-                              className={`h-4 w-4 transition-transform ${solutionsOpen ? "rotate-180" : ""}`}
+                            <Icons8Icon
+                              name="chevron-down"
+                              size={16}
+                              className={`transition-transform ${solutionsOpen ? "rotate-180" : ""}`}
                             />
                           </CollapsibleTrigger>
                           <CollapsibleContent className="pl-4 space-y-1">
-                            {solutionsItems.map((solution, index) =>
+                            {menuItems.map((solution, index) =>
                               solution.title ? (
                                 <div
                                   key={`title-${index}`}
@@ -305,8 +271,8 @@ export function LandingNavbar() {
                     className="w-full cursor-pointer"
                   >
                     <Link href="/dashboard">
-                      <LayoutDashboard className="size-4" />
-                      Dashboard
+                      <Icons8Icon name="dashboard" size={16} />
+                      Admin Dashboard
                     </Link>
                   </Button>
 
@@ -320,7 +286,7 @@ export function LandingNavbar() {
                       <Link href="/sign-in">Sign In</Link>
                     </Button>
                     <Button asChild size="lg" className="cursor-pointer">
-                      <Link href="/auth/sign-up">Get Started</Link>
+                      <Link href="/auth/sign-up">Order Now</Link>
                     </Button>
                   </div>
                 </div>

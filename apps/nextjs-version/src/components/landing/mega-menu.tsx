@@ -1,108 +1,103 @@
 "use client"
 
-import {
-  Shield,
-  BarChart3,
-  Database,
-  Building2,
-  Rocket,
-  Settings,
-  Zap,
-  Package,
-  Layout,
-  Crown,
-  Palette
-} from 'lucide-react'
+import { Icons8Icon, type Icons8Name } from "@/components/landing/icons8-icon";
+
+interface MenuItem {
+  title: string;
+  description: string;
+  icon: Icons8Name;
+  href: string;
+}
 
 const menuSections = [
   {
-    title: 'Browse Products',
+    title: 'Our Menu',
     items: [
       {
-        title: 'Free Blocks',
-        description: 'Essential UI components and sections',
-        icon: Package,
-        href: '#free-blocks'
+        title: 'Espresso Bar',
+        description: 'Handcrafted lattes, cappuccinos & more',
+        icon: "coffee",
+        href: '#pricing'
       },
       {
-        title: 'Premium Templates',
-        description: 'Complete page templates and layouts',
-        icon: Crown,
-        href: '#premium-templates'
+        title: 'Tea & Refreshers',
+        description: 'Premium teas and fruit-infused drinks',
+        icon: "lightning",
+        href: '#pricing'
       },
       {
-        title: 'Admin Dashboards',
-        description: 'Full-featured dashboard solutions',
-        icon: BarChart3,
-        href: '#admin-dashboards'
+        title: 'Bakery & Food',
+        description: 'Fresh pastries and delicious bites',
+        icon: "food",
+        href: '#pricing'
       },
       {
-        title: 'Landing Pages',
-        description: 'Marketing and product landing templates',
-        icon: Layout,
-        href: '#landing-pages'
+        title: 'Seasonal Specials',
+        description: 'Limited-time flavors you will love',
+        icon: "star",
+        href: '#pricing'
       }
     ]
   },
   {
-    title: 'Categories',
+    title: 'Experience',
     items: [
       {
-        title: 'E-commerce',
-        description: 'Online store admin panels and components',
-        icon: Building2,
-        href: '#ecommerce'
+        title: 'Our Story',
+        description: 'Brewing excellence since 2024',
+        icon: "info",
+        href: '#about'
       },
       {
-        title: 'SaaS Dashboards',
-        description: 'Application admin interfaces',
-        icon: Rocket,
-        href: '#saas-dashboards'
+        title: 'Sustainability',
+        description: 'Our commitment to ethical coffee',
+        icon: "leaf",
+        href: '#'
       },
       {
-        title: 'Analytics',
-        description: 'Data visualization and reporting templates',
-        icon: BarChart3,
-        href: '#analytics'
+        title: 'Brew Club Rewards',
+        description: 'Earn points on every single sip',
+        icon: "gift",
+        href: '#'
       },
       {
-        title: 'Authentication',
-        description: 'Login, signup, and user management pages',
-        icon: Shield,
-        href: '#authentication'
+        title: 'Mobile App',
+        description: 'Order ahead and skip the line',
+        icon: "smartphone",
+        href: '#'
       }
     ]
   },
   {
-    title: 'Resources',
+    title: 'Support',
     items: [
       {
-        title: 'Documentation',
-        description: 'Integration guides and setup instructions',
-        icon: Database,
-        href: '#docs'
+        title: 'Store Locator',
+        description: 'Find a Unique Brew Cafe near you',
+        icon: "map-pin",
+        href: '#stores'
       },
       {
-        title: 'Component Showcase',
-        description: 'Interactive preview of all components',
-        icon: Palette,
-        href: '#showcase'
+        title: 'Help & FAQs',
+        description: 'Answers to your common questions',
+        icon: "help",
+        href: '#faq'
       },
       {
-        title: 'GitHub Repository',
-        description: 'Open source foundation and community',
-        icon: Settings,
-        href: '#github'
+        title: 'Contact Us',
+        description: 'Get in touch with our team',
+        icon: "store",
+        href: '#contact'
       },
       {
-        title: 'Design System',
-        description: 'shadcn/ui standards and customization',
-        icon: Zap,
-        href: '#design-system'
+        title: 'Join Our Team',
+        description: 'Careers at Unique Brew Cafe',
+        icon: "heart",
+        href: '#'
       }
     ]
   }
-]
+] as { title: string; items: MenuItem[] }[];
 
 export function MegaMenu() {
   return (
@@ -124,7 +119,11 @@ export function MegaMenu() {
                   className="group block space-y-1 lg:space-y-2 hover:bg-accent rounded-md p-2 lg:p-3 -mx-2 lg:-mx-3 transition-colors my-0"
                 >
                   <div className="flex items-center gap-2 lg:gap-3">
-                    <item.icon className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                    <Icons8Icon
+                      name={item.icon}
+                      size={16}
+                      className="opacity-75 group-hover:opacity-100 transition-opacity"
+                    />
                     <span className="text-sm font-medium text-foreground group-hover:text-primary transition-colors">
                       {item.title}
                     </span>

@@ -128,6 +128,17 @@ export interface StoreFilters {
   city?: string;
 }
 
+export interface PublicStoreFilters {
+  city?: string;
+  latitude?: number;
+  longitude?: number;
+  radius?: number;
+  page?: number;
+  limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
+}
+
 export interface PickupTimesData {
   storeId: string;
   storeName: string;

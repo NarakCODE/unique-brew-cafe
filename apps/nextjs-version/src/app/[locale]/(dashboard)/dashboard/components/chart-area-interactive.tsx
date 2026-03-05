@@ -12,26 +12,40 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import {
   type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { SalesReportItem } from "@/types/report";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTranslations, useFormatter } from "next-intl";
+import { BarChart3, RefreshCw } from "lucide-react";
 
 export const description = "An interactive area chart";
 
 interface ChartAreaInteractiveProps {
   data?: SalesReportItem[];
   isLoading?: boolean;
+  isRefreshing?: boolean;
+  onRefresh?: () => void;
 }
 
 export function ChartAreaInteractive({
   data = [],
   isLoading,
+  isRefreshing = false,
+  onRefresh,
 }: ChartAreaInteractiveProps) {
   const isMobile = useIsMobile();
   const [timeRange, setTimeRange] = React.useState("90d");
@@ -85,6 +99,44 @@ export function ChartAreaInteractive({
         </CardHeader>
         <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
           <Skeleton className="h-62.5 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (formattedData.length === 0) {
+    return (
+      <Card className="@container/card">
+        <CardHeader>
+          <CardTitle>{t("totalSales")}</CardTitle>
+          <CardDescription>{t("dailyRevenueAndOrders")}</CardDescription>
+        </CardHeader>
+        <CardContent className="px-2 pt-4 sm:px-6 sm:pt-6">
+          <Empty className="h-62.5 border border-dashed">
+            <EmptyHeader>
+              <EmptyMedia variant="icon">
+                <BarChart3 className="h-6 w-6" />
+              </EmptyMedia>
+              <EmptyTitle>No chart data available</EmptyTitle>
+              <EmptyDescription>
+                There is no sales data for the selected period yet.
+              </EmptyDescription>
+            </EmptyHeader>
+            <EmptyContent>
+              <Button
+                variant="outline"
+                size="sm"
+                className="cursor-pointer"
+                onClick={onRefresh}
+                disabled={!onRefresh || isRefreshing}
+              >
+                <RefreshCw
+                  className={`mr-2 h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+                />
+                {isRefreshing ? "Refreshing..." : "Refresh"}
+              </Button>
+            </EmptyContent>
+          </Empty>
         </CardContent>
       </Card>
     );

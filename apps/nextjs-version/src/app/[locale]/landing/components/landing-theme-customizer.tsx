@@ -1,7 +1,6 @@
 "use client"
 
 import React from 'react'
-import { Palette, RotateCcw, Settings, X, Dices, Upload, ExternalLink, Sun, Moon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
 import { Label } from '@/components/ui/label'
@@ -16,6 +15,7 @@ import { ColorPicker } from '@/components/color-picker'
 import { ImportModal } from '@/components/theme-customizer/import-modal'
 import { cn } from '@/lib/utils'
 import type { ImportedTheme } from '@/types/theme-customizer'
+import { Icons8Icon } from '@/components/landing/icons8-icon'
 import "@/components/theme-customizer/circular-transition.css"
 
 interface LandingThemeCustomizerProps {
@@ -136,15 +136,15 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
           <SheetHeader className="space-y-0 p-4 pb-2">
             <div className="flex items-center gap-2">
               <div className="p-2 bg-primary/10 rounded-lg">
-                <Settings className="h-4 w-4" />
+                <Icons8Icon name="settings" size={16} />
               </div>
               <SheetTitle className="text-lg font-semibold">Theme Customizer</SheetTitle>
               <div className="ml-auto flex items-center gap-2">
                 <Button variant="outline" size="icon" onClick={handleReset} className="cursor-pointer h-8 w-8">
-                  <RotateCcw className="h-4 w-4" />
+                  <Icons8Icon name="rotate-left" size={16} />
                 </Button>
                 <Button variant="outline" size="icon" onClick={() => onOpenChange(false)} className="cursor-pointer h-8 w-8">
-                  <X className="h-4 w-4" />
+                  <Icons8Icon name="close" size={16} />
                 </Button>
               </div>
             </div>
@@ -164,7 +164,7 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
                   onClick={handleLightMode}
                   className="cursor-pointer mode-toggle-button relative overflow-hidden"
                 >
-                  <Sun className="h-4 w-4 mr-1 transition-transform duration-300" />
+                  <Icons8Icon name="sun" size={16} className="mr-1 transition-transform duration-300" />
                   Light
                 </Button>
                 <Button
@@ -173,7 +173,7 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
                   onClick={handleDarkMode}
                   className="cursor-pointer mode-toggle-button relative overflow-hidden"
                 >
-                  <Moon className="h-4 w-4 mr-1 transition-transform duration-300" />
+                  <Icons8Icon name="moon" size={16} className="mr-1 transition-transform duration-300" />
                   Dark
                 </Button>
               </div>
@@ -186,7 +186,7 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Shadcn UI Theme Presets</Label>
                 <Button variant="outline" size="sm" onClick={handleRandomShadcn} className="cursor-pointer">
-                  <Dices className="h-3.5 w-3.5 mr-1.5" />
+                  <Icons8Icon name="dice" size={14} className="mr-1.5" />
                   Random
                 </Button>
               </div>
@@ -240,7 +240,7 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
               <div className="flex items-center justify-between">
                 <Label className="text-sm font-medium">Tweakcn Theme Presets</Label>
                 <Button variant="outline" size="sm" onClick={handleRandomTweakcn} className="cursor-pointer">
-                  <Dices className="h-3.5 w-3.5 mr-1.5" />
+                  <Icons8Icon name="dice" size={14} className="mr-1.5" />
                   Random
                 </Button>
               </div>
@@ -324,7 +324,7 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
                 onClick={handleImportClick}
                 className="w-full cursor-pointer"
               >
-                <Upload className="h-3.5 w-3.5 mr-1.5" />
+                <Icons8Icon name="upload" size={14} className="mr-1.5" />
                 Import Theme
               </Button>
             </div>
@@ -353,7 +353,7 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
             {/* Tweakcn */}
             <div className="p-4 bg-muted rounded-lg space-y-3">
               <div className="flex items-center gap-2">
-                <Palette className="h-4 w-4 text-primary" />
+                <Icons8Icon name="palette" size={16} />
                 <span className="text-sm font-medium">Advanced Customization</span>
               </div>
               <p className="text-xs text-muted-foreground">
@@ -373,7 +373,7 @@ export function LandingThemeCustomizer({ open, onOpenChange }: LandingThemeCusto
                 className="w-full cursor-pointer"
                 onClick={() => window.open('https://tweakcn.com/editor/theme', '_blank')}
               >
-                <ExternalLink className="h-3.5 w-3.5 mr-1.5" />
+                <Icons8Icon name="external-link" size={14} className="mr-1.5" />
                 Open Tweakcn
               </Button>
             </div>
@@ -400,7 +400,7 @@ export function LandingThemeCustomizerTrigger({ onClick }: { onClick: () => void
         "fixed top-1/2 -translate-y-1/2 h-12 w-12 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer right-4"
       )}
     >
-      <Settings className="h-5 w-5" />
+      <Icons8Icon name="settings" size={20} />
     </Button>
   )
 }
