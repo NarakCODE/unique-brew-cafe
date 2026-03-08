@@ -528,6 +528,7 @@ class CheckoutService {
 
       return confirmedOrderData;
     } catch (error) {
+      console.log(error);
       throw error;
     } finally {
       await mongoSession.endSession();
