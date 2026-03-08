@@ -17,6 +17,7 @@ import {
   resendOtp,
 } from './otpService.js';
 import { sendWelcomeEmail } from './emailService.js';
+import { hashSecret, verifySecret } from '../utils/secretHash.js';
 
 interface RegisterInput {
   fullName: string;
@@ -374,10 +375,12 @@ const storeRefreshToken = async (
   const expiresAt = new Date();
   expiresAt.setDate(expiresAt.getDate() + 7);
 
+  const tokenHash = await hashSecret(token);
+
   await RefreshToken.create({
     userId,
     tokenId,
-    token,
+    token: tokenHash,
     deviceInfo: deviceInfo?.deviceInfo,
     ipAddress: deviceInfo?.ipAddress,
     userAgent: deviceInfo?.userAgent,
@@ -405,6 +408,11 @@ export const refreshAccessToken = async (
   });
 
   if (!tokenRecord) {
+    throw new UnauthorizedError('Invalid or revoked refresh token');
+  }
+
+  const tokenMatches = await verifySecret(refreshTokenString, tokenRecord.token);
+  if (!tokenMatches) {
     throw new UnauthorizedError('Invalid or revoked refresh token');
   }
 
@@ -459,6 +467,15 @@ export const logoutUser = async (
   });
 
   if (tokenRecord && !tokenRecord.isRevoked) {
+    const tokenMatches = await verifySecret(
+      refreshTokenString,
+      tokenRecord.token
+    );
+
+    if (!tokenMatches) {
+      throw new UnauthorizedError('Invalid refresh token');
+    }
+
     tokenRecord.isRevoked = true;
     await tokenRecord.save();
   }

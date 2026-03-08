@@ -5,8 +5,10 @@ import { OrderStatusHistory } from '../models/OrderStatusHistory.js';
 import { Cart } from '../models/Cart.js';
 import { CartItem } from '../models/CartItem.js';
 import { Product } from '../models/Product.js';
+import { Category } from '../models/Category.js';
+import { Store } from '../models/Store.js';
 import { AddOn } from '../models/AddOn.js';
-import { AppError } from '../utils/AppError.js';
+import { AppError, BadRequestError } from '../utils/AppError.js';
 import PDFDocument from 'pdfkit';
 import {
   parsePaginationParams,
@@ -36,7 +38,283 @@ interface OrderTracking {
   pickedUpAt?: Date | undefined;
 }
 
+interface CreateOrderItemInput {
+  productId: string;
+  quantity: number;
+  customization?: {
+    size?: string;
+    sugarLevel?: string;
+    iceLevel?: string;
+    coffeeLevel?: string;
+  };
+  notes?: string;
+}
+
+interface CreateOrderInput {
+  storeId: string;
+  items: CreateOrderItemInput[];
+  pickupTime?: Date;
+  notes?: string;
+  paymentMethod?: string;
+}
+
 export class OrderService {
+  private extractUserId(
+    user:
+      | mongoose.Types.ObjectId
+      | { _id?: mongoose.Types.ObjectId | string; id?: string }
+      | string
+  ): string {
+    if (typeof user === 'string') {
+      return user;
+    }
+
+    if (user instanceof mongoose.Types.ObjectId) {
+      return user.toString();
+    }
+
+    return user.id || user._id?.toString() || '';
+  }
+
+  private buildCustomer(
+    user:
+      | mongoose.Types.ObjectId
+      | {
+          _id?: mongoose.Types.ObjectId | string;
+          id?: string;
+          fullName?: string;
+          email?: string;
+          phoneNumber?: string;
+          profileImage?: string;
+          role?: string;
+        }
+      | string
+  ) {
+    if (typeof user === 'string' || user instanceof mongoose.Types.ObjectId) {
+      return null;
+    }
+
+    const customerId = user.id || user._id?.toString?.();
+
+    if (!customerId) {
+      return null;
+    }
+
+    return {
+      id: customerId,
+      fullName: user.fullName,
+      email: user.email,
+      phoneNumber: user.phoneNumber,
+      profileImage: user.profileImage,
+      role: user.role,
+    };
+  }
+
+  private shapeOrderResponse<T extends { userId: unknown }>(
+    order: T,
+    extra?: Record<string, unknown>
+  ): T {
+    return {
+      ...order,
+      userId: this.extractUserId(order.userId as never),
+      customer: this.buildCustomer(order.userId as never),
+      ...extra,
+    } as T;
+  }
+
+  private async loadOrderResponse(
+    orderId: string,
+    includeItems = false
+  ): Promise<IOrder> {
+    const order = await Order.findById(orderId)
+      .populate('userId', 'fullName email phoneNumber profileImage role')
+      .populate('storeId', 'name address city phone')
+      .lean();
+
+    if (!order) {
+      throw new AppError('Order not found', 404);
+    }
+
+    const items = includeItems
+      ? await OrderItem.find({ orderId: order._id }).lean()
+      : undefined;
+
+    return this.shapeOrderResponse(order, items ? { items } : undefined) as unknown as IOrder;
+  }
+
+  async createOrder(userId: string, input: CreateOrderInput): Promise<IOrder> {
+    const { storeId, items, pickupTime, notes, paymentMethod = 'cash' } = input;
+
+    if (!mongoose.Types.ObjectId.isValid(storeId)) {
+      throw new AppError('Invalid store ID', 400);
+    }
+
+    const mongoSession = await mongoose.startSession();
+    let createdOrderId: mongoose.Types.ObjectId | null = null;
+
+    try {
+      await mongoSession.withTransaction(async () => {
+        const store = await Store.findOne({
+          _id: storeId,
+          isActive: true,
+        }).session(mongoSession);
+
+        if (!store) {
+          throw new AppError('Store not found or inactive', 404);
+        }
+
+        const productIds = items.map((item) => item.productId);
+        const uniqueProductIds = [...new Set(productIds)];
+
+        const products = await Product.find({
+          _id: { $in: uniqueProductIds },
+          isAvailable: true,
+          deletedAt: { $exists: false },
+        })
+          .session(mongoSession);
+
+        if (products.length !== uniqueProductIds.length) {
+          throw new AppError(
+            'One or more products are unavailable or do not exist',
+            400
+          );
+        }
+
+        const productMap = new Map(
+          products.map((product) => [String(product._id), product])
+        );
+
+        const categoryIds = [
+          ...new Set(products.map((product) => String(product.categoryId))),
+        ];
+        const categories = await Category.find({
+          _id: { $in: categoryIds },
+        })
+          .select('_id storeId isActive')
+          .session(mongoSession)
+          .lean();
+
+        const categoryMap = new Map(
+          categories.map((category) => [String(category._id), category])
+        );
+
+        for (const product of products) {
+          const category = categoryMap.get(String(product.categoryId));
+
+          if (!category || !category.isActive) {
+            throw new BadRequestError(
+              'Product category is inactive or missing',
+              undefined,
+              [
+                {
+                  productId: String(product._id),
+                  categoryId: String(product.categoryId),
+                  requestedStoreId: storeId,
+                },
+              ]
+            );
+          }
+
+          if (String(category.storeId) !== storeId) {
+            throw new BadRequestError(
+              'One or more products do not belong to the selected store',
+              undefined,
+              [
+                {
+                  productId: String(product._id),
+                  categoryId: String(product.categoryId),
+                  categoryStoreId: String(category.storeId),
+                  requestedStoreId: storeId,
+                },
+              ]
+            );
+          }
+        }
+
+        const orderItemDocs = items.map((item) => {
+          const product = productMap.get(item.productId);
+          if (!product) {
+            throw new AppError('Product not found', 400);
+          }
+
+          const unitPrice = product.basePrice;
+          const totalPrice = unitPrice * item.quantity;
+
+          return {
+            productId: product._id,
+            productName: product.name,
+            productImage: product.images?.[0] || '',
+            quantity: item.quantity,
+            customization: item.customization,
+            notes: item.notes,
+            unitPrice,
+            totalPrice,
+          };
+        });
+
+        const subtotal = orderItemDocs.reduce(
+          (sum, item) => sum + item.totalPrice,
+          0
+        );
+        const tax = Number((subtotal * 0.1).toFixed(2));
+        const total = Number((subtotal + tax).toFixed(2));
+
+        const estimatedReadyTime = pickupTime
+          ? undefined
+          : new Date(Date.now() + store.averagePrepTime * 60 * 1000);
+
+        const order = new Order({
+          userId,
+          storeId,
+          status: 'received',
+          paymentStatus: 'pending',
+          paymentMethod,
+          subtotal,
+          discount: 0,
+          tax,
+          deliveryFee: 0,
+          total,
+          currency: 'USD',
+          pickupTime,
+          estimatedReadyTime,
+          notes,
+        });
+
+        await order.save({ session: mongoSession });
+
+        await OrderItem.insertMany(
+          orderItemDocs.map((item) => ({
+            orderId: order._id,
+            ...item,
+          })),
+          { session: mongoSession }
+        );
+
+        await OrderStatusHistory.create(
+          [
+            {
+              orderId: order._id,
+              status: 'received',
+              notes: 'Order received from mobile checkout',
+              changedBy: 'customer',
+            },
+          ],
+          { session: mongoSession }
+        );
+
+        createdOrderId = order._id as mongoose.Types.ObjectId;
+      });
+    } finally {
+      await mongoSession.endSession();
+    }
+
+    if (!createdOrderId) {
+      throw new AppError('Unable to create order', 500);
+    }
+
+    return this.loadOrderResponse(String(createdOrderId), true);
+  }
+
   /**
    * Get orders with filters based on user role (with pagination)
    */
@@ -86,6 +364,7 @@ export class OrderService {
     const [orders, total] = await Promise.all([
       Order.find(query)
         .select('-internalNotes') // Exclude internal notes for non-admin users
+        .populate('userId', 'fullName email phoneNumber profileImage role')
         .populate('storeId', 'name address city')
         .sort(sort)
         .skip(skip)
@@ -95,7 +374,7 @@ export class OrderService {
     ]);
 
     return buildPaginationResult(
-      orders as unknown as IOrder[],
+      orders.map((order) => this.shapeOrderResponse(order)) as unknown as IOrder[],
       total,
       page,
       limit
@@ -115,6 +394,7 @@ export class OrderService {
     }
 
     const order = await Order.findById(orderId)
+      .populate('userId', 'fullName email phoneNumber profileImage role')
       .populate('storeId', 'name address city phone')
       .lean();
 
@@ -123,14 +403,14 @@ export class OrderService {
     }
 
     // Validate ownership for non-admin users
-    if (role !== 'admin' && order.userId.toString() !== userId) {
+    if (role !== 'admin' && this.extractUserId(order.userId) !== userId) {
       throw new AppError('You do not have permission to view this order', 403);
     }
 
     // Get order items
     const items = await OrderItem.find({ orderId: order._id }).lean();
 
-    return { ...order, items } as unknown as IOrder;
+    return this.shapeOrderResponse(order, { items }) as unknown as IOrder;
   }
 
   /**
@@ -315,7 +595,7 @@ export class OrderService {
     }
 
     const mongoSession = await mongoose.startSession();
-    let cancelledOrder: IOrder | null = null;
+    let cancelledOrderId: string | null = null;
 
     try {
       await mongoSession.withTransaction(async () => {
@@ -378,17 +658,17 @@ export class OrderService {
           { session: mongoSession }
         );
 
-        cancelledOrder = order;
+        cancelledOrderId = String(order._id);
       });
     } finally {
       await mongoSession.endSession();
     }
 
-    if (!cancelledOrder) {
+    if (!cancelledOrderId) {
       throw new AppError('Unable to cancel order', 500);
     }
 
-    return cancelledOrder;
+    return this.loadOrderResponse(cancelledOrderId);
   }
 
   /**
@@ -767,7 +1047,7 @@ export class OrderService {
 
     await order.save();
 
-    return order;
+    return this.loadOrderResponse(orderId);
   }
 
   /**
@@ -782,7 +1062,7 @@ export class OrderService {
     }
 
     const mongoSession = await mongoose.startSession();
-    let updatedOrder: IOrder | null = null;
+    let updatedOrderId: string | null = null;
 
     try {
       await mongoSession.withTransaction(async () => {
@@ -830,19 +1110,19 @@ export class OrderService {
           { session: mongoSession }
         );
 
-        updatedOrder = order;
+        updatedOrderId = String(order._id);
       });
     } finally {
       await mongoSession.endSession();
     }
 
-    if (!updatedOrder) {
+    if (!updatedOrderId) {
       throw new AppError('Unable to update order status', 500);
     }
 
     // TODO: Send notification to user about status change
     // This would be implemented when notification service is ready
-    return updatedOrder;
+    return this.loadOrderResponse(updatedOrderId);
   }
 
   /**
@@ -858,7 +1138,7 @@ export class OrderService {
     }
 
     const mongoSession = await mongoose.startSession();
-    let updatedOrder: IOrder | null = null;
+    let updatedOrderId: string | null = null;
 
     try {
       await mongoSession.withTransaction(async () => {
@@ -892,19 +1172,19 @@ export class OrderService {
           { session: mongoSession }
         );
 
-        updatedOrder = order;
+        updatedOrderId = String(order._id);
       });
     } finally {
       await mongoSession.endSession();
     }
 
-    if (!updatedOrder) {
+    if (!updatedOrderId) {
       throw new AppError('Unable to assign driver', 500);
     }
 
     // TODO: Send notification to driver about assignment
     // This would be implemented when notification service is ready
-    return updatedOrder;
+    return this.loadOrderResponse(updatedOrderId);
   }
 
   /**
@@ -915,8 +1195,9 @@ export class OrderService {
     newStatus: OrderStatus
   ): boolean {
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
+      received: ['confirmed', 'cancelled'],
       pending_payment: ['confirmed', 'cancelled'],
-      confirmed: ['preparing', 'cancelled'],
+      confirmed: ['preparing', 'ready', 'cancelled'],
       preparing: ['ready', 'cancelled'],
       ready: ['picked_up', 'cancelled'],
       picked_up: ['completed'],

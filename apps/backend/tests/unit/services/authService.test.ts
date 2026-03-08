@@ -5,6 +5,7 @@ import { RefreshToken } from '../../../src/models/RefreshToken.js';
 import { createTestUser } from '../../utils/testHelpers.js';
 import * as otpService from '../../../src/services/otpService.js';
 import * as emailService from '../../../src/services/emailService.js';
+import { verifyRefreshToken } from '../../../src/utils/jwt.js';
 
 // Mock dependencies
 vi.mock('../../../src/services/otpService.js');
@@ -218,10 +219,12 @@ describe('AuthService', () => {
         password: 'password123',
       });
 
+      const decoded = verifyRefreshToken(loginResult.refreshToken);
+
       await authService.logoutUser(loginResult.refreshToken);
 
       const token = await RefreshToken.findOne({
-        token: loginResult.refreshToken,
+        tokenId: decoded.tokenId,
       });
       expect(token?.isRevoked).toBe(true);
     });
@@ -235,10 +238,12 @@ describe('AuthService', () => {
         password: 'password123',
       });
 
+      const decoded = verifyRefreshToken(loginResult.refreshToken);
+
       await authService.revokeAllUserTokens(user.id.toString());
 
       const token = await RefreshToken.findOne({
-        token: loginResult.refreshToken,
+        tokenId: decoded.tokenId,
       });
       expect(token?.isRevoked).toBe(true);
     });

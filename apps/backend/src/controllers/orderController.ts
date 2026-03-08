@@ -7,6 +7,30 @@ import type { OrderStatus } from '../models/Order.js';
 const orderService = new OrderService();
 
 /**
+ * @route   POST /orders
+ * @desc    Create an order directly from mobile checkout
+ * @access  Private
+ */
+export const createOrder = asyncHandler(
+  async (req: Request, res: Response): Promise<void> => {
+    const userId = req.userId!;
+    const { storeId, items, pickupTime, notes, paymentMethod } = req.body;
+
+    const order = await orderService.createOrder(userId, {
+      storeId,
+      items,
+      pickupTime,
+      notes,
+      paymentMethod,
+    });
+
+    res
+      .status(201)
+      .json(new ApiResponse(201, order, 'Order created successfully'));
+  }
+);
+
+/**
  * @route   GET /orders
  * @desc    Get user's orders (or all orders for admin) with pagination
  * @access  Private

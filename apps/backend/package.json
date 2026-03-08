@@ -68,6 +68,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "pdfkit": "^0.17.2",
+    "redis": "^4.7.1",
     "slugify": "^1.6.6",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.12"

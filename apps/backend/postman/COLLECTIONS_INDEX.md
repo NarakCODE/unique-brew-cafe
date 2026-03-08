@@ -2,7 +2,7 @@
 
 ## Overview
 
-This is the master index for all Postman collections. The API has been split into 5 focused collections for better organization and performance.
+This is the master index for all Postman collections. The API has been split into 6 focused collections for better organization and performance.
 
 ## Quick Import Guide
 
@@ -10,12 +10,13 @@ This is the master index for all Postman collections. The API has been split int
 
 1. Open Postman
 2. Click **Import**
-3. Select all 5 JSON files from this directory:
+3. Select all 6 JSON files from this directory:
    - `1_Authentication_User_Management.postman_collection.json`
    - `2_Stores_Products_Categories.postman_collection.json`
    - `3_Shopping_Orders.postman_collection.json`
    - `4_Notifications_Support.postman_collection.json`
    - `5_Admin_Config.postman_collection.json`
+   - `6_Demo_Mobile_Checkout_Admin_Status.postman_collection.json`
 4. Click **Import**
 
 ## Collections Breakdown
@@ -70,6 +71,16 @@ This is the master index for all Postman collections. The API has been split int
 
 **Admin Dashboard** - Business intelligence and settings
 
+### Collection 6: Demo Mobile Checkout & Admin Status (10 endpoints)
+
+- Direct mobile checkout using `POST /orders`
+- Customer-side order tracking
+- Admin status transition testing
+- Guided `received -> confirmed -> ready` demo flow
+- Detailed walkthrough in `DEMO_CHECKOUT_STATUS_GUIDE.md`
+
+**Demo Flow** - Focused collection for the newly implemented order creation path
+
 ## Total Coverage
 
 - **Total Endpoints**: 163+
@@ -83,7 +94,7 @@ This is the master index for all Postman collections. The API has been split int
 
 All collections use the variable: `{{baseUrl}}`
 
-**Default**: `http://localhost:3000/api`
+**Default**: `http://localhost:8081/api`
 
 To change for all collections:
 

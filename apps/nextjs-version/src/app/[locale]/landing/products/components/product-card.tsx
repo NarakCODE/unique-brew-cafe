@@ -61,19 +61,19 @@ export function ProductCard({ product, href }: ProductCardProps) {
   return (
     <Link href={href} aria-label={`View details for ${product.name}`}>
       <Card className="group h-full cursor-pointer overflow-hidden rounded-3xl border border-border/70 bg-card/95 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/10">
-      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+      <div className="relative aspect-4/3 overflow-hidden bg-muted">
         <Avatar className="h-full w-full rounded-none">
           <AvatarImage
             src={imageUrl}
             alt={product.name}
             className="object-cover transition-transform duration-500 group-hover:scale-110"
           />
-          <AvatarFallback className="rounded-none bg-gradient-to-br from-primary/15 to-primary/5 text-4xl text-primary">
+          <AvatarFallback className="rounded-none bg-linear-to-br from-primary/15 to-primary/5 text-4xl text-primary">
             {product.name?.charAt(0)?.toUpperCase() || "P"}
           </AvatarFallback>
         </Avatar>
 
-        <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-black/45 via-transparent to-transparent" />
 
         <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
           {product.isFeatured && (

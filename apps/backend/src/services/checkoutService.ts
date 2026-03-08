@@ -6,6 +6,7 @@ import { PromoCodeUsage } from '../models/PromoCodeUsage.js';
 import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
 import { OrderStatusHistory } from '../models/OrderStatusHistory.js';
+import { redisManager } from '../config/redis.js';
 import { AppError } from '../utils/AppError.js';
 
 interface CheckoutItem {
@@ -73,10 +74,65 @@ interface ConfirmedOrderResponse {
 
 class CheckoutService {
   private readonly CHECKOUT_SESSION_EXPIRY = 15 * 60 * 1000; // 15 minutes
+  private readonly CHECKOUT_SESSION_TTL_SECONDS = Math.floor(
+    this.CHECKOUT_SESSION_EXPIRY / 1000
+  );
   private readonly TAX_RATE = 0.1; // 10% tax
 
-  // In-memory storage for checkout sessions (in production, use Redis)
+  // Local fallback when Redis is disabled.
   private checkoutSessions: Map<string, CheckoutSession> = new Map();
+
+  private getRedisKey(checkoutId: string): string {
+    return `checkout-session:${checkoutId}`;
+  }
+
+  private serializeSession(session: CheckoutSession): string {
+    return JSON.stringify(session);
+  }
+
+  private deserializeSession(payload: string): CheckoutSession {
+    const parsed = JSON.parse(payload) as CheckoutSession;
+
+    return {
+      ...parsed,
+      createdAt: new Date(parsed.createdAt),
+      expiresAt: new Date(parsed.expiresAt),
+    };
+  }
+
+  private async saveCheckoutSession(session: CheckoutSession): Promise<void> {
+    if (redisManager.isEnabled()) {
+      await redisManager.set(
+        this.getRedisKey(session.id),
+        this.serializeSession(session),
+        this.CHECKOUT_SESSION_TTL_SECONDS
+      );
+      return;
+    }
+
+    this.checkoutSessions.set(session.id, session);
+    this.cleanupExpiredSessions();
+  }
+
+  private async loadCheckoutSession(
+    checkoutId: string
+  ): Promise<CheckoutSession | null> {
+    if (redisManager.isEnabled()) {
+      const payload = await redisManager.get(this.getRedisKey(checkoutId));
+      return payload ? this.deserializeSession(payload) : null;
+    }
+
+    return this.checkoutSessions.get(checkoutId) || null;
+  }
+
+  private async deleteCheckoutSession(checkoutId: string): Promise<void> {
+    if (redisManager.isEnabled()) {
+      await redisManager.del(this.getRedisKey(checkoutId));
+      return;
+    }
+
+    this.checkoutSessions.delete(checkoutId);
+  }
 
   async validateCheckout(userId: string): Promise<ValidationResult> {
     const errors: string[] = [];
@@ -196,10 +252,7 @@ class CheckoutService {
       createdAt: new Date(),
     };
 
-    this.checkoutSessions.set(sessionId, session);
-
-    // Clean up expired sessions
-    this.cleanupExpiredSessions();
+    await this.saveCheckoutSession(session);
 
     return session;
   }
@@ -208,7 +261,7 @@ class CheckoutService {
     userId: string,
     checkoutId: string
   ): Promise<CheckoutSession> {
-    const session = this.checkoutSessions.get(checkoutId);
+    const session = await this.loadCheckoutSession(checkoutId);
 
     if (!session) {
       throw new AppError('Checkout session not found', 404);
@@ -219,7 +272,7 @@ class CheckoutService {
     }
 
     if (new Date() > session.expiresAt) {
-      this.checkoutSessions.delete(checkoutId);
+      await this.deleteCheckoutSession(checkoutId);
       throw new AppError('Checkout session has expired', 400);
     }
 
@@ -336,7 +389,7 @@ class CheckoutService {
       discountAmount,
     };
 
-    this.checkoutSessions.set(checkoutId, session);
+    await this.saveCheckoutSession(session);
 
     // Update cart
     await Cart.findByIdAndUpdate(session.cartId, {
@@ -360,7 +413,7 @@ class CheckoutService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (session as any).promoCode;
 
-    this.checkoutSessions.set(checkoutId, session);
+    await this.saveCheckoutSession(session);
 
     // Update cart
     await Cart.findByIdAndUpdate(session.cartId, {
@@ -520,7 +573,7 @@ class CheckoutService {
       });
 
       // Clean up checkout session
-      this.checkoutSessions.delete(checkoutId);
+      await this.deleteCheckoutSession(checkoutId);
 
       if (!confirmedOrderData) {
         throw new AppError('Unable to confirm checkout', 500);

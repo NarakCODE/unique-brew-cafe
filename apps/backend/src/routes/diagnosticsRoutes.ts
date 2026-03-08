@@ -1,9 +1,40 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Router } from 'express';
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { isBrevoConfigured, getDefaultSender } from '../config/brevo.js';
+import { config } from '../config/env.js';
 
 const router = Router();
+
+const requireDiagnosticsAccess = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  if (config.nodeEnv !== 'production') {
+    return next();
+  }
+
+  if (!config.diagnosticsEnabled) {
+    return res.status(404).json({
+      success: false,
+      message: 'Not found',
+    });
+  }
+
+  const providedToken = req.header('x-diagnostics-token');
+
+  if (!providedToken || providedToken !== config.diagnosticsToken) {
+    return res.status(403).json({
+      success: false,
+      message: 'Forbidden',
+    });
+  }
+
+  return next();
+};
+
+router.use(requireDiagnosticsAccess);
 
 /**
  * GET /api/diagnostics/brevo

@@ -33,6 +33,7 @@ import {
   Settings05Icon,
   CreditCardIcon,
   Layout03Icon,
+  ShoppingBasket01Icon,
 } from "@hugeicons/core-free-icons";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -88,6 +89,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: t("Announcements"),
             url: "/announcements",
             icon: Megaphone01Icon,
+          },
+          {
+            title: t("Orders"),
+            url: "/orders",
+            icon: ShoppingBasket01Icon,
           },
           {
             title: t("Support"),

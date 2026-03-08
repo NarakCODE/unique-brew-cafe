@@ -71,7 +71,8 @@
     "Appearance": "Appearance",
     "Connections": "Connections",
     "Pricing": "Pricing",
-    "AdminDashboard": "Admin Dashboard"
+    "AdminDashboard": "Admin Dashboard",
+    "Orders": "Orders"
   },
   "Auth": {
     "loginTitle": "Login to your account",
@@ -269,8 +270,38 @@
       "categoryNotFound": "Category not found."
     }
   },
+
+  "Orders": {
+    "title": "Orders",
+    "description": "Manage your orders and view their details.",
+    "addNew": "Add New",
+    "noOrdersFound": "No orders found",
+    "noOrdersDescription": "There are no orders registered in the system yet.",
+    "addOrder": "Add Order",
+    "orderNumber": "Order Number",
+    "customer": "Customer",
+    "store": "Store",
+    "status": "Status",
+    "created": "Created",
+    "actions": "Actions",
+    "details": {
+      "title": "Order Details",
+      "description": "View detailed information about this order.",
+      "displayOrder": "Display Order",
+      "lastUpdated": "Last Updated",
+      "orderInformation": "Order Information",
+      "orderNumber": "Order Number",
+      "customer": "Customer",
+      "store": "Store",
+      "status": "Status",
+      "created": "Created",
+      "actions": "Actions",
+      "orderNotFound": "Order not found."
+    }
+  },
   "Common": {
     "dashboard": "Dashboard",
-    "settings": "Settings"
+    "settings": "Settings",
+    "orders": "Orders"
   }
 }

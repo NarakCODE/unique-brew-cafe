@@ -1,5 +1,6 @@
 import express, { Router } from 'express';
 import {
+  createOrder,
   getOrders,
   getOrderById,
   getOrderTracking,
@@ -16,6 +17,7 @@ import { authenticate } from '../middlewares/auth.js';
 import { authorize } from '../middlewares/authorize.js';
 import { validate } from '../middlewares/validate.js';
 import {
+  createOrderSchema,
   getOrdersQuerySchema,
   orderParamSchema,
   cancelOrderSchema,
@@ -31,6 +33,7 @@ const router: Router = express.Router();
 router.use(authenticate);
 
 // User order routes
+router.post('/', validate(createOrderSchema), createOrder);
 router.get('/', validate(getOrdersQuerySchema), getOrders);
 router.get('/:orderId', validate(orderParamSchema), getOrderById);
 router.get('/:orderId/tracking', validate(orderParamSchema), getOrderTracking);

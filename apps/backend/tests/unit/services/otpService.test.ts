@@ -75,19 +75,17 @@ describe('OtpService', () => {
       vi.mocked(User.findOne).mockResolvedValue(null);
       vi.mocked(Otp.deleteMany).mockResolvedValue({} as any);
 
-      let capturedOtpCode: string | undefined;
-      vi.mocked(Otp.create).mockImplementation((data: any) => {
-        capturedOtpCode = data.otpCode;
-        return Promise.resolve({} as any);
-      });
+      vi.mocked(Otp.create).mockResolvedValue({} as any);
       vi.mocked(emailService.sendOtpEmail).mockResolvedValue();
 
       await otpService.createRegistrationOtp(email);
 
-      expect(capturedOtpCode).toBeDefined();
-      expect(capturedOtpCode).toMatch(/^\d{6}$/);
-      expect(Number(capturedOtpCode)).toBeGreaterThanOrEqual(100000);
-      expect(Number(capturedOtpCode)).toBeLessThanOrEqual(999999);
+      const otpCode = vi.mocked(emailService.sendOtpEmail).mock.calls[0]?.[0]
+        ?.otpCode;
+      expect(otpCode).toBeDefined();
+      expect(otpCode).toMatch(/^\d{6}$/);
+      expect(Number(otpCode)).toBeGreaterThanOrEqual(100000);
+      expect(Number(otpCode)).toBeLessThanOrEqual(999999);
     });
 
     it('should set expiration to 10 minutes from now', async () => {

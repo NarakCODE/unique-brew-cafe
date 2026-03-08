@@ -5,6 +5,7 @@ import {
   UnauthorizedError,
   NotFoundError,
 } from '../utils/AppError.js';
+import { hashSecret, verifySecret } from '../utils/secretHash.js';
 import { sendOtpEmail, sendPasswordResetEmail } from './emailService.js';
 
 /**
@@ -38,6 +39,7 @@ export const createRegistrationOtp = async (
 
   // Generate OTP code
   const otpCode = generateOtpCode();
+  const otpCodeHash = await hashSecret(otpCode);
 
   // Set expiration to 10 minutes from now
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -45,7 +47,7 @@ export const createRegistrationOtp = async (
   // Create OTP record
   await Otp.create({
     email,
-    otpCode,
+    otpCode: otpCodeHash,
     verificationType: 'registration',
     expiresAt,
   });
@@ -78,6 +80,7 @@ export const createPasswordResetOtp = async (
 
   // Generate OTP code
   const otpCode = generateOtpCode();
+  const otpCodeHash = await hashSecret(otpCode);
 
   // Set expiration to 10 minutes from now
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -86,7 +89,7 @@ export const createPasswordResetOtp = async (
   await Otp.create({
     userId: user._id,
     email,
-    otpCode,
+    otpCode: otpCodeHash,
     verificationType: 'password_reset',
     expiresAt,
   });
@@ -117,6 +120,7 @@ export const createEmailVerificationOtp = async (
 
   // Generate OTP code
   const otpCode = generateOtpCode();
+  const otpCodeHash = await hashSecret(otpCode);
 
   // Set expiration to 10 minutes from now
   const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
@@ -125,7 +129,7 @@ export const createEmailVerificationOtp = async (
   await Otp.create({
     userId,
     email,
-    otpCode,
+    otpCode: otpCodeHash,
     verificationType: 'email_verification',
     expiresAt,
   });
@@ -165,7 +169,7 @@ export const verifyOtp = async (
 
   // If already verified, ensure code matches and it's within valid window
   if (otp.verified) {
-    if (otp.otpCode !== otpCode) {
+    if (!(await verifySecret(otpCode, otp.otpCode))) {
       throw new UnauthorizedError('Invalid OTP code.');
     }
     // Optional: Check if verified recently (e.g., within 30 mins)
@@ -185,7 +189,7 @@ export const verifyOtp = async (
   await otp.save();
 
   // Verify OTP code
-  if (otp.otpCode !== otpCode) {
+  if (!(await verifySecret(otpCode, otp.otpCode))) {
     const remainingAttempts = otp.maxAttempts - otp.attempts;
     throw new UnauthorizedError(
       `Invalid OTP code. ${remainingAttempts} attempt(s) remaining.`

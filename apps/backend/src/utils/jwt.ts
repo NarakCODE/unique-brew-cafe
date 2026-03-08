@@ -1,11 +1,6 @@
 import jwt from 'jsonwebtoken';
 import { UnauthorizedError } from './AppError.js';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret-key';
-const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '24h';
-const JWT_REFRESH_SECRET =
-  process.env.JWT_REFRESH_SECRET || 'fallback-refresh-secret-key';
-const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+import { config } from '../config/env.js';
 
 interface TokenPayload {
   userId: string;
@@ -20,6 +15,21 @@ interface RefreshTokenPayload {
   tokenId: string;
 }
 
+const getJwtConfig = () => {
+  if (!config.jwtSecret || !config.jwtRefreshSecret) {
+    throw new Error(
+      'JWT configuration is missing. Set JWT_SECRET and JWT_REFRESH_SECRET.'
+    );
+  }
+
+  return {
+    jwtSecret: config.jwtSecret,
+    jwtExpiresIn: config.jwtExpiresIn,
+    jwtRefreshSecret: config.jwtRefreshSecret,
+    jwtRefreshExpiresIn: config.jwtRefreshExpiresIn,
+  };
+};
+
 /**
  * Generate JWT access token for a user
  * @param userId - User ID to encode in token
@@ -32,10 +42,11 @@ export const generateAccessToken = (
   email: string,
   role: 'user' | 'admin' | 'moderator'
 ): string => {
+  const { jwtSecret, jwtExpiresIn } = getJwtConfig();
   const payload: TokenPayload = { userId, email, role };
 
-  return jwt.sign(payload, JWT_SECRET, {
-    expiresIn: JWT_EXPIRES_IN,
+  return jwt.sign(payload, jwtSecret, {
+    expiresIn: jwtExpiresIn,
   } as jwt.SignOptions);
 };
 
@@ -47,11 +58,12 @@ export const generateAccessToken = (
 export const generateRefreshToken = (
   userId: string
 ): { token: string; tokenId: string } => {
+  const { jwtRefreshSecret, jwtRefreshExpiresIn } = getJwtConfig();
   const tokenId = `${userId}-${Date.now()}-${Math.random().toString(36).substring(7)}`;
   const payload: RefreshTokenPayload = { userId, tokenId };
 
-  const token = jwt.sign(payload, JWT_REFRESH_SECRET, {
-    expiresIn: JWT_REFRESH_EXPIRES_IN,
+  const token = jwt.sign(payload, jwtRefreshSecret, {
+    expiresIn: jwtRefreshExpiresIn,
   } as jwt.SignOptions);
 
   return { token, tokenId };
@@ -65,7 +77,8 @@ export const generateRefreshToken = (
  */
 export const verifyAccessToken = (token: string): TokenPayload => {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as TokenPayload;
+    const { jwtSecret } = getJwtConfig();
+    const decoded = jwt.verify(token, jwtSecret) as TokenPayload;
     return decoded;
   } catch (error) {
     if (error instanceof jwt.TokenExpiredError) {
@@ -86,9 +99,10 @@ export const verifyAccessToken = (token: string): TokenPayload => {
  */
 export const verifyRefreshToken = (token: string): RefreshTokenPayload => {
   try {
+    const { jwtRefreshSecret } = getJwtConfig();
     const decoded = jwt.verify(
       token,
-      JWT_REFRESH_SECRET
+      jwtRefreshSecret
     ) as RefreshTokenPayload;
     return decoded;
   } catch (error) {
