@@ -20,6 +20,7 @@ const orderStatusHistorySchema = new Schema<IOrderStatusHistory>(
     status: {
       type: String,
       enum: [
+        'received',
         'pending_payment',
         'confirmed',
         'preparing',

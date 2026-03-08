@@ -1,6 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export type OrderStatus =
+  | 'received'
   | 'pending_payment'
   | 'confirmed'
   | 'preparing'
@@ -72,6 +73,7 @@ const orderSchema = new Schema<IOrder>(
     status: {
       type: String,
       enum: [
+        'received',
         'pending_payment',
         'confirmed',
         'preparing',

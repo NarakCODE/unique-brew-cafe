@@ -167,9 +167,9 @@ export function LandingProductsContent() {
     <div className="min-h-screen bg-background text-foreground">
       <LandingNavbar />
 
-      <section className="relative overflow-hidden border-b bg-[radial-gradient(circle_at_top,_hsl(var(--primary)/0.22),transparent_60%)]">
+      <section className="relative overflow-hidden border-b bg-[radial-gradient(circle_at_top,hsl(var(--primary)/0.22),transparent_60%)]">
         <div className="absolute inset-0 bg-[linear-gradient(110deg,transparent_0%,hsl(var(--primary)/0.06)_38%,transparent_70%)]" />
-        <div className="absolute left-1/2 top-0 h-[360px] w-[360px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
+        <div className="absolute left-1/2 top-0 h-90 w-90 -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
 
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-12 md:py-16">
           <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
@@ -180,7 +180,7 @@ export function LandingProductsContent() {
               </span>
 
               <div className="space-y-3">
-                <h1 className="text-balance text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl [font-family:Georgia,ui-serif,serif]">
+                <h1 className="text-balance text-4xl font-semibold leading-tight md:text-5xl lg:text-6xl font-[Georgia,ui-serif,serif]">
                   Crafted Menu for
                   <span className="block text-primary">Coffee Hours & Beyond</span>
                 </h1>
@@ -265,7 +265,7 @@ export function LandingProductsContent() {
                 <p className="mb-2 text-xs tracking-[0.16em] text-muted-foreground">
                   RESULTS
                 </p>
-                <p className="text-3xl font-semibold [font-family:Georgia,ui-serif,serif]">
+                <p className="text-3xl font-semibold font-[Georgia,ui-serif,serif]">
                   {isLoading ? "..." : pagination?.total ?? products.length}
                 </p>
                 <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">

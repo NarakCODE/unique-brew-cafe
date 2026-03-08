@@ -5,6 +5,8 @@ import { PromoCode } from '../models/PromoCode.js';
 import { PromoCodeUsage } from '../models/PromoCodeUsage.js';
 import { Order } from '../models/Order.js';
 import { OrderItem } from '../models/OrderItem.js';
+import { OrderStatusHistory } from '../models/OrderStatusHistory.js';
+import { redisManager } from '../config/redis.js';
 import { AppError } from '../utils/AppError.js';
 
 interface CheckoutItem {
@@ -51,12 +53,86 @@ interface PaymentMethod {
   isActive: boolean;
 }
 
+interface ConfirmedOrderResponse {
+  id: string;
+  orderNumber: string;
+  userId: string;
+  storeId: string;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  subtotal: number;
+  discount: number;
+  tax: number;
+  deliveryFee: number;
+  total: number;
+  currency: string;
+  deliveryAddress: string | undefined;
+  notes: string | undefined;
+  createdAt: Date;
+}
+
 class CheckoutService {
   private readonly CHECKOUT_SESSION_EXPIRY = 15 * 60 * 1000; // 15 minutes
+  private readonly CHECKOUT_SESSION_TTL_SECONDS = Math.floor(
+    this.CHECKOUT_SESSION_EXPIRY / 1000
+  );
   private readonly TAX_RATE = 0.1; // 10% tax
 
-  // In-memory storage for checkout sessions (in production, use Redis)
+  // Local fallback when Redis is disabled.
   private checkoutSessions: Map<string, CheckoutSession> = new Map();
+
+  private getRedisKey(checkoutId: string): string {
+    return `checkout-session:${checkoutId}`;
+  }
+
+  private serializeSession(session: CheckoutSession): string {
+    return JSON.stringify(session);
+  }
+
+  private deserializeSession(payload: string): CheckoutSession {
+    const parsed = JSON.parse(payload) as CheckoutSession;
+
+    return {
+      ...parsed,
+      createdAt: new Date(parsed.createdAt),
+      expiresAt: new Date(parsed.expiresAt),
+    };
+  }
+
+  private async saveCheckoutSession(session: CheckoutSession): Promise<void> {
+    if (redisManager.isEnabled()) {
+      await redisManager.set(
+        this.getRedisKey(session.id),
+        this.serializeSession(session),
+        this.CHECKOUT_SESSION_TTL_SECONDS
+      );
+      return;
+    }
+
+    this.checkoutSessions.set(session.id, session);
+    this.cleanupExpiredSessions();
+  }
+
+  private async loadCheckoutSession(
+    checkoutId: string
+  ): Promise<CheckoutSession | null> {
+    if (redisManager.isEnabled()) {
+      const payload = await redisManager.get(this.getRedisKey(checkoutId));
+      return payload ? this.deserializeSession(payload) : null;
+    }
+
+    return this.checkoutSessions.get(checkoutId) || null;
+  }
+
+  private async deleteCheckoutSession(checkoutId: string): Promise<void> {
+    if (redisManager.isEnabled()) {
+      await redisManager.del(this.getRedisKey(checkoutId));
+      return;
+    }
+
+    this.checkoutSessions.delete(checkoutId);
+  }
 
   async validateCheckout(userId: string): Promise<ValidationResult> {
     const errors: string[] = [];
@@ -176,10 +252,7 @@ class CheckoutService {
       createdAt: new Date(),
     };
 
-    this.checkoutSessions.set(sessionId, session);
-
-    // Clean up expired sessions
-    this.cleanupExpiredSessions();
+    await this.saveCheckoutSession(session);
 
     return session;
   }
@@ -188,7 +261,7 @@ class CheckoutService {
     userId: string,
     checkoutId: string
   ): Promise<CheckoutSession> {
-    const session = this.checkoutSessions.get(checkoutId);
+    const session = await this.loadCheckoutSession(checkoutId);
 
     if (!session) {
       throw new AppError('Checkout session not found', 404);
@@ -199,7 +272,7 @@ class CheckoutService {
     }
 
     if (new Date() > session.expiresAt) {
-      this.checkoutSessions.delete(checkoutId);
+      await this.deleteCheckoutSession(checkoutId);
       throw new AppError('Checkout session has expired', 400);
     }
 
@@ -316,7 +389,7 @@ class CheckoutService {
       discountAmount,
     };
 
-    this.checkoutSessions.set(checkoutId, session);
+    await this.saveCheckoutSession(session);
 
     // Update cart
     await Cart.findByIdAndUpdate(session.cartId, {
@@ -340,7 +413,7 @@ class CheckoutService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     delete (session as any).promoCode;
 
-    this.checkoutSessions.set(checkoutId, session);
+    await this.saveCheckoutSession(session);
 
     // Update cart
     await Cart.findByIdAndUpdate(session.cartId, {
@@ -370,99 +443,148 @@ class CheckoutService {
   ): Promise<any> {
     const session = await this.getCheckoutSession(userId, checkoutId);
 
-    // Get cart
-    const cart = await Cart.findById(session.cartId);
-    if (!cart) {
-      throw new AppError('Cart not found', 404);
-    }
-
-    // Get cart items with product details
-    const cartItems = await CartItem.find({ cartId: cart._id }).populate(
-      'productId'
-    );
-
     // Start a database transaction
     const mongoSession = await mongoose.startSession();
-    mongoSession.startTransaction();
+    let confirmedOrderData: ConfirmedOrderResponse | null = null;
 
     try {
-      // Create order
-      const order = new Order({
-        userId,
-        storeId: cart.storeId,
-        status: 'pending_payment',
-        paymentStatus: 'pending',
-        paymentMethod,
-        subtotal: session.subtotal,
-        discount: session.discount,
-        tax: session.tax,
-        deliveryFee: session.deliveryFee,
-        total: session.total,
-        currency: 'USD',
-        deliveryAddress: session.deliveryAddress,
-        notes: cart.notes,
-        promoCodeId: session.promoCode
-          ? (await PromoCode.findOne({ code: session.promoCode.code }))?._id
-          : undefined,
-      });
+      await mongoSession.withTransaction(async () => {
+        const cart = await Cart.findOne({
+          _id: session.cartId,
+          userId,
+          status: 'active',
+        }).session(mongoSession);
 
-      await order.save({ session: mongoSession });
+        if (!cart) {
+          throw new AppError('Active cart not found', 404);
+        }
 
-      // Create order items
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const orderItems = cartItems.map((item: any) => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const product = item.productId as any;
-        return new OrderItem({
-          orderId: order._id,
-          productId: product._id,
-          productName: product.name,
-          productImage: product.images?.[0] || '',
-          quantity: item.quantity,
-          customization: item.customization,
-          addOns: item.addOns,
-          notes: item.notes,
-          unitPrice: item.unitPrice,
-          totalPrice: item.totalPrice,
+        const cartItems = await CartItem.find({ cartId: cart._id })
+          .populate('productId')
+          .session(mongoSession);
+
+        if (cartItems.length === 0) {
+          throw new AppError('Cart is empty', 400);
+        }
+
+        const promoCodeDoc = session.promoCode
+          ? await PromoCode.findOne({
+              code: session.promoCode.code.toUpperCase(),
+              isActive: true,
+            }).session(mongoSession)
+          : null;
+
+        if (session.promoCode && !promoCodeDoc) {
+          throw new AppError('Applied promo code is no longer valid', 400);
+        }
+
+        // Create order
+        const order = new Order({
+          userId,
+          storeId: cart.storeId,
+          status: 'pending_payment',
+          paymentStatus: 'pending',
+          paymentMethod,
+          subtotal: session.subtotal,
+          discount: session.discount,
+          tax: session.tax,
+          deliveryFee: session.deliveryFee,
+          total: session.total,
+          currency: 'USD',
+          deliveryAddress: session.deliveryAddress,
+          notes: cart.notes,
+          promoCodeId: promoCodeDoc?._id,
         });
+
+        await order.save({ session: mongoSession });
+
+        // Create order items
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const orderItems = cartItems.map((item: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const product = item.productId as any;
+          return new OrderItem({
+            orderId: order._id,
+            productId: product._id,
+            productName: product.name,
+            productImage: product.images?.[0] || '',
+            quantity: item.quantity,
+            customization: item.customization,
+            addOns: item.addOns,
+            notes: item.notes,
+            unitPrice: item.unitPrice,
+            totalPrice: item.totalPrice,
+          });
+        });
+        await OrderItem.insertMany(orderItems, { session: mongoSession });
+
+        await OrderStatusHistory.create(
+          [
+            {
+              orderId: order._id,
+              status: 'pending_payment',
+              notes: 'Order created from checkout session',
+              changedBy: 'system',
+            },
+          ],
+          { session: mongoSession }
+        );
+
+        if (promoCodeDoc && session.discount > 0) {
+          await PromoCodeUsage.create(
+            [
+              {
+                promoCodeId: promoCodeDoc._id,
+                userId: new mongoose.Types.ObjectId(userId),
+                orderId: order._id,
+                discountAmount: session.discount,
+                usedAt: new Date(),
+              },
+            ],
+            { session: mongoSession }
+          );
+
+          promoCodeDoc.usageCount += 1;
+          await promoCodeDoc.save({ session: mongoSession });
+        }
+
+        // Update cart status
+        cart.status = 'checked_out';
+        await cart.save({ session: mongoSession });
+
+        confirmedOrderData = {
+          id: String(order._id),
+          orderNumber: order.orderNumber,
+          userId: String(order.userId),
+          storeId: String(order.storeId),
+          status: order.status,
+          paymentStatus: order.paymentStatus,
+          paymentMethod: order.paymentMethod,
+          subtotal: order.subtotal,
+          discount: order.discount,
+          tax: order.tax,
+          deliveryFee: order.deliveryFee,
+          total: order.total,
+          currency: order.currency,
+          deliveryAddress: order.deliveryAddress,
+          notes: order.notes,
+          createdAt: order.createdAt,
+        };
       });
-
-      await OrderItem.insertMany(orderItems, { session: mongoSession });
-
-      // Update cart status
-      cart.status = 'checked_out';
-      await cart.save({ session: mongoSession });
-
-      // Commit transaction
-      await mongoSession.commitTransaction();
 
       // Clean up checkout session
-      this.checkoutSessions.delete(checkoutId);
+      await this.deleteCheckoutSession(checkoutId);
 
-      // Return plain object to avoid complex union type
-      return {
-        id: String(order._id),
-        orderNumber: order.orderNumber,
-        userId: String(order.userId),
-        storeId: String(order.storeId),
-        status: order.status,
-        paymentStatus: order.paymentStatus,
-        paymentMethod: order.paymentMethod,
-        subtotal: order.subtotal,
-        discount: order.discount,
-        tax: order.tax,
-        deliveryFee: order.deliveryFee,
-        total: order.total,
-        currency: order.currency,
-        deliveryAddress: order.deliveryAddress,
-        notes: order.notes,
-        createdAt: order.createdAt,
-      };
+      if (!confirmedOrderData) {
+        throw new AppError('Unable to confirm checkout', 500);
+      }
+
+      return confirmedOrderData;
     } catch (error) {
-      await mongoSession.abortTransaction();
+      console.log(error);
       throw error;
     } finally {
-      mongoSession.endSession();
+      await mongoSession.endSession();
     }
   }
 

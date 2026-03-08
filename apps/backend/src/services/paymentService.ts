@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { Order } from '../models/Order.js';
 import { AppError } from '../utils/AppError.js';
 import { config } from '../config/env.js';
+import { redisManager } from '../config/redis.js';
 
 interface PaymentIntent {
   id: string;
@@ -34,8 +35,40 @@ interface PaymentResult {
 }
 
 class PaymentService {
-  // In-memory storage for payment intents (in production, use Redis or database)
+  private readonly PAYMENT_INTENT_TTL_SECONDS = 15 * 60;
+
+  // Local fallback when Redis is disabled.
   private paymentIntents: Map<string, PaymentIntent> = new Map();
+
+  private getRedisKey(intentId: string): string {
+    return `payment-intent:${intentId}`;
+  }
+
+  private serializePaymentIntent(paymentIntent: PaymentIntent): string {
+    return JSON.stringify(paymentIntent);
+  }
+
+  private async savePaymentIntent(paymentIntent: PaymentIntent): Promise<void> {
+    if (redisManager.isEnabled()) {
+      await redisManager.set(
+        this.getRedisKey(paymentIntent.id),
+        this.serializePaymentIntent(paymentIntent),
+        this.PAYMENT_INTENT_TTL_SECONDS
+      );
+      return;
+    }
+
+    this.paymentIntents.set(paymentIntent.id, paymentIntent);
+  }
+
+  private async deletePaymentIntent(intentId: string): Promise<void> {
+    if (redisManager.isEnabled()) {
+      await redisManager.del(this.getRedisKey(intentId));
+      return;
+    }
+
+    this.paymentIntents.delete(intentId);
+  }
 
   /**
    * Create a payment intent for an order
@@ -83,8 +116,8 @@ class PaymentService {
       createdAt: new Date(),
     };
 
-    // Store payment intent
-    this.paymentIntents.set(intentId, paymentIntent);
+    // Store payment intent with TTL for restart-safe payment handoff.
+    await this.savePaymentIntent(paymentIntent);
 
     // Update order payment status to processing
     order.paymentStatus = 'processing';
@@ -124,6 +157,7 @@ class PaymentService {
         // Payment failed
         order.paymentStatus = 'failed';
         await order.save();
+        await this.deletePaymentIntentByOrder(orderId);
 
         return {
           success: false,
@@ -147,6 +181,7 @@ class PaymentService {
       }
 
       await order.save();
+      await this.deletePaymentIntentByOrder(orderId);
 
       return {
         success: true,
@@ -164,6 +199,7 @@ class PaymentService {
       // Payment processing error - maintain pending status
       order.paymentStatus = 'failed';
       await order.save();
+      await this.deletePaymentIntentByOrder(orderId);
 
       throw new AppError(
         `Payment processing failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
@@ -206,6 +242,7 @@ class PaymentService {
     order.paymentProviderTransactionId = mockTransactionId;
 
     await order.save();
+    await this.deletePaymentIntentByOrder(orderId);
   }
 
   /**
@@ -244,6 +281,47 @@ class PaymentService {
     // For now, always return true (successful payment)
     // In production, this would check with the actual payment provider
     return true;
+  }
+
+  private async deletePaymentIntentByOrder(orderId: string): Promise<void> {
+    if (redisManager.isEnabled()) {
+      const client = await redisManager.getClient();
+      const keyPattern = redisManager.getKey('payment-intent:*');
+      let cursor = 0;
+
+      do {
+        const result = await client.scan(cursor, {
+          MATCH: keyPattern,
+          COUNT: 100,
+        });
+        cursor = Number(result.cursor);
+
+        if (result.keys.length === 0) {
+          continue;
+        }
+
+        const values = await client.mGet(result.keys);
+        for (let index = 0; index < result.keys.length; index += 1) {
+          const payload = values[index];
+          if (!payload) {
+            continue;
+          }
+
+          const paymentIntent = JSON.parse(payload) as PaymentIntent;
+          if (paymentIntent.orderId === orderId) {
+            await client.del(result.keys[index]!);
+          }
+        }
+      } while (cursor !== 0);
+
+      return;
+    }
+
+    for (const [intentId, paymentIntent] of this.paymentIntents.entries()) {
+      if (paymentIntent.orderId === orderId) {
+        this.paymentIntents.delete(intentId);
+      }
+    }
   }
 }
 

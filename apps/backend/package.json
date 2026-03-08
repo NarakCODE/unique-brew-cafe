@@ -29,7 +29,8 @@
     "seed:faqs": "tsx src/seeders/faqSeeder.ts",
     "seed:config": "tsx src/seeders/appConfigSeeder.ts",
     "seed:zones": "tsx src/seeders/deliveryZoneSeeder.ts",
-    "seed:all": "npm run seed:admin && npm run seed:store && npm run seed:categories && npm run seed:products && npm run seed:promos && npm run seed:faqs && npm run seed:config && npm run seed:zones"
+    "seed:all": "npm run seed:admin && npm run seed:store && npm run seed:categories && npm run seed:products && npm run seed:promos && npm run seed:faqs && npm run seed:config && npm run seed:zones",
+    "migrate:cafe-to-store": "tsx src/scripts/migrateCafeToStore.ts"
   },
   "lint-staged": {
     "*.ts": [
@@ -67,6 +68,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "pdfkit": "^0.17.2",
+    "redis": "^4.7.1",
     "slugify": "^1.6.6",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.12"

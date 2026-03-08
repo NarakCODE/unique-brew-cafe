@@ -9,6 +9,7 @@ import { orderIdParamSchema, objectIdSchema } from './common.schema.js';
  * Order status enum
  */
 const orderStatusEnum = z.enum([
+  'received',
   'pending_payment',
   'confirmed',
   'preparing',
@@ -17,6 +18,42 @@ const orderStatusEnum = z.enum([
   'completed',
   'cancelled',
 ]);
+
+const orderCustomizationSchema = z
+  .object({
+    size: z.string().trim().min(1).max(50).optional(),
+    sugarLevel: z.string().trim().min(1).max(50).optional(),
+    iceLevel: z.string().trim().min(1).max(50).optional(),
+    coffeeLevel: z.string().trim().min(1).max(50).optional(),
+  })
+  .optional();
+
+export const createOrderSchema = z.object({
+  body: z.object({
+    storeId: objectIdSchema,
+    items: z
+      .array(
+        z.object({
+          productId: objectIdSchema,
+          quantity: z.coerce.number().int().positive(),
+          customization: orderCustomizationSchema,
+          notes: z
+            .string()
+            .trim()
+            .max(500, 'Item notes must be 500 characters or less')
+            .optional(),
+        })
+      )
+      .min(1, 'At least one order item is required'),
+    pickupTime: z.coerce.date().optional(),
+    notes: z
+      .string()
+      .trim()
+      .max(1000, 'Order notes must be 1000 characters or less')
+      .optional(),
+    paymentMethod: z.string().trim().min(1).max(50).default('cash'),
+  }),
+});
 
 /**
  * Schema for canceling an order
@@ -109,6 +146,7 @@ export const orderParamSchema = orderIdParamSchema;
  * Type inference
  */
 export type CancelOrderInput = z.infer<typeof cancelOrderSchema>['body'];
+export type CreateOrderInput = z.infer<typeof createOrderSchema>['body'];
 export type RateOrderInput = z.infer<typeof rateOrderSchema>['body'];
 export type GetOrdersQuery = z.infer<typeof getOrdersQuerySchema>['query'];
 export type UpdateOrderStatusInput = z.infer<

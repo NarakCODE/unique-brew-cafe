@@ -4,8 +4,9 @@ import compression from 'compression';
 import swaggerUi from 'swagger-ui-express';
 import yaml from 'js-yaml';
 import fs from 'fs';
-import { config } from './config/env.js';
+import { config, validateRuntimeConfig } from './config/env.js';
 import { connectDB } from './config/database.js';
+import { redisManager } from './config/redis.js';
 import routes from './routes/index.js';
 import { errorHandler } from './middlewares/errorHandler.js';
 import { notFound } from './middlewares/notFound.js';
@@ -21,6 +22,13 @@ import {
 import { verifyIndexes } from './utils/indexOptimization.js';
 
 const app = express();
+
+validateRuntimeConfig();
+
+redisManager.connect().catch((error) => {
+  console.error('Redis connection error:', error);
+  process.exit(1);
+});
 
 // Connect to MongoDB
 connectDB().then(() => {
@@ -92,6 +100,7 @@ app.listen(config.port, () => {
 process.on('SIGTERM', async () => {
   console.log('SIGTERM signal received: closing HTTP server gracefully');
   const mongoose = await import('mongoose');
+  await redisManager.disconnect();
   await mongoose.default.connection.close();
   console.log('MongoDB connection closed');
   process.exit(0);

@@ -4,7 +4,7 @@ This directory contains comprehensive Postman collections for testing all API en
 
 ## 📚 Collections Overview
 
-The API has been split into 5 logical collections for better organization:
+The API has been split into 6 logical collections for better organization:
 
 ### 1. Authentication & User Management
 
@@ -60,12 +60,23 @@ Covers:
 - **Reports**: Dashboard stats, Sales, Orders, Product performance, Revenue analytics
 - **Configuration**: App config, Delivery zones, Health check
 
+### 6. Demo Mobile Checkout & Admin Status
+
+**File:** `6_Demo_Mobile_Checkout_Admin_Status.postman_collection.json`
+
+Covers:
+
+- **Direct mobile order creation** via `POST /orders`
+- **Customer order tracking** for the new demo flow
+- **Admin status changes** from `received` -> `confirmed` -> `ready`
+- **Dedicated test guide** in `DEMO_CHECKOUT_STATUS_GUIDE.md`
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 
 - [Postman](https://www.postman.com/downloads/) installed
-- Backend server running (default: `http://localhost:3000`)
+- Backend server running (default: `http://localhost:8081`)
 
 ### Import Collections
 
@@ -78,7 +89,7 @@ Covers:
 
 Each collection has the following variables that you can customize:
 
-- `baseUrl`: API base URL (default: `http://localhost:3000/api`)
+- `baseUrl`: API base URL (default: `http://localhost:8081/api`)
 - `accessToken`: JWT access token (auto-populated after login)
 - `refreshToken`: JWT refresh token (auto-populated after login)
 - Additional collection-specific IDs (userId, productId, orderId, etc.)
@@ -185,7 +196,7 @@ If auto-populate doesn't work:
 
 Consider creating Postman Environments for different setups:
 
-- **Development**: `http://localhost:3000/api`
+- **Development**: `http://localhost:8081/api`
 - **Staging**: `https://staging.yourdomain.com/api`
 - **Production**: `https://api.yourdomain.com/api`
 

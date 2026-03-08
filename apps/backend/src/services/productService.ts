@@ -403,14 +403,92 @@ export const getProductsByStore = async (
   filters?: ProductFilters,
   paginationParams?: PaginationParams
 ): Promise<PaginationResult<ProductResponse>> => {
-  // Validate store ID
   if (!mongoose.Types.ObjectId.isValid(storeId)) {
     throw new BadRequestError('Invalid store ID');
   }
 
-  // TODO: When StoreInventory is implemented, filter by store availability
-  // For now, return all available products
-  return getProducts(filters, paginationParams);
+  const categoryIds = await Category.find({
+    storeId,
+    isActive: true,
+  })
+    .select('_id')
+    .lean();
+
+  if (categoryIds.length === 0) {
+    return buildPaginationResult([], 0, 1, paginationParams?.limit || 20);
+  }
+
+  const query: mongoose.FilterQuery<IProduct> = {
+    deletedAt: null,
+    categoryId: { $in: categoryIds.map((category) => category._id) },
+  };
+
+  if (filters?.isAvailable !== undefined) {
+    query.isAvailable = filters.isAvailable;
+  } else {
+    query.isAvailable = true;
+  }
+
+  if (filters?.categoryId) {
+    query.categoryId = filters.categoryId;
+  }
+
+  if (filters?.isFeatured !== undefined) {
+    query.isFeatured = filters.isFeatured;
+  }
+
+  if (filters?.isBestSelling !== undefined) {
+    query.isBestSelling = filters.isBestSelling;
+  }
+
+  if (filters?.tags && filters.tags.length > 0) {
+    query.tags = { $in: filters.tags };
+  }
+
+  if (filters?.minPrice !== undefined || filters?.maxPrice !== undefined) {
+    query.basePrice = {};
+    if (filters.minPrice !== undefined) {
+      query.basePrice.$gte = filters.minPrice;
+    }
+    if (filters.maxPrice !== undefined) {
+      query.basePrice.$lte = filters.maxPrice;
+    }
+  }
+
+  if (filters?.search) {
+    query.$or = [
+      { name: { $regex: filters.search, $options: 'i' } },
+      { description: { $regex: filters.search, $options: 'i' } },
+    ];
+  }
+
+  const { page, limit, skip, sortBy, sortOrder } = parsePaginationParams(
+    paginationParams || {}
+  );
+
+  const sort: Record<string, 1 | -1> =
+    sortBy === 'createdAt'
+      ? { [sortBy]: sortOrder }
+      : { displayOrder: 1, name: 1 };
+
+  const [products, total] = await Promise.all([
+    Product.find(query)
+      .select('-__v')
+      .populate('categoryId', 'name slug imageUrl icon')
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Product.countDocuments(query),
+  ]);
+
+  const mappedProducts = products.map((product) => ({
+    ...product,
+    id: product._id?.toString(),
+    category: product.categoryId,
+  })) as unknown as ProductResponse[];
+
+  return buildPaginationResult(mappedProducts, total, page, limit);
 };
 
 /**

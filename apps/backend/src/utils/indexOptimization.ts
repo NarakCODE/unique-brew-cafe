@@ -152,13 +152,13 @@ export const RECOMMENDED_INDEXES: Record<
   ],
 
   RefreshToken: [
-    { fields: { token: 1 }, options: { unique: true } },
+    { fields: { tokenId: 1 }, options: { unique: true } },
     { fields: { userId: 1 } },
     { fields: { expiresAt: 1 }, options: { expireAfterSeconds: 0 } },
   ],
 
   Otp: [
-    { fields: { email: 1, type: 1 } },
+    { fields: { email: 1, verificationType: 1 } },
     { fields: { expiresAt: 1 }, options: { expireAfterSeconds: 0 } },
   ],
 };
