@@ -314,61 +314,81 @@ export class OrderService {
       throw new AppError('Invalid order ID', 400);
     }
 
-    const order = await Order.findById(orderId);
+    const mongoSession = await mongoose.startSession();
+    let cancelledOrder: IOrder | null = null;
 
-    if (!order) {
-      throw new AppError('Order not found', 404);
+    try {
+      await mongoSession.withTransaction(async () => {
+        const order = await Order.findById(orderId).session(mongoSession);
+
+        if (!order) {
+          throw new AppError('Order not found', 404);
+        }
+
+        // Validate ownership
+        if (order.userId.toString() !== userId) {
+          throw new AppError(
+            'You do not have permission to cancel this order',
+            403
+          );
+        }
+
+        // Check if order is already cancelled or completed
+        if (order.status === 'cancelled') {
+          throw new AppError('Order is already cancelled', 400);
+        }
+
+        if (order.status === 'completed') {
+          throw new AppError('Cannot cancel a completed order', 400);
+        }
+
+        // Check 5-minute time limit
+        const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+        if (order.createdAt < fiveMinutesAgo) {
+          throw new AppError(
+            'Order can only be cancelled within 5 minutes of placement',
+            400
+          );
+        }
+
+        // Update order status
+        order.status = 'cancelled';
+        order.cancellationReason = reason;
+        order.cancelledBy = 'customer';
+        order.cancelledAt = new Date();
+
+        // If payment was completed, initiate refund
+        if (order.paymentStatus === 'completed') {
+          order.refundAmount = order.total;
+          order.refundStatus = 'pending';
+        }
+
+        await order.save({ session: mongoSession });
+
+        // Record status change
+        await OrderStatusHistory.create(
+          [
+            {
+              orderId: order._id,
+              status: 'cancelled',
+              notes: `Cancelled by customer: ${reason}`,
+              changedBy: 'customer',
+            },
+          ],
+          { session: mongoSession }
+        );
+
+        cancelledOrder = order;
+      });
+    } finally {
+      await mongoSession.endSession();
     }
 
-    // Validate ownership
-    if (order.userId.toString() !== userId) {
-      throw new AppError(
-        'You do not have permission to cancel this order',
-        403
-      );
+    if (!cancelledOrder) {
+      throw new AppError('Unable to cancel order', 500);
     }
 
-    // Check if order is already cancelled or completed
-    if (order.status === 'cancelled') {
-      throw new AppError('Order is already cancelled', 400);
-    }
-
-    if (order.status === 'completed') {
-      throw new AppError('Cannot cancel a completed order', 400);
-    }
-
-    // Check 5-minute time limit
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-    if (order.createdAt < fiveMinutesAgo) {
-      throw new AppError(
-        'Order can only be cancelled within 5 minutes of placement',
-        400
-      );
-    }
-
-    // Update order status
-    order.status = 'cancelled';
-    order.cancellationReason = reason;
-    order.cancelledBy = 'customer';
-    order.cancelledAt = new Date();
-
-    // If payment was completed, initiate refund
-    if (order.paymentStatus === 'completed') {
-      order.refundAmount = order.total;
-      order.refundStatus = 'pending';
-    }
-
-    await order.save();
-
-    // Record status change
-    await OrderStatusHistory.create({
-      orderId: order._id,
-      status: 'cancelled',
-      notes: `Cancelled by customer: ${reason}`,
-      changedBy: 'customer',
-    });
-
-    return order;
+    return cancelledOrder;
   }
 
   /**
@@ -420,103 +440,132 @@ export class OrderService {
       throw new AppError('Invalid order ID', 400);
     }
 
-    const order = await Order.findById(orderId);
+    const mongoSession = await mongoose.startSession();
 
-    if (!order) {
-      throw new AppError('Order not found', 404);
-    }
+    try {
+      await mongoSession.withTransaction(async () => {
+        const order = await Order.findById(orderId).session(mongoSession);
 
-    // Validate ownership
-    if (order.userId.toString() !== userId) {
-      throw new AppError(
-        'You do not have permission to reorder this order',
-        403
-      );
-    }
+        if (!order) {
+          throw new AppError('Order not found', 404);
+        }
 
-    // Get order items
-    const orderItems = await OrderItem.find({ orderId: order._id });
+        // Validate ownership
+        if (order.userId.toString() !== userId) {
+          throw new AppError(
+            'You do not have permission to reorder this order',
+            403
+          );
+        }
 
-    if (orderItems.length === 0) {
-      throw new AppError('No items found in this order', 400);
-    }
+        // Get order items
+        const orderItems = await OrderItem.find({ orderId: order._id }).session(
+          mongoSession
+        );
 
-    // Find or create active cart
-    let cart = await Cart.findOne({
-      userId: new mongoose.Types.ObjectId(userId),
-      status: 'active',
-    });
+        if (orderItems.length === 0) {
+          throw new AppError('No items found in this order', 400);
+        }
 
-    // If cart exists and is for a different store, clear it
-    if (cart && cart.storeId.toString() !== order.storeId.toString()) {
-      await CartItem.deleteMany({ cartId: cart._id });
-      cart.storeId = order.storeId;
-      cart.subtotal = 0;
-      cart.total = 0;
-    }
+        // Find or create active cart
+        let cart = await Cart.findOne({
+          userId: new mongoose.Types.ObjectId(userId),
+          status: 'active',
+        }).session(mongoSession);
 
-    // Create new cart if doesn't exist
-    if (!cart) {
-      cart = await Cart.create({
-        userId: new mongoose.Types.ObjectId(userId),
-        storeId: order.storeId,
-        status: 'active',
+        // If cart exists and is for a different store, clear it
+        if (cart && cart.storeId.toString() !== order.storeId.toString()) {
+          await CartItem.deleteMany({ cartId: cart._id }).session(mongoSession);
+          cart.storeId = order.storeId;
+          cart.subtotal = 0;
+          cart.total = 0;
+        }
+
+        // Create new cart if doesn't exist
+        if (!cart) {
+          const createdCarts = await Cart.create(
+            [
+              {
+                userId: new mongoose.Types.ObjectId(userId),
+                storeId: order.storeId,
+                status: 'active',
+              },
+            ],
+            { session: mongoSession }
+          );
+          cart = createdCarts[0]!;
+        }
+
+        // Add items to cart
+        for (const orderItem of orderItems) {
+          // Verify product still exists and is available
+          const product = await Product.findById(orderItem.productId).session(
+            mongoSession
+          );
+
+          if (!product || !product.isAvailable) {
+            continue; // Skip unavailable products
+          }
+
+          // Get current price
+          const currentPrice = product.basePrice;
+
+          // Calculate add-ons price
+          let addOnsPrice = 0;
+          const addOnIds: mongoose.Types.ObjectId[] = [];
+
+          if (orderItem.addOns && orderItem.addOns.length > 0) {
+            const addOnIdsFromSnapshot = orderItem.addOns
+              .map((a) =>
+                mongoose.Types.ObjectId.isValid(a.id)
+                  ? new mongoose.Types.ObjectId(a.id)
+                  : null
+              )
+              .filter((id): id is mongoose.Types.ObjectId => id !== null);
+
+            const addOns = await AddOn.find({
+              _id: { $in: addOnIdsFromSnapshot },
+            }).session(mongoSession);
+            addOnsPrice = addOns.reduce((sum, addOn) => sum + addOn.price, 0);
+            addOnIds.push(
+              ...addOns.map((a) => a._id as mongoose.Types.ObjectId)
+            );
+          }
+
+          const unitPrice = currentPrice + addOnsPrice;
+          const totalPrice = unitPrice * orderItem.quantity;
+
+          // Create cart item
+          await CartItem.create(
+            [
+              {
+                cartId: cart._id,
+                productId: orderItem.productId,
+                quantity: orderItem.quantity,
+                customization: orderItem.customization,
+                addOns: addOnIds,
+                notes: orderItem.notes,
+                unitPrice,
+                totalPrice,
+              },
+            ],
+            { session: mongoSession }
+          );
+        }
+
+        // Recalculate cart totals
+        const cartItems = await CartItem.find({ cartId: cart._id }).session(
+          mongoSession
+        );
+        cart.subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+        cart.tax = cart.subtotal * 0.1; // 10% tax
+        cart.total = cart.subtotal + cart.tax + cart.deliveryFee - cart.discount;
+
+        await cart.save({ session: mongoSession });
       });
+    } finally {
+      await mongoSession.endSession();
     }
-
-    // Add items to cart
-    for (const orderItem of orderItems) {
-      // Verify product still exists and is available
-      const product = await Product.findById(orderItem.productId);
-
-      if (!product || !product.isAvailable) {
-        continue; // Skip unavailable products
-      }
-
-      // Get current price
-      const currentPrice = product.basePrice;
-
-      // Calculate add-ons price
-      let addOnsPrice = 0;
-      const addOnIds: mongoose.Types.ObjectId[] = [];
-
-      if (orderItem.addOns && orderItem.addOns.length > 0) {
-        const addOnIdsFromSnapshot = orderItem.addOns
-          .map((a) =>
-            mongoose.Types.ObjectId.isValid(a.id)
-              ? new mongoose.Types.ObjectId(a.id)
-              : null
-          )
-          .filter((id): id is mongoose.Types.ObjectId => id !== null);
-
-        const addOns = await AddOn.find({ _id: { $in: addOnIdsFromSnapshot } });
-        addOnsPrice = addOns.reduce((sum, addOn) => sum + addOn.price, 0);
-        addOnIds.push(...addOns.map((a) => a._id as mongoose.Types.ObjectId));
-      }
-
-      const unitPrice = currentPrice + addOnsPrice;
-      const totalPrice = unitPrice * orderItem.quantity;
-
-      // Create cart item
-      await CartItem.create({
-        cartId: cart._id,
-        productId: orderItem.productId,
-        quantity: orderItem.quantity,
-        customization: orderItem.customization,
-        addOns: addOnIds,
-        notes: orderItem.notes,
-        unitPrice,
-        totalPrice,
-      });
-    }
-
-    // Recalculate cart totals
-    const cartItems = await CartItem.find({ cartId: cart._id });
-    cart.subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-    cart.tax = cart.subtotal * 0.1; // 10% tax
-    cart.total = cart.subtotal + cart.tax + cart.deliveryFee - cart.discount;
-
-    await cart.save();
   }
 
   /**
@@ -732,49 +781,68 @@ export class OrderService {
       throw new AppError('Invalid order ID', 400);
     }
 
-    const order = await Order.findById(orderId);
+    const mongoSession = await mongoose.startSession();
+    let updatedOrder: IOrder | null = null;
 
-    if (!order) {
-      throw new AppError('Order not found', 404);
+    try {
+      await mongoSession.withTransaction(async () => {
+        const order = await Order.findById(orderId).session(mongoSession);
+
+        if (!order) {
+          throw new AppError('Order not found', 404);
+        }
+
+        // Validate status transition
+        if (!this.isValidStatusTransition(order.status, newStatus)) {
+          throw new AppError(
+            `Invalid status transition from ${order.status} to ${newStatus}`,
+            400
+          );
+        }
+
+        const oldStatus = order.status;
+        order.status = newStatus;
+
+        // Update timestamps based on status
+        if (newStatus === 'ready') {
+          order.actualReadyTime = new Date();
+        } else if (newStatus === 'picked_up') {
+          order.pickedUpAt = new Date();
+        } else if (newStatus === 'completed') {
+          order.completedAt = new Date();
+        } else if (newStatus === 'cancelled') {
+          order.cancelledAt = new Date();
+          order.cancelledBy = 'admin';
+        }
+
+        await order.save({ session: mongoSession });
+
+        // Record status change in history
+        await OrderStatusHistory.create(
+          [
+            {
+              orderId: order._id,
+              status: newStatus,
+              notes: `Status changed from ${oldStatus} to ${newStatus} by admin`,
+              changedBy: 'admin',
+            },
+          ],
+          { session: mongoSession }
+        );
+
+        updatedOrder = order;
+      });
+    } finally {
+      await mongoSession.endSession();
     }
 
-    // Validate status transition
-    if (!this.isValidStatusTransition(order.status, newStatus)) {
-      throw new AppError(
-        `Invalid status transition from ${order.status} to ${newStatus}`,
-        400
-      );
+    if (!updatedOrder) {
+      throw new AppError('Unable to update order status', 500);
     }
-
-    const oldStatus = order.status;
-    order.status = newStatus;
-
-    // Update timestamps based on status
-    if (newStatus === 'ready') {
-      order.actualReadyTime = new Date();
-    } else if (newStatus === 'picked_up') {
-      order.pickedUpAt = new Date();
-    } else if (newStatus === 'completed') {
-      order.completedAt = new Date();
-    } else if (newStatus === 'cancelled') {
-      order.cancelledAt = new Date();
-      order.cancelledBy = 'admin';
-    }
-
-    await order.save();
-
-    // Record status change in history
-    await OrderStatusHistory.create({
-      orderId: order._id,
-      status: newStatus,
-      notes: `Status changed from ${oldStatus} to ${newStatus} by admin`,
-      changedBy: 'admin',
-    });
 
     // TODO: Send notification to user about status change
     // This would be implemented when notification service is ready
-
-    return order;
+    return updatedOrder;
   }
 
   /**
@@ -789,35 +857,54 @@ export class OrderService {
       throw new AppError('Invalid driver ID', 400);
     }
 
-    const order = await Order.findById(orderId);
+    const mongoSession = await mongoose.startSession();
+    let updatedOrder: IOrder | null = null;
 
-    if (!order) {
-      throw new AppError('Order not found', 404);
+    try {
+      await mongoSession.withTransaction(async () => {
+        const order = await Order.findById(orderId).session(mongoSession);
+
+        if (!order) {
+          throw new AppError('Order not found', 404);
+        }
+
+        // Validate order status - can only assign driver to confirmed or preparing orders
+        if (!['confirmed', 'preparing', 'ready'].includes(order.status)) {
+          throw new AppError(
+            `Cannot assign driver to order with status ${order.status}`,
+            400
+          );
+        }
+
+        order.assignedDriverId = new mongoose.Types.ObjectId(driverId);
+        await order.save({ session: mongoSession });
+
+        // Record in status history
+        await OrderStatusHistory.create(
+          [
+            {
+              orderId: order._id,
+              status: order.status,
+              notes: `Driver ${driverId} assigned to order`,
+              changedBy: 'admin',
+            },
+          ],
+          { session: mongoSession }
+        );
+
+        updatedOrder = order;
+      });
+    } finally {
+      await mongoSession.endSession();
     }
 
-    // Validate order status - can only assign driver to confirmed or preparing orders
-    if (!['confirmed', 'preparing', 'ready'].includes(order.status)) {
-      throw new AppError(
-        `Cannot assign driver to order with status ${order.status}`,
-        400
-      );
+    if (!updatedOrder) {
+      throw new AppError('Unable to assign driver', 500);
     }
-
-    order.assignedDriverId = new mongoose.Types.ObjectId(driverId);
-    await order.save();
-
-    // Record in status history
-    await OrderStatusHistory.create({
-      orderId: order._id,
-      status: order.status,
-      notes: `Driver ${driverId} assigned to order`,
-      changedBy: 'admin',
-    });
 
     // TODO: Send notification to driver about assignment
     // This would be implemented when notification service is ready
-
-    return order;
+    return updatedOrder;
   }
 
   /**
