@@ -20,6 +20,7 @@ export interface Announcement {
 export interface CreateAnnouncementDTO {
   title: string;
   description: string;
+  imageUrl?: string;
   endDate: string; // ISO Date string
 }
 

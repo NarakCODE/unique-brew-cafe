@@ -3,6 +3,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { LogoutResponse } from "@/types/auth";
+import { clearSessionRole } from "@/lib/session";
 
 interface UseLogoutOptions {
   onSuccess?: (data: LogoutResponse) => void;
@@ -77,6 +78,8 @@ export function useLogout(options?: UseLogoutOptions) {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("refreshToken");
     localStorage.removeItem("user");
+    // Clear the role cookie so the middleware RBAC check is invalidated
+    clearSessionRole();
     router.replace("/sign-in");
   };
 

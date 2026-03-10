@@ -34,6 +34,7 @@ interface AuthResponse {
     id: string;
     fullName: string;
     email: string;
+    role: string;
     createdAt: Date;
     updatedAt: Date;
   };
@@ -126,6 +127,7 @@ export const completeRegistration = async (
       id: userId,
       fullName: user.fullName,
       email: user.email,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     },
@@ -174,6 +176,7 @@ export const registerUser = async (
       id: userId,
       fullName: user.fullName,
       email: user.email,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     },
@@ -226,6 +229,7 @@ export const loginUser = async (
       id: userId,
       fullName: user.fullName,
       email: user.email,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     },
@@ -251,6 +255,7 @@ export const getUserById = async (userId: string) => {
     id: String(user._id),
     fullName: user.fullName,
     email: user.email,
+    role: user.role,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };
