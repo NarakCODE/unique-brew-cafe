@@ -2,6 +2,7 @@ import { Cart } from '../models/Cart.js';
 import { CartItem } from '../models/CartItem.js';
 import { Product } from '../models/Product.js';
 import { Store } from '../models/Store.js';
+import { cleanImageUrls } from './productService.js';
 import { NotFoundError, BadRequestError } from '../utils/AppError.js';
 import mongoose from 'mongoose';
 
@@ -73,10 +74,19 @@ export const getCart = async (userId: string) => {
       'name slug images basePrice currency isAvailable preparationTime categoryId',
   });
 
+  const formattedItems = items.map((item) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const itemData = item.toJSON() as any;
+    if (itemData.productId && Array.isArray(itemData.productId.images)) {
+      itemData.productId.images = cleanImageUrls(itemData.productId.images);
+    }
+    return itemData;
+  });
+
   return {
     cart,
-    items,
-    itemCount: items.length,
+    items: formattedItems,
+    itemCount: formattedItems.length,
   };
 };
 

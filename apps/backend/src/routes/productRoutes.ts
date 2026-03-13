@@ -64,8 +64,8 @@ const processUploadedImages = (
   // Merge all images
   const allImages = [...existingImages, ...uploadedUrls];
 
-  // Update req.body.images with the merged array (as JSON string for preprocessing)
-  req.body.images = JSON.stringify(allImages);
+  // Update req.body.images with the merged array
+  req.body.images = allImages;
 
   next();
 };

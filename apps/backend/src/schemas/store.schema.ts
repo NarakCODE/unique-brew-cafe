@@ -64,6 +64,7 @@ export const getStoresQuerySchema = z.object({
       latitude: z.coerce.number().min(-90).max(90).optional(),
       longitude: z.coerce.number().min(-180).max(180).optional(),
       radius: z.coerce.number().positive().optional(),
+      search: z.string().trim().optional(),
     })
     .refine(
       (data) => {

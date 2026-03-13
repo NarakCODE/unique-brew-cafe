@@ -627,28 +627,8 @@ export const createProduct = asyncHandler(
       productData.isBestSelling = productData.isBestSelling === 'true';
     }
 
-    // Handle uploaded files (multiple images)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const files = (req as any).files as Express.Multer.File[] | undefined;
-    if (files && files.length > 0) {
-      const uploadedUrls = files.map((file) => file.path);
-      // Merge with any existing image URLs from the request
-      const existingImages = Array.isArray(productData.images)
-        ? productData.images.filter(
-            (img: string) => typeof img === 'string' && img.startsWith('http')
-          )
-        : [];
-      productData.images = [...existingImages, ...uploadedUrls];
-    }
-
-    // Fallback for single file upload
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const singleFile = (req as any).file as Express.Multer.File | undefined;
-    if (singleFile && singleFile.path) {
-      if (!productData.images || productData.images.length === 0) {
-        productData.images = [singleFile.path];
-      }
-    }
+    // The images are already merged and processed by processUploadedImages middleware
+    // in productRoutes, and now passed properly via Zod.
 
     const product = await productService.createProduct(productData);
 
@@ -723,28 +703,8 @@ export const updateProduct = asyncHandler(
       productData.isBestSelling = productData.isBestSelling === 'true';
     }
 
-    // Handle uploaded files (multiple images)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const files = (req as any).files as Express.Multer.File[] | undefined;
-    if (files && files.length > 0) {
-      const uploadedUrls = files.map((file) => file.path);
-      // Merge with any existing image URLs from the request
-      const existingImages = Array.isArray(productData.images)
-        ? productData.images.filter(
-            (img: string) => typeof img === 'string' && img.startsWith('http')
-          )
-        : [];
-      productData.images = [...existingImages, ...uploadedUrls];
-    }
-
-    // Fallback for single file upload
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const singleFile = (req as any).file as Express.Multer.File | undefined;
-    if (singleFile && singleFile.path) {
-      if (!productData.images || productData.images.length === 0) {
-        productData.images = [singleFile.path];
-      }
-    }
+    // The images are already merged and processed by processUploadedImages middleware
+    // in productRoutes, and now passed properly via Zod.
 
     const product = await productService.updateProduct(id, productData);
 

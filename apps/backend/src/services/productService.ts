@@ -21,6 +21,31 @@ import {
   type PaginationResult,
 } from '../utils/pagination.js';
 
+export const cleanImageUrls = (images: unknown[] | undefined): string[] => {
+  if (!images || !Array.isArray(images)) return [];
+  const cleaned: string[] = [];
+  for (const img of images) {
+    if (
+      typeof img === 'string' &&
+      (img.startsWith('[') || img.startsWith('"'))
+    ) {
+      try {
+        const parsed = JSON.parse(img);
+        if (Array.isArray(parsed)) {
+          cleaned.push(...parsed);
+        } else {
+          cleaned.push(parsed as string);
+        }
+      } catch {
+        cleaned.push(img as string);
+      }
+    } else {
+      cleaned.push(img as string);
+    }
+  }
+  return cleaned;
+};
+
 interface ProductFilters {
   categoryId?: string;
   isAvailable?: boolean;
@@ -182,6 +207,7 @@ export const getProducts = async (
     ...product,
     id: product._id?.toString(),
     category: product.categoryId,
+    images: cleanImageUrls(product.images),
   })) as unknown as ProductResponse[];
 
   return buildPaginationResult(mappedProducts, total, page, limit);
@@ -273,6 +299,7 @@ export const getAllProductsAdmin = async (
     ...product,
     id: product._id?.toString(),
     category: product.categoryId,
+    images: cleanImageUrls(product.images),
   })) as unknown as ProductResponse[];
 
   return buildPaginationResult(mappedProducts, total, page, limit);
@@ -318,6 +345,7 @@ export const getProductById = async (
     ...product,
     id: product._id?.toString(),
     category: product.categoryId,
+    images: cleanImageUrls(product.images),
     customizations: customizations.map((c) => ({
       ...c,
       id: c._id?.toString(),
@@ -361,6 +389,7 @@ export const getProductBySlug = async (
     ...product,
     id: product._id?.toString(),
     category: product.categoryId,
+    images: cleanImageUrls(product.images),
     customizations: customizations.map((c) => ({
       ...c,
       id: c._id?.toString(),
@@ -570,6 +599,7 @@ export const updateProductStatus = async (
     ...updatedProduct,
     id: updatedProduct._id.toString(),
     category: updatedProduct.categoryId,
+    images: cleanImageUrls(updatedProduct.images),
   } as unknown as ProductResponse;
 };
 
@@ -655,6 +685,7 @@ export const duplicateProduct = async (productId: string): Promise<any> => {
     ...result,
     id: result?._id?.toString(),
     category: result?.categoryId,
+    images: cleanImageUrls(result?.images),
   };
 };
 
@@ -680,6 +711,7 @@ export const createProduct = async (
     ...populatedProduct,
     id: populatedProduct._id.toString(),
     category: populatedProduct.categoryId,
+    images: cleanImageUrls(populatedProduct.images),
   } as unknown as ProductResponse;
 };
 
@@ -711,6 +743,7 @@ export const updateProduct = async (
     ...product,
     id: product._id.toString(),
     category: product.categoryId,
+    images: cleanImageUrls(product.images),
   } as unknown as ProductResponse;
 };
 

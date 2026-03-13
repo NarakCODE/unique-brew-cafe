@@ -1,0 +1,293 @@
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/preflight.css" layer(base);
+@import "tailwindcss/utilities.css";
+@import "nativewind/theme";
+@import "tailwindcss/preflight";
+
+@theme {
+  --font-heading: var(--font-plus-jakarta-sans);
+  --font-body: var(--font-plus-jakarta-sans);
+  --font-mono: var(--font-source-code-pro);
+}
+
+:root {
+  --color-primary-0: 255 255 255;
+  --color-primary-50: 249 244 236;
+  --color-primary-100: 243 233 210;
+  --color-primary-200: 231 209 160;
+  --color-primary-300: 218 180 111;
+  --color-primary-400: 209 158 78;
+  --color-primary-500: 203 137 68;
+  --color-primary-600: 176 101 47;
+  --color-primary-700: 147 75 42;
+  --color-primary-800: 122 63 35;
+  --color-primary-900: 92 47 26;
+  --color-primary-950: 58 29 16;
+
+  --color-secondary-0: 255 255 255;
+  --color-secondary-50: 249 250 248;
+  --color-secondary-100: 244 247 242;
+  --color-secondary-200: 232 235 230;
+  --color-secondary-300: 216 219 212;
+  --color-secondary-400: 169 173 165;
+  --color-secondary-500: 145 149 142;
+  --color-secondary-600: 96 99 94;
+  --color-secondary-700: 70 73 69;
+  --color-secondary-800: 54 58 51;
+  --color-secondary-900: 35 37 34;
+  --color-secondary-950: 24 25 23;
+
+  --color-tertiary-50: 240 250 238;
+  --color-tertiary-100: 219 244 215;
+  --color-tertiary-200: 182 232 174;
+  --color-tertiary-300: 144 218 132;
+  --color-tertiary-400: 102 201 87;
+  --color-tertiary-500: 69 183 51;
+  --color-tertiary-600: 55 146 41;
+  --color-tertiary-700: 42 112 31;
+  --color-tertiary-800: 31 83 23;
+  --color-tertiary-900: 21 58 16;
+  --color-tertiary-950: 13 36 10;
+
+  --color-error-0: 255 245 243;
+  --color-error-50: 254 235 231;
+  --color-error-100: 252 214 206;
+  --color-error-200: 248 181 164;
+  --color-error-300: 241 140 116;
+  --color-error-400: 233 99 68;
+  --color-error-500: 226 88 57;
+  --color-error-600: 188 66 38;
+  --color-error-700: 148 50 29;
+  --color-error-800: 109 37 22;
+  --color-error-900: 76 26 16;
+  --color-error-950: 46 16 10;
+
+  --color-success-0: 242 251 240;
+  --color-success-50: 231 248 228;
+  --color-success-100: 208 241 203;
+  --color-success-200: 167 228 159;
+  --color-success-300: 122 211 106;
+  --color-success-400: 84 191 65;
+  --color-success-500: 69 183 51;
+  --color-success-600: 52 140 38;
+  --color-success-700: 39 105 29;
+  --color-success-800: 29 76 21;
+  --color-success-900: 20 52 15;
+  --color-success-950: 12 31 9;
+
+  --color-warning-0: 255 248 239;
+  --color-warning-50: 254 241 222;
+  --color-warning-100: 252 226 184;
+  --color-warning-200: 249 205 134;
+  --color-warning-300: 247 184 92;
+  --color-warning-400: 245 174 66;
+  --color-warning-500: 232 113 46;
+  --color-warning-600: 191 93 35;
+  --color-warning-700: 147 71 26;
+  --color-warning-800: 108 52 19;
+  --color-warning-900: 73 35 13;
+  --color-warning-950: 45 21 8;
+
+  --color-info-0: 239 251 255;
+  --color-info-50: 221 246 252;
+  --color-info-100: 187 236 246;
+  --color-info-200: 133 219 236;
+  --color-info-300: 84 200 223;
+  --color-info-400: 48 186 213;
+  --color-info-500: 36 181 212;
+  --color-info-600: 27 142 168;
+  --color-info-700: 21 106 126;
+  --color-info-800: 15 76 91;
+  --color-info-900: 10 51 61;
+  --color-info-950: 6 31 37;
+
+  --color-typography-0: 255 255 255;
+  --color-typography-50: 249 250 248;
+  --color-typography-100: 182 184 182;
+  --color-typography-200: 145 149 142;
+  --color-typography-300: 112 117 107;
+  --color-typography-400: 96 101 92;
+  --color-typography-500: 54 58 51;
+  --color-typography-600: 35 37 34;
+  --color-typography-700: 27 29 26;
+  --color-typography-800: 22 23 20;
+  --color-typography-900: 17 18 15;
+  --color-typography-950: 10 11 9;
+
+  --color-outline-0: 255 255 255;
+  --color-outline-50: 249 250 248;
+  --color-outline-100: 244 247 242;
+  --color-outline-200: 232 235 230;
+  --color-outline-300: 169 173 165;
+  --color-outline-400: 145 149 142;
+  --color-outline-500: 96 99 94;
+  --color-outline-600: 70 73 69;
+  --color-outline-700: 54 58 51;
+  --color-outline-800: 35 37 34;
+  --color-outline-900: 24 25 23;
+  --color-outline-950: 17 18 15;
+
+  --color-background-0: 255 255 255;
+  --color-background-50: 249 250 248;
+  --color-background-100: 244 247 242;
+  --color-background-200: 232 235 230;
+  --color-background-300: 216 219 212;
+  --color-background-400: 169 173 165;
+  --color-background-500: 145 149 142;
+  --color-background-600: 96 99 94;
+  --color-background-700: 70 73 69;
+  --color-background-800: 54 58 51;
+  --color-background-900: 35 37 34;
+  --color-background-950: 24 25 23;
+  --color-background-error: 254 235 231;
+  --color-background-warning: 254 241 222;
+  --color-background-muted: 249 250 248;
+  --color-background-success: 231 248 228;
+  --color-background-info: 221 246 252;
+
+  --color-indicator-primary: 203 137 68;
+  --color-indicator-info: 36 181 212;
+  --color-indicator-error: 226 88 57;
+}
+
+.dark {
+  --color-primary-0: 58 29 16;
+  --color-primary-50: 92 47 26;
+  --color-primary-100: 122 63 35;
+  --color-primary-200: 147 75 42;
+  --color-primary-300: 176 101 47;
+  --color-primary-400: 203 137 68;
+  --color-primary-500: 209 158 78;
+  --color-primary-600: 218 180 111;
+  --color-primary-700: 231 209 160;
+  --color-primary-800: 243 233 210;
+  --color-primary-900: 249 244 236;
+  --color-primary-950: 255 255 255;
+
+  --color-secondary-0: 24 25 23;
+  --color-secondary-50: 35 37 34;
+  --color-secondary-100: 54 58 51;
+  --color-secondary-200: 70 73 69;
+  --color-secondary-300: 96 99 94;
+  --color-secondary-400: 145 149 142;
+  --color-secondary-500: 169 173 165;
+  --color-secondary-600: 216 219 212;
+  --color-secondary-700: 232 235 230;
+  --color-secondary-800: 244 247 242;
+  --color-secondary-900: 249 250 248;
+  --color-secondary-950: 255 255 255;
+
+  --color-tertiary-50: 13 36 10;
+  --color-tertiary-100: 21 58 16;
+  --color-tertiary-200: 31 83 23;
+  --color-tertiary-300: 42 112 31;
+  --color-tertiary-400: 55 146 41;
+  --color-tertiary-500: 69 183 51;
+  --color-tertiary-600: 102 201 87;
+  --color-tertiary-700: 144 218 132;
+  --color-tertiary-800: 182 232 174;
+  --color-tertiary-900: 219 244 215;
+  --color-tertiary-950: 240 250 238;
+
+  --color-error-0: 46 16 10;
+  --color-error-50: 76 26 16;
+  --color-error-100: 109 37 22;
+  --color-error-200: 148 50 29;
+  --color-error-300: 188 66 38;
+  --color-error-400: 226 88 57;
+  --color-error-500: 233 99 68;
+  --color-error-600: 241 140 116;
+  --color-error-700: 248 181 164;
+  --color-error-800: 252 214 206;
+  --color-error-900: 254 235 231;
+  --color-error-950: 255 245 243;
+
+  --color-success-0: 12 31 9;
+  --color-success-50: 20 52 15;
+  --color-success-100: 29 76 21;
+  --color-success-200: 39 105 29;
+  --color-success-300: 52 140 38;
+  --color-success-400: 69 183 51;
+  --color-success-500: 84 191 65;
+  --color-success-600: 122 211 106;
+  --color-success-700: 167 228 159;
+  --color-success-800: 208 241 203;
+  --color-success-900: 231 248 228;
+  --color-success-950: 242 251 240;
+
+  --color-warning-0: 45 21 8;
+  --color-warning-50: 73 35 13;
+  --color-warning-100: 108 52 19;
+  --color-warning-200: 147 71 26;
+  --color-warning-300: 191 93 35;
+  --color-warning-400: 232 113 46;
+  --color-warning-500: 245 174 66;
+  --color-warning-600: 247 184 92;
+  --color-warning-700: 249 205 134;
+  --color-warning-800: 252 226 184;
+  --color-warning-900: 254 241 222;
+  --color-warning-950: 255 248 239;
+
+  --color-info-0: 6 31 37;
+  --color-info-50: 10 51 61;
+  --color-info-100: 15 76 91;
+  --color-info-200: 21 106 126;
+  --color-info-300: 27 142 168;
+  --color-info-400: 36 181 212;
+  --color-info-500: 48 186 213;
+  --color-info-600: 84 200 223;
+  --color-info-700: 133 219 236;
+  --color-info-800: 187 236 246;
+  --color-info-900: 221 246 252;
+  --color-info-950: 239 251 255;
+
+  --color-typography-0: 10 11 9;
+  --color-typography-50: 17 18 15;
+  --color-typography-100: 22 23 20;
+  --color-typography-200: 27 29 26;
+  --color-typography-300: 35 37 34;
+  --color-typography-400: 54 58 51;
+  --color-typography-500: 145 149 142;
+  --color-typography-600: 169 173 165;
+  --color-typography-700: 216 219 212;
+  --color-typography-800: 232 235 230;
+  --color-typography-900: 244 247 242;
+  --color-typography-950: 255 255 255;
+
+  --color-outline-0: 17 18 15;
+  --color-outline-50: 24 25 23;
+  --color-outline-100: 35 37 34;
+  --color-outline-200: 54 58 51;
+  --color-outline-300: 70 73 69;
+  --color-outline-400: 96 99 94;
+  --color-outline-500: 145 149 142;
+  --color-outline-600: 169 173 165;
+  --color-outline-700: 216 219 212;
+  --color-outline-800: 232 235 230;
+  --color-outline-900: 244 247 242;
+  --color-outline-950: 255 255 255;
+
+  --color-background-0: 24 25 23;
+  --color-background-50: 35 37 34;
+  --color-background-100: 54 58 51;
+  --color-background-200: 70 73 69;
+  --color-background-300: 96 99 94;
+  --color-background-400: 145 149 142;
+  --color-background-500: 169 173 165;
+  --color-background-600: 216 219 212;
+  --color-background-700: 232 235 230;
+  --color-background-800: 244 247 242;
+  --color-background-900: 249 250 248;
+  --color-background-950: 255 255 255;
+  --color-background-error: 76 26 16;
+  --color-background-warning: 73 35 13;
+  --color-background-muted: 35 37 34;
+  --color-background-success: 20 52 15;
+  --color-background-info: 10 51 61;
+
+  --color-indicator-primary: 209 158 78;
+  --color-indicator-info: 48 186 213;
+  --color-indicator-error: 233 99 68;
+}
+
+@tailwind utilities;
