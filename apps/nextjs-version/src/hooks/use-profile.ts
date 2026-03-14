@@ -11,12 +11,13 @@ import {
   ChangePasswordRequest,
   DeleteAccountRequest,
   UpdateProfileSettingsRequest,
+  User,
 } from "@/types/profile";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export function useProfile() {
-  const query = useQuery({
+  const query = useQuery<ApiResponse<User>, ApiErrorResponse>({
     queryKey: ["profile"],
     queryFn: getProfile,
     retry: false,
@@ -26,7 +27,7 @@ export function useProfile() {
   return {
     user: query.data?.data ?? null,
     isLoading: query.isLoading,
-    error: query.error as ApiErrorResponse | null,
+    error: query.error,
     refetch: query.refetch,
   };
 }
@@ -39,7 +40,11 @@ interface UseUpdateProfileImageOptions {
 export function useUpdateProfileImage(options?: UseUpdateProfileImageOptions) {
   const queryClient = useQueryClient();
 
-  const mutation = useMutation({
+  const mutation = useMutation<
+    ApiResponse<{ profileImage: string }>,
+    ApiErrorResponse,
+    FormData
+  >({
     mutationFn: updateProfileImage,
     onSuccess: (data) => {
       // Invalidate profile query to refetch updated data
