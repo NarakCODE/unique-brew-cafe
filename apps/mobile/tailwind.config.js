@@ -47,6 +47,12 @@ module.exports = {
       borderWidth: {
         hairline: hairlineWidth(),
       },
+      borderRadius: {
+        xl: 'calc(var(--radius) + 4px)',
+        lg: 'var(--radius)',
+        md: 'calc(var(--radius) - 2px)',
+        sm: 'calc(var(--radius) - 4px)',
+      },
     },
   },
   plugins: [],
@@ -58,11 +64,13 @@ function withOpacity(variableName) {
       return platformSelect({
         ios: `rgb(var(--${variableName}) / ${opacityValue})`,
         android: `rgb(var(--android-${variableName}) / ${opacityValue})`,
+        default: `rgb(var(--${variableName}) / ${opacityValue})`,
       });
     }
     return platformSelect({
       ios: `rgb(var(--${variableName}))`,
       android: `rgb(var(--android-${variableName}))`,
+      default: `rgb(var(--${variableName}))`,
     });
   };
 }

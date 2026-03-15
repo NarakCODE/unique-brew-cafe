@@ -4,7 +4,7 @@ import Animated, { LayoutAnimationConfig, ZoomInRotate } from 'react-native-rean
 
 import { Icon } from '@/components/nativewindui/Icon';
 import { cn } from '@/lib/cn';
-import { useColorScheme } from '@/lib/useColorScheme';
+import { useColorScheme } from "@/lib/color-scheme";
 import { COLORS } from '@/theme/colors';
 
 export function ThemeToggle() {

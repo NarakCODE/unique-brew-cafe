@@ -180,6 +180,9 @@ importers:
       '@react-navigation/native':
         specifier: ^7.1.8
         version: 7.1.33(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
+      '@rn-primitives/slot':
+        specifier: ^1.2.0
+        version: 1.2.0(react-native-web@0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
       '@shopify/flash-list':
         specifier: 2.0.2
         version: 2.0.2(@babel/runtime@7.28.6)(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)
@@ -264,6 +267,9 @@ importers:
       tailwind-merge:
         specifier: ^3.4.0
         version: 3.4.0
+      tailwindcss-animate:
+        specifier: ^1.0.7
+        version: 1.0.7(tailwindcss@3.4.19(tsx@4.20.6)(yaml@2.8.2))
     devDependencies:
       '@types/react':
         specifier: ~19.1.0
@@ -2991,6 +2997,18 @@ packages:
       react:
         optional: true
       react-redux:
+        optional: true
+
+  '@rn-primitives/slot@1.2.0':
+    resolution: {integrity: sha512-cpbn+JLjSeq3wcA4uqgFsUimMrWYWx2Ks7r5rkwd1ds1utxynsGkLOKpYVQkATwWrYhtcoF1raxIKEqXuMN+/w==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-web: '*'
+    peerDependenciesMeta:
+      react-native:
+        optional: true
+      react-native-web:
         optional: true
 
   '@rollup/rollup-android-arm-eabi@4.53.3':
@@ -8118,6 +8136,11 @@ packages:
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
 
+  tailwindcss-animate@1.0.7:
+    resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
+    peerDependencies:
+      tailwindcss: '>=3.0.0 || insiders'
+
   tailwindcss@3.4.19:
     resolution: {integrity: sha512-3ofp+LL8E+pK/JuPLPggVAIaEuhvIz4qNcf3nA1Xn2o/7fb7s/TYpHhwGDv1ZU3PkBluUVaF8PyCHcm48cKLWQ==}
     engines: {node: '>=14.0.0'}
@@ -11837,6 +11860,13 @@ snapshots:
     optionalDependencies:
       react: 19.2.3
       react-redux: 9.2.0(@types/react@19.2.8)(react@19.2.3)(redux@5.0.1)
+
+  '@rn-primitives/slot@1.2.0(react-native-web@0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0))(react-native@0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0))(react@19.1.0)':
+    dependencies:
+      react: 19.1.0
+    optionalDependencies:
+      react-native: 0.81.5(@babel/core@7.28.5)(@types/react@19.1.17)(react@19.1.0)
+      react-native-web: 0.21.2(react-dom@19.1.0(react@19.1.0))(react@19.1.0)
 
   '@rollup/rollup-android-arm-eabi@4.53.3':
     optional: true
@@ -18168,6 +18198,10 @@ snapshots:
       win-export-certificate-and-key: 2.1.0
 
   tailwind-merge@3.4.0: {}
+
+  tailwindcss-animate@1.0.7(tailwindcss@3.4.19(tsx@4.20.6)(yaml@2.8.2)):
+    dependencies:
+      tailwindcss: 3.4.19(tsx@4.20.6)(yaml@2.8.2)
 
   tailwindcss@3.4.19(tsx@4.20.6)(yaml@2.8.2):
     dependencies:

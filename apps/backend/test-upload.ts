@@ -7,7 +7,7 @@ const PNG_BUFFER = Buffer.from(
   'hex'
 );
 
-const API_URL = 'http://localhost:8081/api';
+const API_URL = 'http://localhost:3000/api';
 const ADMIN_EMAIL = 'channarakluy@gmail.com';
 const ADMIN_PASSWORD = 'password123';
 
