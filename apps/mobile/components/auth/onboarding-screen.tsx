@@ -9,9 +9,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { Button } from "@/components/nativewindui/Button";
-import { Text } from "@/components/nativewindui/Text";
+import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/logo";
+import { Text } from "@/components/ui/text";
 
 const BACKGROUND_IMAGE = require("@/assets/images/login-bg.png");
 

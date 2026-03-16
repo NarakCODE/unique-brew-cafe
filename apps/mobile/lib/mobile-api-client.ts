@@ -1,15 +1,15 @@
-import Constants from 'expo-constants';
-import { Platform } from 'react-native';
+import Constants from "expo-constants";
+import { Platform } from "react-native";
 
-import { normalizeApiError } from '@/lib/api-errors';
+import { normalizeApiError } from "@/lib/api-errors";
 
 function extractHost(uri: string | null | undefined) {
   if (!uri) {
     return null;
   }
 
-  const normalizedUri = uri.replace(/^[a-z]+:\/\//i, '');
-  const host = normalizedUri.split('/')[0]?.split(':')[0];
+  const normalizedUri = uri.replace(/^[a-z]+:\/\//i, "");
+  const host = normalizedUri.split("/")[0]?.split(":")[0];
 
   return host || null;
 }
@@ -29,16 +29,22 @@ function resolveApiBaseUrl() {
     return `http://${expoHost}:9000/api`;
   }
 
-  if (Platform.OS === 'android') {
-    return 'http://10.0.2.2:9000/api';
+  if (Platform.OS === "android") {
+    return "http://10.0.2.2:9000/api";
   }
 
-  return 'http://localhost:9000/api';
+  return "http://localhost:9000/api";
 }
 
 export const API_BASE_URL = resolveApiBaseUrl();
+const REQUEST_TIMEOUT_MS = 12000;
 
 let accessToken: string | null = null;
+let onUnauthorizedCallback: (() => void) | null = null;
+
+export function setOnUnauthorizedCallback(callback: (() => void) | null) {
+  onUnauthorizedCallback = callback;
+}
 
 function buildUrl(path: string) {
   return `${API_BASE_URL}${path}`;
@@ -47,11 +53,11 @@ function buildUrl(path: string) {
 async function request<TResponse>(
   method: string,
   path: string,
-  body?: BodyInit | Record<string, unknown>
+  body?: BodyInit | Record<string, unknown>,
 ): Promise<TResponse> {
   const requestUrl = buildUrl(path);
   const headers: Record<string, string> = {
-    Accept: 'application/json',
+    Accept: "application/json",
   };
 
   if (accessToken) {
@@ -61,38 +67,67 @@ async function request<TResponse>(
   const isFormData = body instanceof FormData;
 
   if (body !== undefined && !isFormData) {
-    headers['Content-Type'] = 'application/json';
+    headers["Content-Type"] = "application/json";
   }
 
   try {
-    const response = await fetch(requestUrl, {
-      method,
-      headers,
-      body:
-        body === undefined
-          ? undefined
-          : isFormData
-            ? body
-            : JSON.stringify(body),
-    });
+    if (__DEV__) {
+      console.log(`[mobile-api] ${method} ${requestUrl}`);
+    }
 
-    const contentType = response.headers.get('content-type') ?? '';
-    const payload = contentType.includes('application/json')
+    const response = await Promise.race([
+      fetch(requestUrl, {
+        method,
+        headers,
+        body:
+          body === undefined
+            ? undefined
+            : isFormData
+              ? body
+              : JSON.stringify(body),
+      }),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => {
+          reject(
+            new Error(
+              `Request timed out after ${REQUEST_TIMEOUT_MS / 1000} seconds while reaching ${requestUrl}.`,
+            ),
+          );
+        }, REQUEST_TIMEOUT_MS);
+      }),
+    ]);
+
+    const contentType = response.headers.get("content-type") ?? "";
+    const payload = contentType.includes("application/json")
       ? await response.json()
       : null;
 
     if (!response.ok) {
-      throw normalizeApiError(
+      const apiError = normalizeApiError(
         payload,
-        `Request failed with status ${response.status}.`
+        `Request failed with status ${response.status}.`,
       );
+
+      // Notify if session seems expired/unauthorized
+      if (
+        path !== "/auth/logout" &&
+        (response.status === 401 ||
+          response.status === 403 ||
+          apiError.errorCode === "AUTH_UNAUTHORIZED")
+      ) {
+        if (onUnauthorizedCallback) {
+          onUnauthorizedCallback();
+        }
+      }
+
+      throw apiError;
     }
 
     return payload as TResponse;
   } catch (error) {
     throw normalizeApiError(
       error,
-      `Unable to reach the server at ${requestUrl}.`
+      `Unable to reach the server at ${requestUrl}.`,
     );
   }
 }
@@ -102,9 +137,12 @@ export function setApiAccessToken(token: string | null) {
 }
 
 export const mobileApiClient = {
-  get: <T = unknown, R = T>(url: string) => request<R>('GET', url),
-  post: <T = unknown, R = T>(url: string, data?: T) => request<R>('POST', url, data as Record<string, unknown> | undefined),
-  put: <T = unknown, R = T>(url: string, data?: T) => request<R>('PUT', url, data as Record<string, unknown> | undefined),
-  patch: <T = unknown, R = T>(url: string, data?: T) => request<R>('PATCH', url, data as Record<string, unknown> | undefined),
-  delete: <T = unknown, R = T>(url: string) => request<R>('DELETE', url),
+  get: <T = unknown, R = T>(url: string) => request<R>("GET", url),
+  post: <T = unknown, R = T>(url: string, data?: T) =>
+    request<R>("POST", url, data as Record<string, unknown> | undefined),
+  put: <T = unknown, R = T>(url: string, data?: T) =>
+    request<R>("PUT", url, data as Record<string, unknown> | undefined),
+  patch: <T = unknown, R = T>(url: string, data?: T) =>
+    request<R>("PATCH", url, data as Record<string, unknown> | undefined),
+  delete: <T = unknown, R = T>(url: string) => request<R>("DELETE", url),
 };

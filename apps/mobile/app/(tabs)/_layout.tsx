@@ -1,15 +1,18 @@
-import { Redirect, Tabs } from 'expo-router';
-import React from 'react';
+import { Redirect, Tabs } from "expo-router";
+import React from "react";
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { useAuth } from '@/providers/auth-provider';
+import { FloatingTabBar } from "@/components/navigation/floating-tab-bar";
+import { IconSymbol } from "@/components/ui/icon-symbol";
+import { useColorScheme } from "@/lib/color-scheme";
+import { useAuth } from "@/providers/auth-provider";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const { isAuthenticated } = useAuth();
+  const { colors } = useColorScheme();
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return null;
+  }
 
   if (!isAuthenticated) {
     return <Redirect href="/" />;
@@ -17,23 +20,58 @@ export default function TabLayout() {
 
   return (
     <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} />}
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
+        sceneStyle: {
+          backgroundColor: colors.background,
+        },
         headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
+        tabBarHideOnKeyboard: true,
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="house.fill" color={color} />
+          ),
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: "Explore",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={24} name="magnifyingglass" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="cart"
+        options={{
+          title: "Cart",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={28} name="cart.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="favorite"
+        options={{
+          title: "Saved",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={24} name="heart.fill" color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="account"
+        options={{
+          title: "Account",
+          tabBarIcon: ({ color }) => (
+            <IconSymbol size={24} name="person.fill" color={color} />
+          ),
         }}
       />
     </Tabs>

@@ -1,112 +1,269 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Grid2x2, ShoppingBag } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import * as React from "react";
+import { Pressable, ScrollView, View } from "react-native";
+import { FadeInUp } from "react-native-reanimated";
 
-import { Collapsible } from '@/components/ui/collapsible';
-import { ExternalLink } from '@/components/external-link';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Fonts } from '@/constants/theme';
+import { ScreenLayout } from "@/components/layout/screen-layout";
+import { ExploreProductCard } from "@/components/product/explore-product-card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
+import { Text } from "@/components/ui/text";
+import { useCategories } from "@/hooks/use-categories";
+import { useProducts } from "@/hooks/use-products";
+import { useColorScheme } from "@/lib/color-scheme";
+import type { MobileCategory } from "@/services/category.service";
+import type { MobileProduct } from "@/services/product.service";
 
-export default function TabTwoScreen() {
+const ALL_CATEGORY = {
+  id: "all",
+  name: "All",
+  slug: "all",
+} as const;
+
+export default function ExploreScreen() {
+  const router = useRouter();
+  const [selectedCategoryId, setSelectedCategoryId] = React.useState<
+    string | undefined
+  >(undefined);
+  const { colors, isDarkColorScheme } = useColorScheme();
+  const categoriesQuery = useCategories();
+  const productsQuery = useProducts({
+    categoryId: selectedCategoryId,
+  });
+
+  const categories = React.useMemo(
+    () => categoriesQuery.data ?? [],
+    [categoriesQuery.data],
+  );
+  const products = React.useMemo(
+    () => productsQuery.data?.items ?? [],
+    [productsQuery.data?.items],
+  );
+  const selectedCategory = categories.find(
+    (category) => category.id === selectedCategoryId,
+  );
+  const productRows = React.useMemo(() => groupProducts(products), [products]);
+  const productCount = productsQuery.data?.pagination.total ?? 0;
+  const errorMessage =
+    categoriesQuery.error?.message ??
+    productsQuery.error?.message ??
+    "Unable to load the cafe menu.";
+
+  const handleRetry = React.useCallback(() => {
+    void categoriesQuery.refetch();
+    void productsQuery.refetch();
+  }, [categoriesQuery, productsQuery]);
+
+  const categoryChips = React.useMemo(
+    () => [ALL_CATEGORY, ...categories],
+    [categories],
+  );
+
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText
-          type="title"
-          style={{
-            fontFamily: Fonts.rounded,
-          }}>
-          Explore
-        </ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image
-          source={require('@/assets/images/react-logo.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
-        />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful{' '}
-          <ThemedText type="defaultSemiBold" style={{ fontFamily: Fonts.mono }}>
-            react-native-reanimated
-          </ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <ScreenLayout contentClassName="gap-5">
+      <NativeOnlyAnimatedView entering={FadeInUp.delay(120).duration(420)}>
+        <View className="items-center">
+          <Text className="text-2xl font-semibold text-foreground">
+            Explore
+          </Text>
+        </View>
+      </NativeOnlyAnimatedView>
+
+      <NativeOnlyAnimatedView entering={FadeInUp.delay(160).duration(420)}>
+        <View className="gap-3">
+          {categoriesQuery.isLoading ? (
+            <CategoryChipSkeleton />
+          ) : (
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={{ paddingRight: 8 }}
+            >
+              <View className="flex-row gap-3">
+                {categoryChips.map((category) => {
+                  const isSelected =
+                    (selectedCategoryId ?? ALL_CATEGORY.id) === category.id;
+
+                  return (
+                    <Pressable
+                      key={category.id}
+                      accessibilityRole="button"
+                      accessibilityState={isSelected ? { selected: true } : {}}
+                      className="rounded-full border px-4 py-2.5"
+                      onPress={() => {
+                        setSelectedCategoryId(
+                          category.id === ALL_CATEGORY.id
+                            ? undefined
+                            : category.id,
+                        );
+                      }}
+                      style={{
+                        backgroundColor: isSelected
+                          ? isDarkColorScheme
+                            ? colors.cardForeground
+                            : colors.foreground
+                          : isDarkColorScheme
+                            ? colors.card
+                            : colors.card,
+                        borderColor: isSelected
+                          ? isDarkColorScheme
+                            ? colors.cardForeground
+                            : colors.foreground
+                          : colors.border,
+                      }}
+                    >
+                      <Text
+                        className="text-sm font-semibold"
+                        style={{
+                          color: isSelected
+                            ? isDarkColorScheme
+                              ? colors.background
+                              : colors.background
+                            : colors.foreground,
+                        }}
+                      >
+                        {category.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          )}
+        </View>
+      </NativeOnlyAnimatedView>
+
+      <NativeOnlyAnimatedView entering={FadeInUp.delay(180).duration(420)}>
+        <View className="gap-4 px-4">
+          <View className="flex-row items-end justify-between px-1">
+            <View className="flex-1 pr-4">
+              <Text className="text-xl font-semibold text-foreground">
+                {selectedCategory?.name ?? "All products"}
+              </Text>
+              <Text className="mt-1 text-sm text-muted-foreground">
+                {buildSectionDescription(selectedCategory, productCount)}
+              </Text>
+            </View>
+
+            <View className="flex-row items-center gap-2 rounded-full border border-border px-3 py-1.5">
+              <Grid2x2
+                size={14}
+                color={colors.mutedForeground}
+                strokeWidth={2.2}
+              />
+              <Text className="text-xs font-medium uppercase tracking-[1.1px] text-muted-foreground">
+                {productCount} items
+              </Text>
+            </View>
+          </View>
+
+          {categoriesQuery.isError || productsQuery.isError ? (
+            <EmptyState
+              title="Unable to load the menu"
+              description={errorMessage}
+              variant="error"
+              centered
+              actionLabel="Try again"
+              onAction={handleRetry}
+            />
+          ) : categoriesQuery.isLoading || productsQuery.isLoading ? (
+            <ProductGridSkeleton />
+          ) : products.length === 0 ? (
+            <EmptyState
+              title="Nothing available here yet"
+              description="Switch categories or come back later for fresh menu updates."
+              variant="default"
+              centered
+              icon={ShoppingBag}
+            />
+          ) : (
+            <View className="gap-4">
+              {productRows.map((row, rowIndex) => (
+                <NativeOnlyAnimatedView
+                  key={`product-row-${rowIndex}`}
+                  entering={FadeInUp.delay(220 + rowIndex * 60).duration(360)}
+                >
+                  <View className="flex-row gap-4">
+                    {row.map((product) => (
+                      <ExploreProductCard
+                        key={product.id}
+                        product={product}
+                        onPress={() => {
+                          router.push(`/product/${product.id}`);
+                        }}
+                      />
+                    ))}
+                    {row.length === 1 ? <View className="flex-1" /> : null}
+                  </View>
+                </NativeOnlyAnimatedView>
+              ))}
+            </View>
+          )}
+        </View>
+      </NativeOnlyAnimatedView>
+    </ScreenLayout>
   );
 }
 
-const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
-  },
-  titleContainer: {
-    flexDirection: 'row',
-    gap: 8,
-  },
-});
+function CategoryChipSkeleton() {
+  return (
+    <View className="mt-4 flex-row gap-3">
+      {Array.from({ length: 4 }).map((_, index) => (
+        <View
+          key={`category-skeleton-${index}`}
+          className="h-11 w-24 rounded-full bg-muted"
+        />
+      ))}
+    </View>
+  );
+}
+
+function ProductGridSkeleton() {
+  return (
+    <View className="gap-4">
+      {Array.from({ length: 3 }).map((_, rowIndex) => (
+        <View
+          key={`product-grid-skeleton-${rowIndex}`}
+          className="flex-row gap-4"
+        >
+          {Array.from({ length: 2 }).map((_, columnIndex) => (
+            <View
+              key={`product-card-skeleton-${rowIndex}-${columnIndex}`}
+              className="flex-1 overflow-hidden rounded-[24px] border border-border bg-card"
+            >
+              <View className="h-36 bg-muted" />
+              <View className="gap-3 px-4 py-4">
+                <View className="h-5 w-4/5 rounded-full bg-muted" />
+                <View className="h-4 w-1/2 rounded-full bg-muted" />
+                <View className="h-4 w-full rounded-full bg-muted" />
+                <View className="h-4 w-2/3 rounded-full bg-muted" />
+              </View>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+}
+
+function groupProducts(products: MobileProduct[]) {
+  const rows: MobileProduct[][] = [];
+
+  for (let index = 0; index < products.length; index += 2) {
+    rows.push(products.slice(index, index + 2));
+  }
+
+  return rows;
+}
+
+function buildSectionDescription(
+  category: MobileCategory | undefined,
+  productCount: number,
+) {
+  if (category) {
+    return `${productCount} items in ${category.name.toLowerCase()}.`;
+  }
+
+  return `${productCount} available picks across the full menu.`;
+}

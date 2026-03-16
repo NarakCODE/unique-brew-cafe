@@ -2,6 +2,12 @@ import type { FilterQuery } from 'mongoose';
 import Announcement, { type IAnnouncement } from '../models/Announcement.js';
 import { NotFoundError } from '../utils/AppError.js';
 import { User } from '../models/User.js';
+import {
+  parsePaginationParams,
+  buildPaginationResult,
+  type PaginationParams,
+  type PaginationResult,
+} from '../utils/pagination.js';
 
 // Base DTO for shared fields
 interface BaseAnnouncementDTO {
@@ -87,56 +93,77 @@ export const announcementService = {
    * Get active announcements for a user (or guest)
    */
 
-  async getActiveAnnouncements(userId?: string): Promise<IAnnouncement[]> {
+  async getActiveAnnouncements(
+    userId?: string,
+    paginationParams?: PaginationParams
+  ): Promise<PaginationResult<IAnnouncement>> {
     const query: FilterQuery<IAnnouncement> = {
       isActive: true,
     };
 
+    const { page, limit, skip, sortBy, sortOrder } = parsePaginationParams(
+      paginationParams || {}
+    );
+
+    const sort: Record<string, 1 | -1> = paginationParams?.sortBy
+      ? { [sortBy]: sortOrder }
+      : { priority: -1, createdAt: -1 };
+
     if (!userId) {
       query.targetAudience = 'all';
-      return Announcement.find(query).sort({ priority: -1, createdAt: -1 });
+    } else {
+      const user = await User.findById(userId).lean();
+
+      if (!user) {
+        query.targetAudience = 'all';
+      } else {
+        const audienceFilters: FilterQuery<IAnnouncement>[] = [
+          { targetAudience: 'all' },
+        ];
+
+        const now = new Date();
+        const accountAgeInMs =
+          now.getTime() - new Date(user.createdAt).getTime();
+        const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+
+        if (accountAgeInMs <= thirtyDaysInMs) {
+          audienceFilters.push({ targetAudience: 'new_users' });
+        }
+
+        if ((user.totalOrders ?? 0) > 0 || (user.loyaltyPoints ?? 0) > 0) {
+          audienceFilters.push({ targetAudience: 'loyal_users' });
+        }
+
+        if (user.loyaltyTier) {
+          audienceFilters.push({
+            targetAudience: 'specific_tier',
+            userTierFilter: user.loyaltyTier,
+          });
+        }
+
+        query.$or = audienceFilters;
+      }
     }
 
-    const user = await User.findById(userId).lean();
+    const [announcements, total] = await Promise.all([
+      Announcement.find(query)
+        .sort(sort as any)
+        .skip(skip)
+        .limit(limit),
+      Announcement.countDocuments(query),
+    ]);
 
-    if (!user) {
-      query.targetAudience = 'all';
-      return Announcement.find(query).sort({ priority: -1, createdAt: -1 });
-    }
-
-    const audienceFilters: FilterQuery<IAnnouncement>[] = [
-      { targetAudience: 'all' },
-    ];
-
-    const now = new Date();
-    const accountAgeInMs = now.getTime() - new Date(user.createdAt).getTime();
-    const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
-
-    if (accountAgeInMs <= thirtyDaysInMs) {
-      audienceFilters.push({ targetAudience: 'new_users' });
-    }
-
-    if ((user.totalOrders ?? 0) > 0 || (user.loyaltyPoints ?? 0) > 0) {
-      audienceFilters.push({ targetAudience: 'loyal_users' });
-    }
-
-    if (user.loyaltyTier) {
-      audienceFilters.push({
-        targetAudience: 'specific_tier',
-        userTierFilter: user.loyaltyTier,
-      });
-    }
-
-    query.$or = audienceFilters;
-
-    return Announcement.find(query).sort({ priority: -1, createdAt: -1 });
+    return buildPaginationResult(announcements, total, page, limit);
   },
 
   /**
    * Get all announcements for admin users (no filtering)
    * Admin users can see all announcements regardless of status, date, or target audience
    */
-  async getAdminAnnouncements(userId?: string): Promise<IAnnouncement[]> {
+  async getAdminAnnouncements(
+    userId?: string,
+    paginationParams?: PaginationParams
+  ): Promise<PaginationResult<IAnnouncement>> {
     if (!userId) {
       throw new NotFoundError('User ID is required for admin announcements');
     }
@@ -151,8 +178,24 @@ export const announcementService = {
       throw new NotFoundError('Access denied. Admin role required.');
     }
 
+    const { page, limit, skip, sortBy, sortOrder } = parsePaginationParams(
+      paginationParams || {}
+    );
+
+    const sort: Record<string, 1 | -1> = paginationParams?.sortBy
+      ? { [sortBy]: sortOrder }
+      : { priority: -1, createdAt: -1 };
+
     // Return all announcements for admin to manage
-    return Announcement.find({}).sort({ priority: -1, createdAt: -1 });
+    const [announcements, total] = await Promise.all([
+      Announcement.find({})
+        .sort(sort as any)
+        .skip(skip)
+        .limit(limit),
+      Announcement.countDocuments({}),
+    ]);
+
+    return buildPaginationResult(announcements, total, page, limit);
   },
 
   /**

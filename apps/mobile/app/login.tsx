@@ -1,156 +1,192 @@
-import { ImageBackground } from "expo-image";
-import { Redirect } from "expo-router";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import * as React from "react";
+import { Redirect, useRouter } from "expo-router";
+import { Eye, EyeOff } from "lucide-react-native";
+import { Pressable, TextInput, View } from "react-native";
 
 import { AuthFormField } from "@/components/auth/auth-form-field";
-import { Button } from "@/components/nativewindui/Button";
-import { Text } from "@/components/nativewindui/Text";
-import { Logo } from "@/components/ui/logo";
+import { AuthScreenShell } from "@/components/auth/auth-screen-shell";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
 import { useLoginForm } from "@/hooks/use-login-form";
+import { mobileApiClient } from "@/lib/mobile-api-client";
 import { useAuth } from "@/providers/auth-provider";
+import { createAuthApi } from "../../../packages/api/src";
 
-const BACKGROUND_IMAGE = require("@/assets/images/login-bg.png");
+const authApi = createAuthApi(mobileApiClient);
 
 export default function LoginScreen() {
-  const { isAuthenticated, signIn } = useAuth();
-  const form = useLoginForm(async (values) => {
-    await signIn(values);
+  const { isAuthenticated, isLoading, signIn } = useAuth();
+  const router = useRouter();
+  const passwordInputRef = React.useRef<TextInput>(null);
+  const [isPasswordVisible, setIsPasswordVisible] = React.useState(false);
+
+  const {
+    values,
+    errors,
+    submissionError,
+    isSubmitting,
+    canSubmit,
+    setFieldValue,
+    submit,
+  } = useLoginForm(async (credentials) => {
+    const response = await authApi.login(credentials);
+    await signIn(response);
   });
+
+  function onEmailSubmitEditing() {
+    passwordInputRef.current?.focus();
+  }
+
+  if (isLoading) {
+    return null;
+  }
 
   if (isAuthenticated) {
     return <Redirect href="/(tabs)" />;
   }
 
   return (
-    <ImageBackground
-      source={BACKGROUND_IMAGE}
-      style={{ flex: 1 }}
-      contentFit="cover"
-    >
-      <View className="flex-1 bg-[#2E190C]/55">
-        <SafeAreaView edges={["top", "bottom"]} className="flex-1">
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : undefined}
-            className="flex-1"
-          >
-            <ScrollView
-              contentInsetAdjustmentBehavior="automatic"
-              keyboardShouldPersistTaps="handled"
-              contentContainerClassName="flex-grow justify-between px-6 py-6"
+    <View className="flex-1 bg-[#FBF6EF]">
+      <AuthScreenShell
+        title="Welcome back"
+        subtitle="Sign in to keep your favorites, recent searches, and coffee routine synced across Unique Brew."
+        footer={
+          <View className="items-center gap-3">
+            <View className="flex-row items-center gap-1">
+              <Text variant="subhead" className="text-[#6F5847]">
+                Don&apos;t have an account?
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Sign up"
+                onPress={() => {
+                  router.push("/signup");
+                }}
+              >
+                <Text
+                  variant="subhead"
+                  className="font-semibold text-[#3D2415]"
+                >
+                  Sign up
+                </Text>
+              </Pressable>
+            </View>
+          </View>
+        }
+      >
+        <View>
+          <View className="gap-5">
+            <AuthFormField
+              id="email"
+              autoCapitalize="none"
+              autoComplete="email"
+              autoCorrect={false}
+              keyboardType="email-address"
+              placeholder="you@example.com"
+              returnKeyType="next"
+              submitBehavior="submit"
+              textContentType="emailAddress"
+              value={values.email}
+              onChangeText={(value) => setFieldValue("email", value)}
+              onSubmitEditing={onEmailSubmitEditing}
+              label="Email address"
+              error={errors.email}
+              className="border border-[#E5D3C3] bg-white text-[#2F1B10]"
+            />
+
+            <View className="gap-2">
+              <View className="flex-row items-center justify-between">
+                <Text className="font-medium text-[#3D2415]">Password</Text>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Forgot password"
+                  onPress={() => {
+                    // TODO: Navigate to forgot password screen
+                  }}
+                >
+                  <Text className="text-sm font-medium text-[#9A6B3A]">
+                    Forgot password?
+                  </Text>
+                </Pressable>
+              </View>
+
+              <View
+                className={`flex-row items-center rounded-2xl border bg-white px-4 ${
+                  errors.password ? "border-red-500" : "border-[#E5D3C3]"
+                }`}
+              >
+                <Input
+                  ref={passwordInputRef}
+                  id="password"
+                  secureTextEntry={!isPasswordVisible}
+                  autoComplete="password"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  placeholder="Enter your password"
+                  textContentType="password"
+                  value={values.password}
+                  onChangeText={(value) => setFieldValue("password", value)}
+                  returnKeyType="send"
+                  submitBehavior="submit"
+                  onSubmitEditing={() => {
+                    void submit();
+                  }}
+                  className="h-14 flex-1 border-0 bg-transparent px-0 pr-3 text-[#2F1B10] shadow-none"
+                />
+
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    isPasswordVisible ? "Hide password" : "Show password"
+                  }
+                  className="rounded-full p-2 active:opacity-70"
+                  onPress={() => {
+                    setIsPasswordVisible((current) => !current);
+                  }}
+                >
+                  {isPasswordVisible ? (
+                    <EyeOff size={20} color="#7B6A59" strokeWidth={2.2} />
+                  ) : (
+                    <Eye size={20} color="#7B6A59" strokeWidth={2.2} />
+                  )}
+                </Pressable>
+              </View>
+
+              {errors.password ? (
+                <Text variant="caption1" className="text-red-500">
+                  {errors.password}
+                </Text>
+              ) : (
+                <Text variant="caption1" className="text-[#8F7765]">
+                  Password must be at least 6 characters.
+                </Text>
+              )}
+            </View>
+
+            {submissionError ? (
+              <View className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3">
+                <Text className="text-sm leading-6 text-red-600">
+                  {submissionError}
+                </Text>
+              </View>
+            ) : null}
+
+            <Button
+              size="lg"
+              className="mt-2 h-14 rounded-[22px] bg-[#5A3421]"
+              disabled={!canSubmit}
+              onPress={() => {
+                void submit();
+              }}
             >
-              <View className="items-center pt-3">
-                <View className="rounded-[32px] border border-white/30 bg-white/88 p-4 shadow-2xl">
-                  <Logo size={88} />
-                </View>
-              </View>
-
-              <View className="gap-6 pb-8">
-                <View className="gap-3">
-                  <Text
-                    variant="largeTitle"
-                    className="max-w-[280px] text-white"
-                  >
-                    Brew your next order.
-                  </Text>
-                  <Text
-                    variant="body"
-                    className="max-w-[320px] leading-6 text-white/80"
-                  >
-                    Sign in to track pickups, reorder favorites, and keep your
-                    coffee routine moving.
-                  </Text>
-                </View>
-
-                <View className="rounded-[34px] border border-white/20 bg-[#FFF7EE]/92 p-6 shadow-2xl">
-                  <View className="gap-5">
-                    <View className="gap-1">
-                      <Text
-                        variant="title2"
-                        className="font-semibold text-[#3D2415]"
-                      >
-                        Welcome back
-                      </Text>
-                      <Text
-                        variant="subhead"
-                        className="leading-6 text-[#6F5847]"
-                      >
-                        Use your account to continue browsing the menu and place
-                        your next pickup.
-                      </Text>
-                    </View>
-
-                    {form.submissionError ? (
-                      <View className="rounded-2xl border border-[#C96E4B]/30 bg-[#FFF1EA] p-4">
-                        <Text variant="subhead" className="text-[#A24724]">
-                          {form.submissionError}
-                        </Text>
-                      </View>
-                    ) : null}
-
-                    <AuthFormField
-                      autoCapitalize="none"
-                      autoComplete="email"
-                      autoCorrect={false}
-                      keyboardType="email-address"
-                      label="Email address"
-                      placeholder="you@example.com"
-                      returnKeyType="next"
-                      textContentType="emailAddress"
-                      value={form.values.email}
-                      error={form.errors.email}
-                      className="border border-[#E5D3C3] bg-white text-[#2F1B10]"
-                      onChangeText={(text) => form.setFieldValue("email", text)}
-                    />
-
-                    <AuthFormField
-                      autoCapitalize="none"
-                      autoComplete="password"
-                      helperText="Passwords must be at least 6 characters."
-                      label="Password"
-                      placeholder="Enter your password"
-                      returnKeyType="done"
-                      secureTextEntry
-                      textContentType="password"
-                      value={form.values.password}
-                      error={form.errors.password}
-                      className="border border-[#E5D3C3] bg-white text-[#2F1B10]"
-                      onChangeText={(text) =>
-                        form.setFieldValue("password", text)
-                      }
-                      onSubmitEditing={() => {
-                        void form.submit();
-                      }}
-                    />
-
-                    <Button
-                      size="lg"
-                      className="mt-2 h-14 rounded-[22px] bg-[#5A3421]"
-                      disabled={!form.canSubmit}
-                      onPress={() => {
-                        void form.submit();
-                      }}
-                    >
-                      <Text className="text-lg font-semibold text-white">
-                        {form.isSubmitting ? "Signing in..." : "Sign in"}
-                      </Text>
-                    </Button>
-
-                    <Text
-                      variant="footnote"
-                      className="text-center leading-5 text-[#6F5847]"
-                    >
-                      Authentication uses the backend `/auth/login` endpoint.
-                      Set `EXPO_PUBLIC_API_URL` if your API is not running on
-                      the local default.
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </ScrollView>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      </View>
-    </ImageBackground>
+              <Text className="text-lg font-semibold text-white">
+                {isSubmitting ? "Signing in..." : "Log in"}
+              </Text>
+            </Button>
+          </View>
+        </View>
+      </AuthScreenShell>
+    </View>
   );
 }

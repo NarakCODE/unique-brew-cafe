@@ -1,7 +1,7 @@
 import { Image } from 'expo-image';
 import { View, ViewStyle } from 'react-native';
 
-import { cn } from '@/lib/cn';
+import { cn } from '@/lib/utils';
 
 const LOGO_SOURCE = require('@/assets/images/logo.svg');
 

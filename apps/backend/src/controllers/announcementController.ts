@@ -107,9 +107,19 @@ export const togglePublish = asyncHandler(
  */
 export const getAnnouncements = asyncHandler(
   async (req: Request, res: Response) => {
+    const paginationParams = {
+      page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
+      limit: req.query.limit
+        ? parseInt(req.query.limit as string, 10)
+        : undefined,
+      sortBy: req.query.sortBy as string,
+      sortOrder: req.query.sortOrder as 'asc' | 'desc',
+    };
+
     // req.userId might be undefined if guest, which is handled by service
-    const announcements = await announcementService.getActiveAnnouncements(
-      req.userId
+    const result = await announcementService.getActiveAnnouncements(
+      req.userId,
+      paginationParams
     );
 
     res
@@ -117,7 +127,7 @@ export const getAnnouncements = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          announcements,
+          { items: result.data, pagination: result.pagination },
           'Active announcements fetched successfully'
         )
       );
@@ -130,8 +140,18 @@ export const getAnnouncements = asyncHandler(
  */
 export const getAdminAnnouncements = asyncHandler(
   async (req: Request, res: Response) => {
-    const adminAnnouncements = await announcementService.getAdminAnnouncements(
-      req.userId
+    const paginationParams = {
+      page: req.query.page ? parseInt(req.query.page as string, 10) : undefined,
+      limit: req.query.limit
+        ? parseInt(req.query.limit as string, 10)
+        : undefined,
+      sortBy: req.query.sortBy as string,
+      sortOrder: req.query.sortOrder as 'asc' | 'desc',
+    };
+
+    const result = await announcementService.getAdminAnnouncements(
+      req.userId,
+      paginationParams
     );
 
     res
@@ -139,7 +159,7 @@ export const getAdminAnnouncements = asyncHandler(
       .json(
         new ApiResponse(
           200,
-          adminAnnouncements,
+          { items: result.data, pagination: result.pagination },
           'Admin announcements fetched successfully'
         )
       );

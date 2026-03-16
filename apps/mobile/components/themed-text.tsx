@@ -1,5 +1,5 @@
 import { StyleSheet, type TextProps } from 'react-native';
-import { Text } from '@/components/nativewindui/Text';
+import { Text } from '@/components/ui/text';
 
 import { useThemeColor } from '@/hooks/use-theme-color';
 

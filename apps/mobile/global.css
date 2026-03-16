@@ -33,7 +33,7 @@
     --input: 237 237 237;
 
     --ring: 63 115 255;
-    --radius: 0.75rem;
+    --radius: 1.5rem;
 
     /* Android tokens aligned with same palette */
     --android-background: 250 250 250;
@@ -96,7 +96,7 @@
       --input: 56 56 58;
 
       --ring: 0 115 255;
-      --radius: 0.75rem;
+      --radius: 1.5rem;
 
       /* Android dark */
       --android-background: 13 13 15;
