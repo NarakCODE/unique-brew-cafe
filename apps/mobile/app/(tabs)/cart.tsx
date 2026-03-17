@@ -155,7 +155,7 @@ export default function CartScreen() {
 
   if (cartQuery.isError) {
     return (
-      <ScreenLayout contentClassName="gap-5 px-4 pt-2">
+      <ScreenLayout contentClassName="gap-5 px-4">
         <ScreenTopBar title={CART_SCREEN_COPY.title} />
         <EmptyState
           title={CART_SCREEN_COPY.loadingErrorTitle}
@@ -171,7 +171,7 @@ export default function CartScreen() {
 
   if (!cart || items.length === 0) {
     return (
-      <ScreenLayout contentClassName="gap-5 px-4 pt-2">
+      <ScreenLayout contentClassName="gap-5 px-4">
         <ScreenTopBar title={CART_SCREEN_COPY.title} />
         <EmptyState
           title={CART_SCREEN_COPY.emptyTitle}
@@ -186,7 +186,7 @@ export default function CartScreen() {
 
   return (
     <>
-      <ScreenLayout contentClassName="gap-5 px-4 pt-2">
+      <ScreenLayout contentClassName="gap-5 px-4">
         <ScreenTitle
           title={CART_SCREEN_COPY.title}
           action={
@@ -411,7 +411,10 @@ function CartItemCard({
                 {title}
               </Text>
               <Text className="text-sm font-medium text-foreground">
-                {formatCurrency(item.totalPrice, item.product?.currency ?? "USD")}
+                {formatCurrency(
+                  item.totalPrice,
+                  item.product?.currency ?? "USD",
+                )}
               </Text>
             </View>
           </View>
@@ -495,7 +498,7 @@ function SummaryRow({
 
 function CartLoadingState() {
   return (
-    <ScreenLayout contentClassName="gap-5 px-4 pt-2">
+    <ScreenLayout contentClassName="gap-5 px-4">
       <ScreenTitle title="Cart" />
       <View className="gap-4">
         {Array.from({ length: 2 }).map((_, index) => (
@@ -539,9 +542,7 @@ function formatCustomization(customization?: CartCustomization) {
     customization.coffeeLevel,
   ].filter(Boolean);
 
-  return values
-    .map((value) => formatLabel(value as string))
-    .join(" • ");
+  return values.map((value) => formatLabel(value as string)).join(" • ");
 }
 
 function formatLabel(value: string) {

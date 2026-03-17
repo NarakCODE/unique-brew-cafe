@@ -1,9 +1,16 @@
 import { BottomSheetModal } from "@gorhom/bottom-sheet";
-import { ChevronDown, Grid2x2, ShoppingBag, Store as StoreIcon } from "lucide-react-native";
 import { useRouter } from "expo-router";
+import {
+  ChevronDown,
+  Flame,
+  Grid2x2,
+  Sparkles,
+  ShoppingBag,
+  Store as StoreIcon,
+  Timer,
+} from "lucide-react-native";
 import * as React from "react";
-import { Pressable, View } from "react-native";
-import { FadeInUp } from "react-native-reanimated";
+import { Pressable, ScrollView, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenLayout } from "@/components/layout/screen-layout";
@@ -12,24 +19,49 @@ import { ExploreProductCard } from "@/components/product/explore-product-card";
 import { SearchInput } from "@/components/search/SearchInput";
 import { StoreSelectionSheet } from "@/components/store/store-selection-sheet";
 import { EmptyState } from "@/components/ui/empty-state";
-import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
 import { Text } from "@/components/ui/text";
 import { useProducts } from "@/hooks/use-products";
 import { useStores } from "@/hooks/use-stores";
 import { useColorScheme } from "@/lib/color-scheme";
+import { cn } from "@/lib/utils";
 import type { MobileProduct } from "@/services/product.service";
 import type { MobileStore } from "@/services/store.service";
+
+type QuickFilterKey = "all" | "featured" | "best-selling" | "ready-fast";
+
+type QuickFilterOption = {
+  key: QuickFilterKey;
+  label: string;
+  Icon: React.ComponentType<{
+    size?: number;
+    color?: string;
+    strokeWidth?: number;
+  }>;
+};
+
+const QUICK_FILTER_OPTIONS: QuickFilterOption[] = [
+  { key: "all", label: "All", Icon: Grid2x2 },
+  { key: "featured", label: "Featured", Icon: Sparkles },
+  { key: "best-selling", label: "Best Seller", Icon: Flame },
+  { key: "ready-fast", label: "Ready < 10m", Icon: Timer },
+];
 
 export default function ExploreScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const storeSheetRef = React.useRef<BottomSheetModal>(null);
   const sheetSnapPoints = React.useMemo(() => ["62%"], []);
-  const [selectedStoreId, setSelectedStoreId] = React.useState<string | undefined>();
+
+  const [selectedStoreId, setSelectedStoreId] = React.useState<
+    string | undefined
+  >();
   const [searchQuery, setSearchQuery] = React.useState("");
+  const [activeQuickFilter, setActiveQuickFilter] =
+    React.useState<QuickFilterKey>("all");
   const deferredSearchQuery = React.useDeferredValue(searchQuery.trim());
   const { colors } = useColorScheme();
 
+  // --- QUERIES ---
   const storesQuery = useStores({ limit: 50 });
   const productsQuery = useProducts({
     storeId: selectedStoreId,
@@ -37,39 +69,68 @@ export default function ExploreScreen() {
     limit: 100,
   });
 
-  const stores = React.useMemo(() => storesQuery.data?.items ?? [], [storesQuery.data?.items]);
+  // --- MEMOIZED DATA ---
+  const stores = React.useMemo(
+    () => storesQuery.data?.items ?? [],
+    [storesQuery.data?.items],
+  );
   const products = React.useMemo(
     () => productsQuery.data?.items ?? [],
     [productsQuery.data?.items],
   );
   const selectedStore = stores.find((store) => store.id === selectedStoreId);
-  const productRows = React.useMemo(() => groupProducts(products), [products]);
-  const productCount = products.length;
+  const filteredProducts = React.useMemo(
+    () => applyQuickFilter(products, activeQuickFilter),
+    [activeQuickFilter, products],
+  );
+  const productRows = React.useMemo(
+    () => groupProducts(filteredProducts),
+    [filteredProducts],
+  );
+
+  // --- DERIVED STATE ---
+  const isInitialStoreLoading = storesQuery.isLoading && !storesQuery.data;
+  const isInitialProductLoading =
+    productsQuery.isLoading && !productsQuery.data;
+  const hasStoreError = storesQuery.isError && !stores.length;
+  const hasNoStores =
+    !isInitialStoreLoading && !hasStoreError && stores.length === 0;
+  const hasFiltersApplied =
+    Boolean(deferredSearchQuery) || activeQuickFilter !== "all";
+
+  const sectionTitle = hasFiltersApplied ? "Filtered Menu" : "Discover Today";
+  const sectionSubtitle = hasFiltersApplied
+    ? getFilterSubtitle({
+        searchQuery: deferredSearchQuery,
+        quickFilter: activeQuickFilter,
+      })
+    : (selectedStore?.name ?? "Choose a store to begin");
+
   const errorMessage =
     storesQuery.error?.message ??
     productsQuery.error?.message ??
     "Unable to load the cafe menu.";
+
+  // --- EFFECTS & HANDLERS ---
+  React.useEffect(() => {
+    if (!stores.length) return;
+    const selectedStoreExists = stores.some(
+      (store) => store.id === selectedStoreId,
+    );
+    if (!selectedStoreId || !selectedStoreExists) {
+      setSelectedStoreId(stores[0]?.id);
+    }
+  }, [selectedStoreId, stores]);
 
   const handleRetry = React.useCallback(() => {
     void storesQuery.refetch();
     void productsQuery.refetch();
   }, [productsQuery, storesQuery]);
 
-  const handleClearSearch = React.useCallback(() => {
+  const handleClearFilters = React.useCallback(() => {
     setSearchQuery("");
+    setActiveQuickFilter("all");
   }, []);
-
-  React.useEffect(() => {
-    if (!stores.length) {
-      return;
-    }
-
-    const selectedStoreExists = stores.some((store) => store.id === selectedStoreId);
-
-    if (!selectedStoreId || !selectedStoreExists) {
-      setSelectedStoreId(stores[0]?.id);
-    }
-  }, [selectedStoreId, stores]);
 
   const handleSelectStore = React.useCallback((storeId: string) => {
     setSelectedStoreId(storeId);
@@ -77,119 +138,55 @@ export default function ExploreScreen() {
   }, []);
 
   const handleOpenStoreSheet = React.useCallback(() => {
-    if (!stores.length) {
-      return;
-    }
-
-    storeSheetRef.current?.present();
+    if (stores.length) storeSheetRef.current?.present();
   }, [stores.length]);
-
-  const isInitialStoreLoading = storesQuery.isLoading && !storesQuery.data;
-  const isInitialProductLoading = productsQuery.isLoading && !productsQuery.data;
-  const hasStoreError = storesQuery.isError && !stores.length;
-  const hasNoStores = !isInitialStoreLoading && !hasStoreError && stores.length === 0;
-  const hasFiltersApplied = Boolean(deferredSearchQuery);
+  const handleOpenProduct = React.useCallback(
+    (productId: string) => router.push(`/product/${productId}`),
+    [router],
+  );
 
   return (
     <>
-      <ScreenLayout bottomInsetOffset={168} contentClassName="gap-6 px-4 pt-2">
+      <ScreenLayout bottomInsetOffset={168} contentClassName="gap-5 px-4">
         <ScreenTopBar title="Explore" />
 
-        <NativeOnlyAnimatedView entering={FadeInUp.delay(130).duration(420)}>
-          {isInitialStoreLoading ? (
-            <StoreSelectorSkeleton />
-          ) : (
-            <StoreSelectorButton
-              store={selectedStore}
-              disabled={!stores.length}
-              onPress={handleOpenStoreSheet}
-            />
-          )}
-        </NativeOnlyAnimatedView>
+        <ExploreHeroSection
+          isStoreLoading={isInitialStoreLoading}
+          selectedStore={selectedStore}
+          hasStores={stores.length > 0}
+          onOpenStoreSheet={handleOpenStoreSheet}
+          searchQuery={searchQuery}
+          onChangeSearch={setSearchQuery}
+          activeQuickFilter={activeQuickFilter}
+          onSelectQuickFilter={setActiveQuickFilter}
+          onClearFilters={handleClearFilters}
+          hasFiltersApplied={hasFiltersApplied}
+        />
 
-        <NativeOnlyAnimatedView entering={FadeInUp.delay(150).duration(420)}>
-          <View className="rounded-[20px] border border-border bg-card p-3">
-            <SearchInput
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              placeholder="Search"
-              onClear={handleClearSearch}
-            />
-          </View>
-        </NativeOnlyAnimatedView>
+        <View className="gap-5 pb-8">
+          <ExploreSectionHeader
+            title={sectionTitle}
+            subtitle={sectionSubtitle}
+            hasFiltersApplied={hasFiltersApplied}
+            productCount={filteredProducts.length}
+            onClearFilters={handleClearFilters}
+            mutedForegroundColor={colors.mutedForeground}
+            primaryColor={colors.primary}
+          />
 
-        <NativeOnlyAnimatedView entering={FadeInUp.delay(210).duration(420)}>
-          <View className="gap-4">
-            <View className="flex-row items-end justify-between gap-4 px-1">
-              <View className="flex-1">
-                <Text className="text-xl font-semibold text-foreground">Products</Text>
-              </View>
-
-              <View className="items-end gap-2">
-                <View className="flex-row items-center gap-2 rounded-full border border-border px-3 py-1.5">
-                  <Grid2x2 size={14} color="#6B6F68" strokeWidth={2.2} />
-                  <Text className="text-xs font-medium uppercase tracking-[1.1px] text-muted-foreground">
-                    {formatItemCount(productCount)}
-                  </Text>
-                </View>
-
-                {productsQuery.isFetching && productsQuery.data ? <View className="h-4" /> : null}
-              </View>
-            </View>
-
-            {hasStoreError || productsQuery.isError ? (
-              <EmptyState
-                title="Unable to load the menu"
-                description={errorMessage}
-                variant="error"
-                centered
-                actionLabel="Try again"
-                onAction={handleRetry}
-              />
-            ) : hasNoStores ? (
-              <EmptyState
-                title="No stores available"
-                description="Store locations will appear here once they are available."
-                variant="default"
-                centered
-                icon={StoreIcon}
-              />
-            ) : isInitialProductLoading ? (
-              <ProductGridSkeleton />
-            ) : products.length === 0 ? (
-              <EmptyState
-                title={hasFiltersApplied ? "No matching products" : "Nothing available yet"}
-                variant="default"
-                centered
-                icon={ShoppingBag}
-                actionLabel={hasFiltersApplied ? "Clear search" : undefined}
-                onAction={hasFiltersApplied ? handleClearSearch : undefined}
-              />
-            ) : (
-              <View className="gap-4">
-                {productRows.map((row, rowIndex) => (
-                  <NativeOnlyAnimatedView
-                    key={`product-row-${rowIndex}`}
-                    entering={FadeInUp.delay(240 + rowIndex * 60).duration(360)}
-                  >
-                    <View className="flex-row gap-4">
-                      {row.map((product) => (
-                        <ExploreProductCard
-                          key={product.id}
-                          product={product}
-                          onPress={() => {
-                            router.push(`/product/${product.id}`);
-                          }}
-                        />
-                      ))}
-                      {row.length === 1 ? <View className="flex-1" /> : null}
-                    </View>
-                  </NativeOnlyAnimatedView>
-                ))}
-              </View>
-            )}
-          </View>
-        </NativeOnlyAnimatedView>
+          <ExploreContentSection
+            hasError={hasStoreError || productsQuery.isError}
+            errorMessage={errorMessage}
+            hasNoStores={hasNoStores}
+            isLoading={isInitialProductLoading}
+            products={filteredProducts}
+            productRows={productRows}
+            hasFiltersApplied={hasFiltersApplied}
+            onRetry={handleRetry}
+            onClearFilters={handleClearFilters}
+            onOpenProduct={handleOpenProduct}
+          />
+        </View>
       </ScreenLayout>
 
       <StoreSelectionSheet
@@ -205,6 +202,197 @@ export default function ExploreScreen() {
   );
 }
 
+// --- SUB COMPONENTS ---
+
+function ExploreHeroSection({
+  isStoreLoading,
+  selectedStore,
+  hasStores,
+  onOpenStoreSheet,
+  searchQuery,
+  onChangeSearch,
+  activeQuickFilter,
+  onSelectQuickFilter,
+  onClearFilters,
+  hasFiltersApplied,
+}: {
+  isStoreLoading: boolean;
+  selectedStore?: MobileStore;
+  hasStores: boolean;
+  onOpenStoreSheet: () => void;
+  searchQuery: string;
+  onChangeSearch: (value: string) => void;
+  activeQuickFilter: QuickFilterKey;
+  onSelectQuickFilter: (nextFilter: QuickFilterKey) => void;
+  onClearFilters: () => void;
+  hasFiltersApplied: boolean;
+}) {
+  return (
+    <View className="gap-5 pb-2">
+      {isStoreLoading ? (
+        <StoreSelectorSkeleton />
+      ) : (
+        <StoreSelectorButton
+          store={selectedStore}
+          disabled={!hasStores}
+          onPress={onOpenStoreSheet}
+        />
+      )}
+
+      <SearchInput
+        value={searchQuery}
+        onChangeText={onChangeSearch}
+        placeholder="Search for coffee, tea, treats..."
+        onClear={onClearFilters}
+      />
+
+      <QuickFilterRow
+        activeFilter={activeQuickFilter}
+        onSelectFilter={onSelectQuickFilter}
+      />
+    </View>
+  );
+}
+
+function ExploreSectionHeader({
+  title,
+  subtitle,
+  hasFiltersApplied,
+  productCount,
+  onClearFilters,
+  mutedForegroundColor,
+  primaryColor,
+}: {
+  title: string;
+  subtitle?: string;
+  hasFiltersApplied: boolean;
+  productCount: number;
+  onClearFilters: () => void;
+  mutedForegroundColor?: string;
+  primaryColor?: string;
+}) {
+  return (
+    <View className="flex-row items-center justify-between pb-2">
+      <View className="flex-1 gap-1.5">
+        <Text className="text-xl font-bold tracking-tight text-foreground">
+          {title}
+        </Text>
+        {subtitle ? (
+          <Text className="text-sm font-medium text-muted-foreground" numberOfLines={1}>
+            {subtitle}
+          </Text>
+        ) : null}
+      </View>
+
+      <View className="items-end gap-2">
+        <Text className="text-sm font-medium text-muted-foreground">
+          {formatItemCount(productCount)}
+        </Text>
+
+        {hasFiltersApplied ? (
+          <Pressable
+            accessibilityRole="button"
+            className="flex-row items-center gap-1 active:opacity-70"
+            onPress={onClearFilters}
+          >
+            <Text className="text-sm font-semibold text-primary">Clear</Text>
+          </Pressable>
+        ) : null}
+      </View>
+    </View>
+  );
+}
+
+function ExploreContentSection({
+  hasError,
+  errorMessage,
+  hasNoStores,
+  isLoading,
+  products,
+  productRows,
+  hasFiltersApplied,
+  onRetry,
+  onClearFilters,
+  onOpenProduct,
+}: {
+  hasError: boolean;
+  errorMessage: string;
+  hasNoStores: boolean;
+  isLoading: boolean;
+  products: MobileProduct[];
+  productRows: MobileProduct[][];
+  hasFiltersApplied: boolean;
+  onRetry: () => void;
+  onClearFilters: () => void;
+  onOpenProduct: (productId: string) => void;
+}) {
+  if (hasError) {
+    return (
+      <EmptyState
+        title="Unable to load the menu"
+        description={errorMessage}
+        variant="error"
+        centered
+        actionLabel="Try again"
+        onAction={onRetry}
+      />
+    );
+  }
+
+  if (hasNoStores) {
+    return (
+      <EmptyState
+        title="No stores available"
+        description="No active stores right now."
+        variant="default"
+        centered
+        icon={StoreIcon}
+      />
+    );
+  }
+
+  if (isLoading) {
+    return <ProductGridSkeleton />;
+  }
+
+  if (products.length === 0) {
+    return (
+      <EmptyState
+        title={
+          hasFiltersApplied ? "No matching products" : "Nothing available yet"
+        }
+        description={
+          hasFiltersApplied
+            ? "Try different search terms or reset your filters."
+            : "Check back later."
+        }
+        variant="default"
+        centered
+        icon={ShoppingBag}
+        actionLabel={hasFiltersApplied ? "Reset filters" : undefined}
+        onAction={hasFiltersApplied ? onClearFilters : undefined}
+      />
+    );
+  }
+
+  return (
+    <View className="gap-5">
+      {productRows.map((row, rowIndex) => (
+        <View key={`product-row-${rowIndex}`} className="flex-row gap-4">
+          {row.map((product) => (
+            <ExploreProductCard
+              key={product.id}
+              product={product}
+              onPress={() => onOpenProduct(product.id)}
+            />
+          ))}
+          {row.length === 1 ? <View className="flex-1" /> : null}
+        </View>
+      ))}
+    </View>
+  );
+}
+
 function StoreSelectorButton({
   store,
   disabled,
@@ -217,23 +405,34 @@ function StoreSelectorButton({
   return (
     <Pressable
       accessibilityRole="button"
-      accessibilityLabel={store ? `Choose store, currently ${store.name}` : "Choose store"}
-      className="rounded-[20px] border border-border bg-card px-4 py-3 active:opacity-90"
+      className={cn(
+        "flex-row items-center justify-between gap-3 active:opacity-80 py-2",
+        disabled && "opacity-50",
+      )}
       disabled={disabled}
       onPress={onPress}
     >
-      <View className="flex-row items-center justify-between gap-3">
-        {store ? (
-          <Text className="flex-1 text-base font-semibold text-foreground" numberOfLines={1}>
-            {store.name}
-          </Text>
-        ) : (
-          <View className="flex-row items-center gap-2">
-            <StoreIcon size={16} color="#7C806F" strokeWidth={2} />
-            <Text className="text-sm text-muted-foreground">Select store</Text>
-          </View>
-        )}
-        <ChevronDown size={18} color="#7C806F" strokeWidth={2.2} />
+      <View className="flex-1">
+        <Text className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Pickup Location
+        </Text>
+        <View className="mt-1 flex-row items-center gap-1.5">
+          {store ? (
+            <>
+              <Text className="text-xl font-bold tracking-tight text-foreground" numberOfLines={1}>
+                {store.name}
+              </Text>
+              <ChevronDown size={20} className="text-foreground" strokeWidth={2.5} />
+            </>
+          ) : (
+            <>
+              <Text className="text-xl font-bold tracking-tight text-muted-foreground">
+                Select a store
+              </Text>
+              <ChevronDown size={20} className="text-muted-foreground" strokeWidth={2.5} />
+            </>
+          )}
+        </View>
       </View>
     </Pressable>
   );
@@ -241,15 +440,10 @@ function StoreSelectorButton({
 
 function StoreSelectorSkeleton() {
   return (
-    <View className="rounded-[24px] border border-border bg-card px-4 py-4">
-      <View className="flex-row items-center gap-3">
-        <View className="h-12 w-12 rounded-full bg-muted" />
-        <View className="flex-1 gap-2">
-          <View className="h-3 w-20 rounded-full bg-muted" />
-          <View className="h-5 w-40 rounded-full bg-muted" />
-          <View className="h-4 w-32 rounded-full bg-muted" />
-        </View>
-        <View className="h-5 w-14 rounded-full bg-muted" />
+    <View className="py-2">
+      <View className="gap-2">
+        <View className="h-3 w-24 rounded-full bg-muted" />
+        <View className="h-7 w-48 rounded-full bg-muted" />
       </View>
     </View>
   );
@@ -257,29 +451,19 @@ function StoreSelectorSkeleton() {
 
 function ProductGridSkeleton() {
   return (
-    <View className="gap-4">
+    <View className="gap-5">
       {Array.from({ length: 3 }).map((_, rowIndex) => (
-        <View
-          key={`product-grid-skeleton-${rowIndex}`}
-          className="flex-row gap-4"
-        >
-          {Array.from({ length: 2 }).map((_, columnIndex) => (
+        <View key={`skeleton-row-${rowIndex}`} className="flex-row gap-4">
+          {Array.from({ length: 2 }).map((_, colIndex) => (
             <View
-              key={`product-card-skeleton-${rowIndex}-${columnIndex}`}
-              className="flex-1 overflow-hidden rounded-[18px] border border-border bg-card"
+              key={`skeleton-col-${colIndex}`}
+              className="flex-1 overflow-hidden rounded-[24px] border border-border bg-card shadow-sm shadow-black/5"
             >
-              <View className="h-36 bg-muted" />
+              <View className="h-40 bg-muted" />
               <View className="gap-3 px-4 py-4">
                 <View className="h-5 w-4/5 rounded-full bg-muted" />
                 <View className="h-4 w-full rounded-full bg-muted" />
-                <View className="flex-row gap-2">
-                  <View className="h-7 w-20 rounded-full bg-muted" />
-                  <View className="h-7 w-16 rounded-full bg-muted" />
-                </View>
-                <View className="flex-row items-center gap-3">
-                  <View className="h-4 w-20 rounded-full bg-muted" />
-                  <View className="h-11 w-11 rounded-full bg-muted" />
-                </View>
+                <View className="mt-2 h-6 w-16 rounded-full bg-muted" />
               </View>
             </View>
           ))}
@@ -289,16 +473,103 @@ function ProductGridSkeleton() {
   );
 }
 
+function QuickFilterRow({
+  activeFilter,
+  onSelectFilter,
+}: {
+  activeFilter: QuickFilterKey;
+  onSelectFilter: (nextFilter: QuickFilterKey) => void;
+}) {
+  return (
+    <View className="gap-0">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={{ gap: 8, paddingRight: 4, paddingBottom: 10, paddingTop: 4 }}
+      >
+        {QUICK_FILTER_OPTIONS.map(({ key, label, Icon }) => {
+          const isActive = activeFilter === key;
+          return (
+            <Pressable
+              key={key}
+              accessibilityRole="button"
+              className={cn(
+                "flex-row items-center gap-2 rounded-full border px-4 py-2.5 active:opacity-80",
+                isActive
+                  ? "border-primary bg-primary"
+                  : "border-border bg-card",
+              )}
+              onPress={() => onSelectFilter(key)}
+            >
+              <Icon
+                size={14}
+                strokeWidth={isActive ? 2.5 : 2}
+                color={isActive ? "#FFFFFF" : "#98989D"}
+              />
+              <Text
+                className={cn(
+                  "text-[13px] font-medium",
+                  isActive ? "text-primary-foreground" : "text-foreground",
+                )}
+              >
+                {label}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+// --- UTILITIES ---
+
 function groupProducts(products: MobileProduct[]) {
   const rows: MobileProduct[][] = [];
-
   for (let index = 0; index < products.length; index += 2) {
     rows.push(products.slice(index, index + 2));
   }
-
   return rows;
 }
 
 function formatItemCount(count: number) {
-  return `${count} ${count === 1 ? "item" : "items"}`;
+  return `${count} ${count === 1 ? "Item" : "Items"}`;
+}
+
+function applyQuickFilter(
+  products: MobileProduct[],
+  activeQuickFilter: QuickFilterKey,
+) {
+  switch (activeQuickFilter) {
+    case "featured":
+      return products.filter((product) => product.isFeatured);
+    case "best-selling":
+      return products.filter((product) => product.isBestSelling);
+    case "ready-fast":
+      return products.filter((product) => product.preparationTime <= 10);
+    default:
+      return products;
+  }
+}
+
+function getFilterSubtitle({
+  searchQuery,
+  quickFilter,
+}: {
+  searchQuery: string;
+  quickFilter: QuickFilterKey;
+}) {
+  const quickFilterLabel =
+    QUICK_FILTER_OPTIONS.find((option) => option.key === quickFilter)?.label ??
+    "All";
+
+  if (searchQuery && quickFilter !== "all") {
+    return `Search "${searchQuery}" + ${quickFilterLabel}`;
+  }
+
+  if (searchQuery) {
+    return `Search "${searchQuery}"`;
+  }
+
+  return quickFilterLabel;
 }

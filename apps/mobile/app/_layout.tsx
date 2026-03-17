@@ -66,12 +66,9 @@ export default function RootLayout() {
                 <Stack.Screen
                   name="search"
                   options={{
-                    title: "Search",
-                    headerBackVisible: false,
-                    gestureEnabled: true,
-                    headerLeft: ({ tintColor }) => (
-                      <StableBackButton tintColor={tintColor} />
-                    ),
+                    headerShown: false,
+                    presentation: "fullScreenModal",
+                    animation: "slide_from_bottom",
                   }}
                 />
                 <Stack.Screen

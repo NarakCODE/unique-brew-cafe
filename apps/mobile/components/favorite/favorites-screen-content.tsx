@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
 import { useFavorites, useRemoveFavorite } from "@/hooks/use-favorites";
+import { AccountActionHeader } from "../account/account-action-header";
 
 const FAVORITE_SCREEN_COPY = {
   title: "Saved",
@@ -49,6 +50,7 @@ type FavoritesScreenContentProps = {
   emptyActionLabel?: string;
   onEmptyAction?: () => void;
   bottomInsetOffset?: number;
+  headerComponent?: React.ReactNode;
 };
 
 export function FavoritesScreenContent({
@@ -56,6 +58,7 @@ export function FavoritesScreenContent({
   emptyActionLabel = FAVORITE_SCREEN_COPY.profileAction,
   onEmptyAction,
   bottomInsetOffset = 168,
+  headerComponent,
 }: FavoritesScreenContentProps) {
   const router = useRouter();
   const insets = useSafeAreaInsets();
@@ -123,7 +126,15 @@ export function FavoritesScreenContent({
   );
 
   if (favoritesQuery.isLoading) {
-    return <FavoriteLoadingState showTitle={showTitle} />;
+    return (
+      <View>
+        <AccountActionHeader title="Favorite" />
+        <FavoriteLoadingState
+          showTitle={showTitle}
+          headerComponent={headerComponent}
+        />
+      </View>
+    );
   }
 
   return (
@@ -141,11 +152,16 @@ export function FavoritesScreenContent({
       }}
       ItemSeparatorComponent={FavoriteSeparator}
       ListHeaderComponent={
-        <FavoritesHeader
-          count={favoritesQuery.data?.count ?? 0}
-          latestSaved={latestSaved}
-          showTitle={showTitle}
-        />
+        <View>
+          {headerComponent ? (
+            <View className="mb-4 pt-2">{headerComponent}</View>
+          ) : null}
+          <FavoritesHeader
+            count={favoritesQuery.data?.count ?? 0}
+            latestSaved={latestSaved}
+            showTitle={showTitle}
+          />
+        </View>
       }
       ListHeaderComponentStyle={{ paddingBottom: favorites.length ? 12 : 0 }}
       ListEmptyComponent={
@@ -179,9 +195,7 @@ function FavoritesHeader({
 }) {
   return (
     <View className="gap-6">
-      {showTitle ? (
-        <ScreenTopBar title={FAVORITE_SCREEN_COPY.title} />
-      ) : null}
+      {showTitle ? <ScreenTopBar title={FAVORITE_SCREEN_COPY.title} /> : null}
 
       <View className="gap-3">
         <View className="flex-row items-center justify-between px-1">
@@ -370,9 +384,19 @@ function FavoritesState({
   );
 }
 
-function FavoriteLoadingState({ showTitle }: { showTitle: boolean }) {
+function FavoriteLoadingState({
+  showTitle,
+  headerComponent,
+}: {
+  showTitle: boolean;
+  headerComponent?: React.ReactNode;
+}) {
   return (
     <View className="flex-1 bg-background px-4 pt-10">
+      {headerComponent ? (
+        <View className="mb-4 pt-2 -mt-8">{headerComponent}</View>
+      ) : null}
+
       {showTitle ? (
         <View className="items-center">
           <View className="h-8 w-24 rounded-full bg-muted" />
@@ -392,7 +416,7 @@ function FavoriteLoadingState({ showTitle }: { showTitle: boolean }) {
               <View className="h-5 w-28 rounded-full bg-muted" />
             </View>
             <View className="h-11 w-11 rounded-full bg-muted" />
-        </View>  
+          </View>
         </View>
       </View>
 

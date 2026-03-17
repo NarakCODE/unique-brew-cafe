@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { AccountActionHeader } from "@/components/account/account-action-header";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -38,6 +39,7 @@ export default function OrderHistoryScreen() {
   if (isLoading) {
     return (
       <View className="gap-4 px-4 pt-2">
+        <AccountActionHeader title="History" />
         {Array.from({ length: 3 }).map((_, index) => (
           <Card
             key={`order-history-loading-${index}`}
@@ -69,6 +71,11 @@ export default function OrderHistoryScreen() {
         paddingHorizontal: 16,
       }}
       ItemSeparatorComponent={OrderHistorySeparator}
+      ListHeaderComponent={
+        <View className="mb-4 pt-2">
+          <AccountActionHeader title="History" />
+        </View>
+      }
       ListEmptyComponent={
         <OrderHistoryState isError={isError} errorMessage={error?.message} />
       }

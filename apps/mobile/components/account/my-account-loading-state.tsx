@@ -1,11 +1,16 @@
+import type { ReactNode } from "react";
 import { View } from "react-native";
 
 import { AccountDetailScreen } from "@/components/account/account-detail-screen";
 import { Card, CardContent } from "@/components/ui/card";
 
-export function MyAccountLoadingState() {
+type MyAccountLoadingStateProps = {
+  header?: ReactNode;
+};
+
+export function MyAccountLoadingState({ header }: MyAccountLoadingStateProps) {
   return (
-    <AccountDetailScreen>
+    <AccountDetailScreen header={header}>
       <View className="gap-5">
         <Card className="rounded-[30px] border border-border bg-card py-0">
           <CardContent className="gap-5 px-5 py-6">

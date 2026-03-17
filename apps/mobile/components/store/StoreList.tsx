@@ -1,49 +1,48 @@
 import { FlashList } from "@shopify/flash-list";
-import { useCallback, useDeferredValue, useMemo, useState } from "react";
-import type { StoreItem } from "../../../../packages/api/src";
-import {
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  View,
-  useColorScheme,
-} from "react-native";
+import { useCallback, useState, type ReactNode } from "react";
+import { RefreshControl, StyleSheet, View, useColorScheme } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { SlidersHorizontal } from "lucide-react-native";
+import type { StoreItem } from "../../../../packages/api/src";
 
 import { SearchInput } from "@/components/search/SearchInput";
 import { StoreCard } from "@/components/store/StoreCard";
-import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   DEFAULT_EMPTY_ILLUSTRATION,
   EmptyState,
 } from "@/components/ui/empty-state";
-import { Text } from "@/components/ui/text";
 import { useStores } from "@/hooks/use-stores";
+import { useDebounce } from "@/hooks/use-debounce";
 
-export function StoreList() {
+export function StoreList({
+  headerComponent,
+}: {
+  headerComponent?: ReactNode;
+}) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [showOpenNowOnly, setShowOpenNowOnly] = useState(false);
-  const deferredSearchQuery = useDeferredValue(searchQuery);
-  const { data, isLoading, isError, error, isRefetching, refetch } = useStores({
-    search: deferredSearchQuery,
+  const [isPullRefreshing, setIsPullRefreshing] = useState(false);
+
+  const debouncedSearchQuery = useDebounce(searchQuery.trim(), 400);
+
+  const { data, isLoading, isError, error, refetch } = useStores({
+    search: debouncedSearchQuery,
   });
+
   const insets = useSafeAreaInsets();
   const colorScheme = useColorScheme();
 
-  const filteredStores = useMemo(() => {
-    const stores = data?.items ?? [];
+  const stores = data?.items ?? [];
+  const hasSearch = debouncedSearchQuery.length > 0;
+  const showInitialLoading = isLoading && !data;
 
-    if (!showOpenNowOnly) {
-      return stores;
+  const handleRefresh = useCallback(async () => {
+    setIsPullRefreshing(true);
+
+    try {
+      await refetch();
+    } finally {
+      setIsPullRefreshing(false);
     }
-
-    return stores.filter((store) => store.isOpenNow);
-  }, [data?.items, showOpenNowOnly]);
-
-  const handleRefresh = useCallback(() => {
-    void refetch();
   }, [refetch]);
 
   const handleClearSearch = useCallback(() => {
@@ -56,64 +55,51 @@ export function StoreList() {
   );
 
   const keyExtractor = useCallback((item: StoreItem) => item.id, []);
-  const showInitialLoading = isLoading && !data;
+
+  const listHeader = headerComponent ? (
+    <View className="pb-4 pt-2">{headerComponent}</View>
+  ) : null;
 
   return (
-    <View className="flex-1 px-4 pt-2">
-      <StoreSearchBar
-        searchQuery={searchQuery}
-        onChangeSearchQuery={setSearchQuery}
-        onClearSearch={handleClearSearch}
-      />
-      <StoreListFilters
-        showOpenNowOnly={showOpenNowOnly}
-        onToggleOpenNow={() => {
-          setShowOpenNowOnly((current) => !current);
-        }}
-      />
+    <View className="flex-1 bg-background">
+      {/* Fixed search area */}
+      <View className="px-4 pb-3 pt-2">
+        <SearchInput
+          value={searchQuery}
+          onChangeText={setSearchQuery}
+          placeholder="Search stores and products"
+          onClear={handleClearSearch}
+        />
+      </View>
 
       {showInitialLoading ? (
-        <View className="gap-4">
-          {Array.from({ length: 4 }).map((_, index) => (
-            <Card
-              key={`store-loading-${index}`}
-              className="overflow-hidden rounded-[28px] border border-border bg-card py-0"
-            >
-              <View className="flex-row">
-                <View className="h-36 w-40 bg-muted" />
-                <CardContent className="flex-1 gap-3 px-4 py-4">
-                  <View className="h-6 w-2/3 rounded-full bg-muted" />
-                  <View className="h-4 w-full rounded-full bg-muted" />
-                  <View className="h-4 w-5/6 rounded-full bg-muted" />
-                  <View className="h-4 w-2/3 rounded-full bg-muted" />
-                </CardContent>
-              </View>
-            </Card>
-          ))}
-        </View>
+        <StoreListSkeleton headerComponent={headerComponent} />
       ) : (
         <FlashList
-          data={filteredStores}
+          data={stores}
           renderItem={renderStoreItem}
           keyExtractor={keyExtractor}
-          contentInsetAdjustmentBehavior="automatic"
+          keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: insets.bottom + 28,
-          }}
           ItemSeparatorComponent={StoreSeparator}
+          ListHeaderComponent={listHeader}
           ListEmptyComponent={
-            <StoreListState
-              isError={isError}
-              errorMessage={error?.message}
-              hasSearch={deferredSearchQuery.trim().length > 0}
-              isOpenOnly={showOpenNowOnly}
-            />
+            <View style={styles.emptyStateContainer}>
+              <StoreListState
+                isError={isError}
+                errorMessage={error?.message}
+                hasSearch={hasSearch}
+              />
+            </View>
           }
+          contentContainerStyle={{
+            paddingHorizontal: 16,
+            paddingBottom: insets.bottom + 24,
+            flexGrow: 1,
+          }}
           refreshControl={
             <RefreshControl
-              refreshing={isRefetching}
+              refreshing={isPullRefreshing}
               onRefresh={handleRefresh}
               tintColor={colorScheme === "dark" ? "#F5F5F5" : "#5A3421"}
             />
@@ -124,66 +110,35 @@ export function StoreList() {
   );
 }
 
-function StoreSearchBar({
-  searchQuery,
-  onChangeSearchQuery,
-  onClearSearch,
+function StoreListSkeleton({
+  headerComponent,
 }: {
-  searchQuery: string;
-  onChangeSearchQuery: (value: string) => void;
-  onClearSearch: () => void;
+  headerComponent?: ReactNode;
 }) {
   return (
-    <View className="pb-3">
-      <SearchInput
-        value={searchQuery}
-        onChangeText={onChangeSearchQuery}
-        placeholder="Search stores"
-        onClear={onClearSearch}
-      />
-    </View>
-  );
-}
-
-function StoreListFilters({
-  showOpenNowOnly,
-  onToggleOpenNow,
-}: {
-  showOpenNowOnly: boolean;
-  onToggleOpenNow: () => void;
-}) {
-  return (
-    <View className="pb-5">
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={
-          showOpenNowOnly ? "Show all stores" : "Show only open stores"
-        }
-        className={`h-14 self-start items-center justify-center rounded-[20px] border px-4 ${
-          showOpenNowOnly
-            ? "border-[#C89A6A] bg-[#F6EBDD]"
-            : "border-border bg-card"
-        } active:opacity-80`}
-        onPress={onToggleOpenNow}
-      >
-        <View className="flex-row items-center gap-2">
-          <SlidersHorizontal size={18} color="#4A4F47" strokeWidth={2.1} />
-          <Text className="text-sm font-medium text-foreground">
-            {showOpenNowOnly ? "Showing open stores" : "Filter stores"}
-          </Text>
-        </View>
-      </Pressable>
-
-      {showOpenNowOnly ? (
-        <View className="pt-4">
-          <Badge
-            variant="secondary"
-            className="self-start rounded-full px-4 py-2"
-          >
-            <Text>Open now</Text>
-          </Badge>
-        </View>
+    <View className="flex-1 px-4">
+      {headerComponent ? (
+        <View className="pb-4 pt-2">{headerComponent}</View>
       ) : null}
+
+      <View className="gap-4">
+        {Array.from({ length: 4 }).map((_, index) => (
+          <Card
+            key={`store-loading-${index}`}
+            className="overflow-hidden rounded-[28px] border border-border bg-card py-0"
+          >
+            <View className="flex-row">
+              <View className="h-36 w-40 bg-muted" />
+              <CardContent className="flex-1 gap-3 px-4 py-4">
+                <View className="h-6 w-2/3 rounded-full bg-muted" />
+                <View className="h-4 w-full rounded-full bg-muted" />
+                <View className="h-4 w-5/6 rounded-full bg-muted" />
+                <View className="h-4 w-2/3 rounded-full bg-muted" />
+              </CardContent>
+            </View>
+          </Card>
+        ))}
+      </View>
     </View>
   );
 }
@@ -192,12 +147,10 @@ function StoreListState({
   isError,
   errorMessage,
   hasSearch,
-  isOpenOnly,
 }: {
   isError: boolean;
   errorMessage?: string;
   hasSearch: boolean;
-  isOpenOnly: boolean;
 }) {
   if (isError) {
     return (
@@ -211,10 +164,10 @@ function StoreListState({
 
   return (
     <EmptyState
-      title={hasSearch || isOpenOnly ? "No matching stores" : "No stores yet"}
+      title={hasSearch ? "No matching stores" : "No stores yet"}
       description={
-        hasSearch || isOpenOnly
-          ? "Try another search or turn off the open-now filter."
+        hasSearch
+          ? "Try another search."
           : "Store locations will appear here once they are available."
       }
       illustrationSource={DEFAULT_EMPTY_ILLUSTRATION}
@@ -230,5 +183,9 @@ function StoreSeparator() {
 const styles = StyleSheet.create({
   separator: {
     height: 16,
+  },
+  emptyStateContainer: {
+    flex: 1,
+    justifyContent: "center",
   },
 });

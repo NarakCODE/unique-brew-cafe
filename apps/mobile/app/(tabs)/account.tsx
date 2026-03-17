@@ -1,5 +1,15 @@
 import { useRouter } from "expo-router";
-import { ChevronRight, CircleHelp, Headphones, Heart, History, Megaphone, MessageSquareText, Store, UserRound } from "lucide-react-native";
+import {
+  ChevronRight,
+  CircleHelp,
+  Headphones,
+  Heart,
+  History,
+  Megaphone,
+  MessageSquareText,
+  Store,
+  UserRound,
+} from "lucide-react-native";
 import { Pressable, View } from "react-native";
 
 import { getInitials } from "@/components/account/my-account-helpers";
@@ -109,10 +119,7 @@ export default function AccountScreen() {
   const profileImage = user?.profileImage?.trim();
 
   return (
-    <ScreenLayout
-      contentClassName="gap-6 px-4 pt-2"
-      bottomInsetOffset={160}
-    >
+    <ScreenLayout contentClassName="gap-6 px-4" bottomInsetOffset={160}>
       <ScreenTopBar title="Account" />
 
       <View className="gap-3">
@@ -128,7 +135,9 @@ export default function AccountScreen() {
           }}
         >
           <Avatar className="size-[64px] bg-muted" alt="Profile picture">
-            {profileImage ? <AvatarImage source={{ uri: profileImage }} /> : null}
+            {profileImage ? (
+              <AvatarImage source={{ uri: profileImage }} />
+            ) : null}
             <AvatarFallback className="bg-muted">
               <Text className="text-lg font-semibold text-foreground">
                 {avatarFallback}

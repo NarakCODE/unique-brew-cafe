@@ -27,7 +27,7 @@ export function TabScreenShell({
   children,
 }: TabScreenShellProps) {
   return (
-    <ScreenLayout contentClassName="gap-5 px-4 pt-2">
+    <ScreenLayout contentClassName="gap-5 px-4">
       <NativeOnlyAnimatedView entering={FadeInDown.duration(450)}>
         <View className="overflow-hidden rounded-[32px] border border-border bg-card px-5 py-6">
           <View className="absolute -right-10 -top-10 h-36 w-36 rounded-full bg-primary/10" />

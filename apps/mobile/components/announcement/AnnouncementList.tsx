@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, type ReactNode } from "react";
 import type { Announcement } from "../../../../packages/api/src";
 import {
   FlatList,
@@ -19,9 +19,13 @@ import { useAnnouncements } from "@/hooks/use-announcements";
 
 type AnnouncementListProps = {
   limit?: number;
+  headerComponent?: ReactNode;
 };
 
-export function AnnouncementList({ limit }: AnnouncementListProps) {
+export function AnnouncementList({
+  limit,
+  headerComponent,
+}: AnnouncementListProps) {
   const { data, isLoading, isError, error, isRefetching, refetch } =
     useAnnouncements(limit);
   const insets = useSafeAreaInsets();
@@ -40,8 +44,13 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
   const keyExtractor = useCallback((item: { id: string }) => item.id, []);
 
   if (isLoading) {
+    const showHeader = Boolean(headerComponent) && !isPreview;
+
     return (
-      <View className="gap-4">
+      <View className={showHeader ? "gap-4 px-4" : "gap-4"}>
+        {showHeader ? (
+          <View className="pb-4 pt-2">{headerComponent}</View>
+        ) : null}
         {Array.from({ length: Math.min(limit ?? 2, 2) }).map((_, index) => (
           <Card
             key={`announcement-loading-${index}`}
@@ -98,10 +107,15 @@ export function AnnouncementList({ limit }: AnnouncementListProps) {
       showsVerticalScrollIndicator={false}
       contentContainerStyle={{
         flexGrow: 1,
-        paddingTop: 8,
+        paddingTop: headerComponent ? 0 : 8,
         paddingBottom: insets.bottom + 28,
         paddingHorizontal: 16,
       }}
+      ListHeaderComponent={
+        headerComponent ? (
+          <View className="pb-4 pt-2">{headerComponent}</View>
+        ) : null
+      }
       ItemSeparatorComponent={AnnouncementSeparator}
       ListEmptyComponent={
         <AnnouncementListState

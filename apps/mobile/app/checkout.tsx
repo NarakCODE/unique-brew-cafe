@@ -37,7 +37,8 @@ const CHECKOUT_COPY = {
   paymentTitle: "Payment method",
   pickupTitle: "Pickup",
   deliveryTitle: "Delivery",
-  pickupDescription: "No delivery address selected. This order will be prepared for pickup.",
+  pickupDescription:
+    "No delivery address selected. This order will be prepared for pickup.",
   placeOrder: "Place order",
   placeOrderLoading: "Placing order...",
   emptyTitle: "Your cart is empty",
@@ -81,7 +82,9 @@ export default function CheckoutScreen() {
     [],
   );
   const [countdownLabel, setCountdownLabel] = React.useState<string>("");
-  const [cartSnapshot, setCartSnapshot] = React.useState(cartQuery.data ?? null);
+  const [cartSnapshot, setCartSnapshot] = React.useState(
+    cartQuery.data ?? null,
+  );
 
   const checkoutSessionQuery = useCheckoutSession(activeCheckoutId, {
     enabled: Boolean(activeCheckoutId),
@@ -89,8 +92,7 @@ export default function CheckoutScreen() {
   });
 
   const availablePaymentMethods = React.useMemo(
-    () =>
-      (paymentMethodsQuery.data ?? []).filter((method) => method.isActive),
+    () => (paymentMethodsQuery.data ?? []).filter((method) => method.isActive),
     [paymentMethodsQuery.data],
   );
 
@@ -151,7 +153,8 @@ export default function CheckoutScreen() {
 
     const updateCountdown = () => {
       const remainingMs =
-        new Date(checkoutSession.payment?.expiresAt ?? "").getTime() - Date.now();
+        new Date(checkoutSession.payment?.expiresAt ?? "").getTime() -
+        Date.now();
 
       if (remainingMs <= 0) {
         setCountdownLabel("00:00");
@@ -200,8 +203,7 @@ export default function CheckoutScreen() {
   ]);
 
   const displayCart = cartQuery.data?.cart ? cartQuery.data : cartSnapshot;
-  const displayStoreName =
-    displayCart?.cart?.store?.name ?? "Selected store";
+  const displayStoreName = displayCart?.cart?.store?.name ?? "Selected store";
   const isBusy =
     validateCheckoutMutation.isPending ||
     createCheckoutMutation.isPending ||
@@ -209,7 +211,7 @@ export default function CheckoutScreen() {
 
   if (!displayCart?.cart || displayCart.items.length === 0) {
     return (
-      <ScreenLayout contentClassName="gap-5 px-4 pt-2">
+      <ScreenLayout contentClassName="gap-5 px-4">
         <ScreenTopBar
           title={CHECKOUT_COPY.title}
           leftAccessory={<StableBackButton />}
@@ -227,7 +229,7 @@ export default function CheckoutScreen() {
   }
 
   return (
-    <ScreenLayout contentClassName="gap-5 px-4 pt-2" bottomInsetOffset={96}>
+    <ScreenLayout contentClassName="gap-5 px-4" bottomInsetOffset={96}>
       <ScreenTopBar
         title={CHECKOUT_COPY.title}
         leftAccessory={<StableBackButton />}
@@ -264,7 +266,11 @@ export default function CheckoutScreen() {
       ) : null}
 
       {checkoutError ? (
-        <InlineNotice title="Checkout error" description={checkoutError} tone="error" />
+        <InlineNotice
+          title="Checkout error"
+          description={checkoutError}
+          tone="error"
+        />
       ) : null}
 
       <View className="gap-4 rounded-[20px] border border-border bg-card px-4 py-4">
@@ -317,7 +323,8 @@ export default function CheckoutScreen() {
         />
       </View>
 
-      {checkoutStatus === "awaiting_payment" || checkoutStatus === "completed" ? (
+      {checkoutStatus === "awaiting_payment" ||
+      checkoutStatus === "completed" ? (
         <CheckoutStatusCard
           session={checkoutSession}
           countdownLabel={countdownLabel}
@@ -389,9 +396,7 @@ function PaymentMethodCard({
     <Pressable
       accessibilityRole="button"
       className={`rounded-[18px] border px-4 py-4 ${
-        selected
-          ? "border-primary bg-primary/5"
-          : "border-border bg-muted/20"
+        selected ? "border-primary bg-primary/5" : "border-border bg-muted/20"
       }`}
       onPress={onPress}
     >
@@ -460,7 +465,10 @@ function CheckoutStatusCard({
             />
             <SummaryRow
               label={CHECKOUT_COPY.total}
-              value={formatCurrency(session.order.total, session.order.currency)}
+              value={formatCurrency(
+                session.order.total,
+                session.order.currency,
+              )}
             />
           </View>
         ) : null}
@@ -506,10 +514,7 @@ function CheckoutStatusCard({
           />
         ) : null}
         {countdownLabel ? (
-          <SummaryRow
-            label={CHECKOUT_COPY.qrExpires}
-            value={countdownLabel}
-          />
+          <SummaryRow label={CHECKOUT_COPY.qrExpires} value={countdownLabel} />
         ) : null}
         <SummaryRow
           label={CHECKOUT_COPY.total}
@@ -542,12 +547,20 @@ function SummaryRow({
   return (
     <View className="flex-row items-center justify-between gap-3">
       <Text
-        className={emphasized ? "text-base font-semibold text-foreground" : "text-sm text-muted-foreground"}
+        className={
+          emphasized
+            ? "text-base font-semibold text-foreground"
+            : "text-sm text-muted-foreground"
+        }
       >
         {label}
       </Text>
       <Text
-        className={emphasized ? "text-base font-semibold text-foreground" : "text-sm font-medium text-foreground"}
+        className={
+          emphasized
+            ? "text-base font-semibold text-foreground"
+            : "text-sm font-medium text-foreground"
+        }
       >
         {value}
       </Text>

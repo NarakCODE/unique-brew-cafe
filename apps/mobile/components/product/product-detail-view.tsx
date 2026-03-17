@@ -1,20 +1,9 @@
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { BottomSheetScrollView } from "@gorhom/bottom-sheet";
-import {
-  ChevronLeft,
-  Coffee,
-  Heart,
-  Minus,
-  Plus,
-  Share2,
-  X,
-} from "lucide-react-native";
+import { Coffee, Heart, Minus, Plus, Share2 } from "lucide-react-native";
 import { useEffect, useState, type ReactNode } from "react";
-import type {
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-} from "react-native";
+import type { NativeScrollEvent, NativeSyntheticEvent } from "react-native";
 import {
   Alert,
   Pressable,
@@ -28,6 +17,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { CartCustomization } from "../../../../packages/api/src";
 
 import { formatCurrency } from "@/components/account/my-account-helpers";
+import {
+  ActionHeader,
+  HeaderIconButton,
+} from "@/components/layout/action-header";
 import { ScreenLayout } from "@/components/layout/screen-layout";
 import {
   DEFAULT_EMPTY_ILLUSTRATION,
@@ -70,19 +63,12 @@ const PRODUCT_DETAIL_COPY = {
   unavailableBadge: "Currently unavailable",
   featured: "Featured",
   bestSelling: "Best seller",
-  details: "Product Details",
-  startingPrice: "Starting price",
-  prepTime: "Prep time",
-  reviews: "Reviews",
-  category: "Category",
   nutrition: "Nutrition",
   allergens: "Allergens",
   tags: "Tags",
   addOns: "Add-ons",
-  noCategory: "House drink",
   gramsUnit: "g",
   milligramsUnit: "mg",
-  minutesUnit: "min",
   protein: "Protein",
   carbohydrates: "Carbs",
   fat: "Fat",
@@ -155,12 +141,10 @@ export function ProductDetailView({
   const dotCount = galleryImages.length;
   const imageWidth = width - 32;
   const imageHeight = Math.min(Math.max(width * 0.86, 280), 360);
-  const description = normalizeText(data?.description) || PRODUCT_DETAIL_COPY.noDescription;
+  const description =
+    normalizeText(data?.description) || PRODUCT_DETAIL_COPY.noDescription;
   const sizeOptions = data
-    ? buildSelectionOptions(
-        getCustomization(data.customizations, "size"),
-        data,
-      )
+    ? buildSelectionOptions(getCustomization(data.customizations, "size"), data)
     : [];
   const sugarOptions = data
     ? buildSelectionOptions(
@@ -191,8 +175,8 @@ export function ProductDetailView({
       addFavoriteMutation.variables === data?.id) ||
     (removeFavoriteMutation.isPending &&
       removeFavoriteMutation.variables === data?.id);
-  const canAddToCart = Boolean(data?.isAvailable) && !addCartItemMutation.isPending;
-  const detailItems = data ? buildDetailItems(data) : [];
+  const canAddToCart =
+    Boolean(data?.isAvailable) && !addCartItemMutation.isPending;
   const nutritionalItems = data?.nutritionalInfo
     ? buildNutritionalItems(data.nutritionalInfo)
     : [];
@@ -201,7 +185,6 @@ export function ProductDetailView({
   const headerActionLabel = isSheet ? "Close" : PRODUCT_DETAIL_COPY.back;
   const effectiveBottomInset = isSheet ? 8 : insets.bottom;
   const contentBottomOffset = isSheet ? 144 : 168;
-  const containerTopClassName = isSheet ? "gap-7 px-4 pt-4" : "gap-7 px-4";
 
   async function handleShare() {
     if (!data) {
@@ -216,10 +199,7 @@ export function ProductDetailView({
         )}`,
       });
     } catch (shareError) {
-      Alert.alert(
-        PRODUCT_DETAIL_COPY.shareError,
-        getErrorMessage(shareError),
-      );
+      Alert.alert(PRODUCT_DETAIL_COPY.shareError, getErrorMessage(shareError));
     }
   }
 
@@ -313,7 +293,7 @@ export function ProductDetailView({
     <>
       <ContentContainer
         asSheet={isSheet}
-        className={containerTopClassName}
+        className={isSheet ? "gap-7 px-4 pt-4" : "gap-7 px-4"}
         bottomInsetOffset={contentBottomOffset}
       >
         <ProductDetailLoadingState />
@@ -339,46 +319,43 @@ export function ProductDetailView({
     <>
       <ContentContainer
         asSheet={isSheet}
-        className={containerTopClassName}
+        className="gap-7 px-4"
         bottomInsetOffset={contentBottomOffset}
+        stickyHeader={
+          <ActionHeader
+            mode={isSheet ? "close" : "back"}
+            label={headerActionLabel}
+            leftAccessibilityLabel={
+              isSheet ? "Close product details" : "Go back"
+            }
+            onLeftPress={handleBack}
+            rightAccessory={
+              <>
+                <HeaderIconButton
+                  accessibilityLabel="Share product"
+                  onPress={handleShare}
+                >
+                  <Share2 size={18} color="#1F1A16" strokeWidth={2.1} />
+                </HeaderIconButton>
+                <HeaderIconButton
+                  accessibilityLabel={
+                    isFavorited ? "Remove favorite" : "Add favorite"
+                  }
+                  disabled={isFavoritePending}
+                  onPress={handleToggleFavorite}
+                >
+                  <Heart
+                    size={18}
+                    color={isFavorited ? ACCENT_COLOR : "#1F1A16"}
+                    fill={isFavorited ? ACCENT_COLOR : "transparent"}
+                    strokeWidth={2.1}
+                  />
+                </HeaderIconButton>
+              </>
+            }
+          />
+        }
       >
-        <View className="flex-row items-center justify-between">
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={isSheet ? "Close product details" : "Go back"}
-            className="flex-row items-center gap-1 rounded-full px-1 py-2 active:opacity-80"
-            hitSlop={10}
-            onPress={handleBack}
-          >
-            {isSheet ? (
-              <X size={18} color="#1F1A16" strokeWidth={2.4} />
-            ) : (
-              <ChevronLeft size={20} color="#1F1A16" strokeWidth={2.4} />
-            )}
-            <Text className="text-base font-medium text-foreground">
-              {headerActionLabel}
-            </Text>
-          </Pressable>
-
-          <View className="flex-row items-center gap-3">
-            <IconButton accessibilityLabel="Share product" onPress={handleShare}>
-              <Share2 size={18} color="#1F1A16" strokeWidth={2.1} />
-            </IconButton>
-            <IconButton
-              accessibilityLabel={isFavorited ? "Remove favorite" : "Add favorite"}
-              disabled={isFavoritePending}
-              onPress={handleToggleFavorite}
-            >
-              <Heart
-                size={18}
-                color={isFavorited ? ACCENT_COLOR : "#1F1A16"}
-                fill={isFavorited ? ACCENT_COLOR : "transparent"}
-                strokeWidth={2.1}
-              />
-            </IconButton>
-          </View>
-        </View>
-
         <View className="gap-4">
           <ProductImageScroller
             galleryImages={galleryImages}
@@ -408,20 +385,6 @@ export function ProductDetailView({
               <StatusChip key={badge} label={badge} />
             ))}
           </View>
-        ) : null}
-
-        {detailItems.length ? (
-          <SelectionSection title={PRODUCT_DETAIL_COPY.details}>
-            <View className="flex-row flex-wrap gap-3">
-              {detailItems.map((item) => (
-                <DetailStatCard
-                  key={item.label}
-                  label={item.label}
-                  value={item.value}
-                />
-              ))}
-            </View>
-          </SelectionSection>
         ) : null}
 
         {sizeOptions.length ? (
@@ -522,7 +485,6 @@ export function ProductDetailView({
             </View>
           </SelectionSection>
         ) : null}
-
       </ContentContainer>
 
       <BottomActionBar
@@ -549,9 +511,7 @@ export function ProductDetailView({
     </>
   );
 
-  return (
-    <View className="flex-1 bg-background">{content}</View>
-  );
+  return <View className="flex-1 bg-background">{content}</View>;
 }
 
 export default ProductDetailView;
@@ -560,23 +520,49 @@ function ContentContainer({
   asSheet,
   className,
   bottomInsetOffset,
+  stickyHeader,
   children,
 }: {
   asSheet: boolean;
   className?: string;
   bottomInsetOffset?: number;
+  stickyHeader?: ReactNode;
   children: ReactNode;
 }) {
+  const insets = useSafeAreaInsets();
+
   if (asSheet) {
     return (
       <BottomSheetScrollView
+        stickyHeaderIndices={stickyHeader ? [0] : undefined}
         contentContainerStyle={{
           paddingBottom: (bottomInsetOffset ?? 0) + 8,
         }}
         showsVerticalScrollIndicator={false}
       >
+        {stickyHeader ? (
+          <View className="bg-background px-4 pb-3 pt-4">{stickyHeader}</View>
+        ) : null}
         <View className={className}>{children}</View>
       </BottomSheetScrollView>
+    );
+  }
+
+  if (stickyHeader) {
+    return (
+      <ScrollView
+        className="flex-1 bg-background"
+        contentInsetAdjustmentBehavior="automatic"
+        contentContainerStyle={{
+          paddingTop: 12,
+          paddingBottom: insets.bottom + (bottomInsetOffset ?? 28),
+        }}
+        showsVerticalScrollIndicator={false}
+        stickyHeaderIndices={[0]}
+      >
+        <View className="bg-background px-4 pb-3">{stickyHeader}</View>
+        <View className={className}>{children}</View>
+      </ScrollView>
     );
   }
 
@@ -664,13 +650,7 @@ function SelectionSection({
   );
 }
 
-function DetailStatCard({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) {
+function DetailStatCard({ label, value }: { label: string; value: string }) {
   return (
     <View className="min-w-[150px] flex-1 rounded-[18px] border border-border bg-card px-4 py-4">
       <Text className="text-sm font-medium text-muted-foreground">{label}</Text>
@@ -740,31 +720,6 @@ function ChoiceChip({
       >
         {label}
       </Text>
-    </Pressable>
-  );
-}
-
-function IconButton({
-  children,
-  accessibilityLabel,
-  disabled,
-  onPress,
-}: {
-  children: ReactNode;
-  accessibilityLabel: string;
-  disabled?: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
-      className="h-11 w-11 items-center justify-center rounded-full border bg-card active:opacity-80"
-      style={{ borderColor: "#E6DDD6", opacity: disabled ? 0.6 : 1 }}
-      disabled={disabled}
-      onPress={onPress}
-    >
-      {children}
     </Pressable>
   );
 }
@@ -889,7 +844,10 @@ function BottomActionBar({
           <Text className="text-sm font-medium text-muted-foreground">
             {subtotalLabel}
           </Text>
-          <Text className="text-lg font-semibold" style={{ color: ACCENT_COLOR }}>
+          <Text
+            className="text-lg font-semibold"
+            style={{ color: ACCENT_COLOR }}
+          >
             {subtotalValue}
           </Text>
         </View>
@@ -982,10 +940,7 @@ function ProductDetailLoadingState() {
       </View>
 
       {Array.from({ length: 3 }).map((_, index) => (
-        <View
-          key={`detail-section-loading-${index}`}
-          className="gap-3"
-        >
+        <View key={`detail-section-loading-${index}`} className="gap-3">
           <View className="h-5 w-28 rounded-full bg-muted" />
           <View className="h-14 rounded-[18px] bg-muted" />
         </View>
@@ -996,11 +951,7 @@ function ProductDetailLoadingState() {
   );
 }
 
-function BottomActionBarSkeleton({
-  bottomInset,
-}: {
-  bottomInset: number;
-}) {
+function BottomActionBarSkeleton({ bottomInset }: { bottomInset: number }) {
   return (
     <View
       className="border-t border-border bg-background px-4 pt-3"
@@ -1027,8 +978,7 @@ function getCustomization(
 ) {
   return (
     customizations.find(
-      (customization) =>
-        customization.customizationType === customizationType,
+      (customization) => customization.customizationType === customizationType,
     ) ?? null
   );
 }
@@ -1096,9 +1046,7 @@ function getSelectedOption(
   selectedId: string | null,
 ) {
   return (
-    options.find((option) => option.id === selectedId) ??
-    options[0] ??
-    null
+    options.find((option) => option.id === selectedId) ?? options[0] ?? null
   );
 }
 
@@ -1236,30 +1184,6 @@ function buildStatusBadges(product: ProductDetail) {
   return badges;
 }
 
-function buildDetailItems(product: ProductDetail) {
-  return [
-    {
-      label: PRODUCT_DETAIL_COPY.startingPrice,
-      value: formatCurrency(product.basePrice, product.currency),
-    },
-    {
-      label: PRODUCT_DETAIL_COPY.prepTime,
-      value: `${product.preparationTime} ${PRODUCT_DETAIL_COPY.minutesUnit}`,
-    },
-    {
-      label: PRODUCT_DETAIL_COPY.reviews,
-      value:
-        typeof product.rating === "number"
-          ? `${product.rating.toFixed(1)} (${product.totalReviews})`
-          : `${product.totalReviews}`,
-    },
-    {
-      label: PRODUCT_DETAIL_COPY.category,
-      value: product.category?.name ?? PRODUCT_DETAIL_COPY.noCategory,
-    },
-  ];
-}
-
 function buildNutritionalItems(nutritionalInfo: ProductNutritionalInfo) {
   return [
     formatNutritionItem(
@@ -1308,14 +1232,21 @@ function getErrorMessage(error: unknown) {
   return "Please try again.";
 }
 
-function isCartSize(value?: string): value is NonNullable<CartCustomization["size"]> {
+function isCartSize(
+  value?: string,
+): value is NonNullable<CartCustomization["size"]> {
   return value === "small" || value === "medium" || value === "large";
 }
 
 function isCartSweetness(
   value?: string,
 ): value is NonNullable<CartCustomization["sugarLevel"]> {
-  return value === "none" || value === "low" || value === "medium" || value === "high";
+  return (
+    value === "none" ||
+    value === "low" ||
+    value === "medium" ||
+    value === "high"
+  );
 }
 
 function formatAddOnCategory(category: ProductAddOn["category"]) {
