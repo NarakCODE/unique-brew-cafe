@@ -1,3 +1,5 @@
+import { Pagination } from "@unique-brew/api";
+
 export interface Announcement {
   id: string;
   title: string;
@@ -28,7 +30,10 @@ export type UpdateAnnouncementDTO = Partial<CreateAnnouncementDTO>;
 
 export interface GetAnnouncementsResponse {
   statusCode: number;
-  data: Announcement[];
+  data: {
+    items: Announcement[];
+    pagination: Pagination;
+  };
   message: string;
   success: boolean;
 }

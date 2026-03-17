@@ -112,7 +112,7 @@ export const VALID_NEXT_STATUSES: Partial<Record<OrderStatus, OrderStatus[]>> =
   {
     pending_payment: ["confirmed", "cancelled"],
     confirmed: ["preparing", "cancelled"],
-    preparing: ["ready"],
+    preparing: ["ready", "cancelled"],
     ready: ["picked_up", "cancelled"],
     picked_up: ["completed"],
     completed: [],

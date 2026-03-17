@@ -45,18 +45,42 @@ export function OrderStatusActions({ order }: OrderStatusActionsProps) {
     );
   }
 
-  // Single next step: show an inline button for the primary action
+  const handleUpdate = (newStatus: OrderStatus) => {
+    const orderId = order.id || (order as any)._id;
+    if (!orderId) return;
+    mutate({ orderId, payload: { status: newStatus } });
+  };
+
+  // If there's only one action, show it as a primary button (even if it's 'cancelled')
+  if (nextStatuses.length === 1) {
+    const status = nextStatuses[0];
+    const config = NEXT_STATUS_CONFIG[status];
+    return (
+      <Button
+        variant={config?.variant ?? "default"}
+        size="sm"
+        disabled={isPending}
+        onClick={() => handleUpdate(status)}
+        className="cursor-pointer h-7 text-xs"
+      >
+        {isPending ? (
+          <Loader2 className="h-3 w-3 animate-spin" />
+        ) : (
+          config?.label ?? ORDER_STATUS_LABELS[status]
+        )}
+      </Button>
+    );
+  }
+
+  // Multiple actions: show the non-cancelled one as primary, 'cancelled' in dropdown
   const primaryNext = nextStatuses.find((s) => s !== "cancelled");
   const canCancel = nextStatuses.includes("cancelled");
-
-  const handleUpdate = (newStatus: OrderStatus) => {
-    mutate({ orderId: order.id, payload: { status: newStatus } });
-  };
 
   return (
     <div className="flex items-center gap-2">
       {primaryNext && (
         <Button
+          variant={NEXT_STATUS_CONFIG[primaryNext]?.variant ?? "default"}
           size="sm"
           disabled={isPending}
           onClick={() => handleUpdate(primaryNext)}
@@ -65,8 +89,8 @@ export function OrderStatusActions({ order }: OrderStatusActionsProps) {
           {isPending ? (
             <Loader2 className="h-3 w-3 animate-spin" />
           ) : (
-            (NEXT_STATUS_CONFIG[primaryNext]?.label ??
-            ORDER_STATUS_LABELS[primaryNext])
+            NEXT_STATUS_CONFIG[primaryNext]?.label ??
+            ORDER_STATUS_LABELS[primaryNext]
           )}
         </Button>
       )}
@@ -91,6 +115,7 @@ export function OrderStatusActions({ order }: OrderStatusActionsProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive cursor-pointer"
+              disabled={isPending}
               onClick={() => handleUpdate("cancelled")}
             >
               Cancel Order

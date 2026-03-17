@@ -8,6 +8,8 @@ import {
   ShoppingBag,
   Store as StoreIcon,
   Timer,
+  Search,
+  X,
 } from "lucide-react-native";
 import * as React from "react";
 import { Pressable, ScrollView, View } from "react-native";
@@ -16,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ScreenLayout } from "@/components/layout/screen-layout";
 import { ScreenTopBar } from "@/components/layout/screen-topbar";
 import { ExploreProductCard } from "@/components/product/explore-product-card";
-import { SearchInput } from "@/components/search/SearchInput";
+import { SearchSheet } from "@/components/search/search-sheet";
 import { StoreSelectionSheet } from "@/components/store/store-selection-sheet";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Text } from "@/components/ui/text";
@@ -50,7 +52,9 @@ export default function ExploreScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const storeSheetRef = React.useRef<BottomSheetModal>(null);
+  const searchSheetRef = React.useRef<BottomSheetModal>(null);
   const sheetSnapPoints = React.useMemo(() => ["62%"], []);
+  const searchSnapPoints = React.useMemo(() => ["100%"], []);
 
   const [selectedStoreId, setSelectedStoreId] = React.useState<
     string | undefined
@@ -140,10 +144,19 @@ export default function ExploreScreen() {
   const handleOpenStoreSheet = React.useCallback(() => {
     if (stores.length) storeSheetRef.current?.present();
   }, [stores.length]);
+
+  const handleOpenSearchSheet = React.useCallback(() => {
+    searchSheetRef.current?.present();
+  }, []);
+
   const handleOpenProduct = React.useCallback(
     (productId: string) => router.push(`/product/${productId}`),
     [router],
   );
+
+  const handleClearSearch = React.useCallback(() => {
+    setSearchQuery("");
+  }, []);
 
   return (
     <>
@@ -155,12 +168,13 @@ export default function ExploreScreen() {
           selectedStore={selectedStore}
           hasStores={stores.length > 0}
           onOpenStoreSheet={handleOpenStoreSheet}
+          onOpenSearchSheet={handleOpenSearchSheet}
           searchQuery={searchQuery}
-          onChangeSearch={setSearchQuery}
           activeQuickFilter={activeQuickFilter}
           onSelectQuickFilter={setActiveQuickFilter}
           onClearFilters={handleClearFilters}
           hasFiltersApplied={hasFiltersApplied}
+          onClearSearch={handleClearSearch}
         />
 
         <View className="gap-5 pb-8">
@@ -198,6 +212,17 @@ export default function ExploreScreen() {
         bottomInset={insets.bottom}
         snapPoints={sheetSnapPoints}
       />
+
+      <SearchSheet
+        ref={searchSheetRef}
+        value={searchQuery}
+        onChangeText={setSearchQuery}
+        onClear={handleClearSearch}
+        products={filteredProducts}
+        isLoading={productsQuery.isLoading}
+        onOpenProduct={handleOpenProduct}
+        snapPoints={searchSnapPoints}
+      />
     </>
   );
 }
@@ -209,23 +234,25 @@ function ExploreHeroSection({
   selectedStore,
   hasStores,
   onOpenStoreSheet,
+  onOpenSearchSheet,
   searchQuery,
-  onChangeSearch,
   activeQuickFilter,
   onSelectQuickFilter,
   onClearFilters,
   hasFiltersApplied,
+  onClearSearch,
 }: {
   isStoreLoading: boolean;
   selectedStore?: MobileStore;
   hasStores: boolean;
   onOpenStoreSheet: () => void;
+  onOpenSearchSheet: () => void;
   searchQuery: string;
-  onChangeSearch: (value: string) => void;
   activeQuickFilter: QuickFilterKey;
   onSelectQuickFilter: (nextFilter: QuickFilterKey) => void;
   onClearFilters: () => void;
   hasFiltersApplied: boolean;
+  onClearSearch: () => void;
 }) {
   return (
     <View className="gap-5 pb-2">
@@ -239,12 +266,32 @@ function ExploreHeroSection({
         />
       )}
 
-      <SearchInput
-        value={searchQuery}
-        onChangeText={onChangeSearch}
-        placeholder="Search for coffee, tea, treats..."
-        onClear={onClearFilters}
-      />
+      <Pressable
+        onPress={onOpenSearchSheet}
+        className="flex-row items-center gap-3 rounded-[24px] border border-border bg-card px-4 py-4 active:opacity-80"
+      >
+        <Search size={21} color="#666C63" strokeWidth={2.2} />
+        <Text
+          className={cn(
+            "flex-1 text-[17px]",
+            searchQuery ? "text-foreground" : "text-muted-foreground",
+          )}
+          numberOfLines={1}
+        >
+          {searchQuery || "Search for coffee, tea, treats..."}
+        </Text>
+        {searchQuery ? (
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation();
+              onClearSearch();
+            }}
+            className="rounded-full bg-muted p-1.5 active:opacity-80"
+          >
+            <X size={15} color="#5F655C" strokeWidth={2.6} />
+          </Pressable>
+        ) : null}
+      </Pressable>
 
       <QuickFilterRow
         activeFilter={activeQuickFilter}
@@ -253,6 +300,7 @@ function ExploreHeroSection({
     </View>
   );
 }
+
 
 function ExploreSectionHeader({
   title,
@@ -278,7 +326,10 @@ function ExploreSectionHeader({
           {title}
         </Text>
         {subtitle ? (
-          <Text className="text-sm font-medium text-muted-foreground" numberOfLines={1}>
+          <Text
+            className="text-sm font-medium text-muted-foreground"
+            numberOfLines={1}
+          >
             {subtitle}
           </Text>
         ) : null}
@@ -419,17 +470,28 @@ function StoreSelectorButton({
         <View className="mt-1 flex-row items-center gap-1.5">
           {store ? (
             <>
-              <Text className="text-xl font-bold tracking-tight text-foreground" numberOfLines={1}>
+              <Text
+                className="text-xl font-bold tracking-tight text-foreground"
+                numberOfLines={1}
+              >
                 {store.name}
               </Text>
-              <ChevronDown size={20} className="text-foreground" strokeWidth={2.5} />
+              <ChevronDown
+                size={20}
+                className="text-foreground"
+                strokeWidth={2.5}
+              />
             </>
           ) : (
             <>
               <Text className="text-xl font-bold tracking-tight text-muted-foreground">
                 Select a store
               </Text>
-              <ChevronDown size={20} className="text-muted-foreground" strokeWidth={2.5} />
+              <ChevronDown
+                size={20}
+                className="text-muted-foreground"
+                strokeWidth={2.5}
+              />
             </>
           )}
         </View>
@@ -485,7 +547,12 @@ function QuickFilterRow({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ gap: 8, paddingRight: 4, paddingBottom: 10, paddingTop: 4 }}
+        contentContainerStyle={{
+          gap: 8,
+          paddingRight: 4,
+          paddingBottom: 10,
+          paddingTop: 4,
+        }}
       >
         {QUICK_FILTER_OPTIONS.map(({ key, label, Icon }) => {
           const isActive = activeFilter === key;

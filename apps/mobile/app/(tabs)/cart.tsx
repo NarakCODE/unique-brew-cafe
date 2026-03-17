@@ -1,8 +1,4 @@
-import {
-  BottomSheetBackdrop,
-  BottomSheetModal,
-  BottomSheetView,
-} from "@gorhom/bottom-sheet";
+import { BottomSheetBackdrop, BottomSheetModal } from "@gorhom/bottom-sheet";
 import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import { Trash2 } from "lucide-react-native";
@@ -341,15 +337,13 @@ export default function CartScreen() {
           setSelectedProductId(null);
         }}
       >
-        <BottomSheetView className="flex-1">
-          {selectedProductId ? (
-            <ProductDetailView
-              productId={selectedProductId}
-              presentation="sheet"
-              onRequestClose={handleDismissProductSheet}
-            />
-          ) : null}
-        </BottomSheetView>
+        {selectedProductId ? (
+          <ProductDetailView
+            productId={selectedProductId}
+            presentation="sheet"
+            onRequestClose={handleDismissProductSheet}
+          />
+        ) : null}
       </BottomSheetModal>
     </>
   );

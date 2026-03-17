@@ -44,3 +44,15 @@ export interface ProductPerformanceResponse {
   message: string;
   success: boolean;
 }
+
+export interface OrdersReportItem {
+  _id: string; // OrderStatus
+  count: number;
+}
+
+export interface OrdersReportResponse {
+  statusCode: number;
+  data: OrdersReportItem[];
+  message: string;
+  success: boolean;
+}

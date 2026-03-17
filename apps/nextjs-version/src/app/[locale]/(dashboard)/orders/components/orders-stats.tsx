@@ -36,19 +36,14 @@ function StatCard({ label, value, icon, color, isLoading }: StatCardProps) {
 }
 
 export function OrdersStats() {
-  const { orders: allOrders, isLoading } = useOrders({ limit: 200 });
-  const { orders: activeOrders, isLoading: activeLoading } = useOrders({
-    limit: 200,
-  });
+  const { orders, isLoading } = useOrders({ limit: 200 });
 
-  const pending = allOrders.filter(
-    (o) => o.status === "pending_payment",
-  ).length;
-  const active = activeOrders.filter((o) =>
+  const pending = orders.filter((o) => o.status === "pending_payment").length;
+  const active = orders.filter((o) =>
     ACTIVE_STATUSES.includes(o.status),
   ).length;
-  const ready = allOrders.filter((o) => o.status === "ready").length;
-  const completed = allOrders.filter((o) => o.status === "completed").length;
+  const ready = orders.filter((o) => o.status === "ready").length;
+  const completed = orders.filter((o) => o.status === "completed").length;
 
   return (
     <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
@@ -64,7 +59,7 @@ export function OrdersStats() {
         value={active}
         icon={<Coffee className="h-5 w-5 text-violet-600" />}
         color="bg-violet-50 dark:bg-violet-400/10"
-        isLoading={activeLoading}
+        isLoading={isLoading}
       />
       <StatCard
         label="Ready for Pickup"
