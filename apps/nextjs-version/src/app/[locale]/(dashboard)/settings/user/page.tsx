@@ -233,7 +233,10 @@ export default function UserSettingsPage() {
       };
       reader.readAsDataURL(file);
 
-      updateProfileImage(file, {
+      const formData = new FormData();
+      formData.append("image", file);
+
+      updateProfileImage(formData, {
         onSuccess: (data) => {
           toast.success("Profile image updated successfully");
           if (data.data.profileImage) {

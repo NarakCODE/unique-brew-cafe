@@ -254,7 +254,8 @@ export const addInternalNotes = asyncHandler(
 export const updateOrderStatus = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const orderId = req.params.orderId!;
-    const { status } = req.body;
+    const adminId = req.userId!;
+    const { status, note } = req.body;
 
     if (!status || typeof status !== 'string') {
       res.status(400).json(new ApiResponse(400, null, 'Status is required'));
@@ -263,7 +264,9 @@ export const updateOrderStatus = asyncHandler(
 
     const order = await orderService.updateOrderStatus(
       orderId,
-      status as OrderStatus
+      status as OrderStatus,
+      adminId,
+      note
     );
 
     res

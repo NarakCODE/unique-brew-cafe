@@ -133,47 +133,82 @@ describe('AnnouncementService', () => {
       expect(mockSort).toHaveBeenCalledWith({ priority: -1, createdAt: -1 });
     });
 
-    it('should NOT filter targetAudience for logged-in users (showing all available)', async () => {
+    it('should include matching audience filters for logged-in users', async () => {
       const userId = 'user123';
-      (User.findById as any).mockResolvedValue({ _id: userId });
+      (User.findById as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue({
+          _id: userId,
+          createdAt: new Date('2023-12-20T12:00:00Z'),
+          loyaltyTier: 'gold',
+          loyaltyPoints: 100,
+          totalOrders: 3,
+        }),
+      });
 
       const mockSort = vi.fn().mockResolvedValue([]);
       (Announcement.find as any).mockReturnValue({ sort: mockSort });
 
       await announcementService.getActiveAnnouncements(userId);
 
-      // Verify query strictly DOES NOT contain targetAudience: 'all'
-      // It should query purely based on date and active status according to current service logic
       const callArgs = (Announcement.find as any).mock.calls[0][0];
       expect(callArgs.isActive).toBe(true);
       expect(callArgs.targetAudience).toBeUndefined();
+      expect(callArgs.$or).toEqual(
+        expect.arrayContaining([
+          { targetAudience: 'all' },
+          { targetAudience: 'new_users' },
+          { targetAudience: 'loyal_users' },
+          {
+            targetAudience: 'specific_tier',
+            userTierFilter: 'gold',
+          },
+        ])
+      );
     });
 
     it('should treat user as guest if User ID provided does not exist in DB', async () => {
       const userId = 'nonExistent';
-      (User.findById as any).mockResolvedValue(null);
+      (User.findById as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue(null),
+      });
 
       const mockSort = vi.fn().mockResolvedValue([]);
       (Announcement.find as any).mockReturnValue({ sort: mockSort });
 
       await announcementService.getActiveAnnouncements(userId);
 
-      // Should default back to guest logic (targetAudience: 'all') because !userId check runs after fallback?
-      // Re-reading service logic:
-      // if (userId) { user = find... }
-      // if (!userId) { query.targetAudience = 'all' }
-      //
-      // Wait, the service logic provided shows:
-      // if (userId) { const user = await User... }
-      // ...
-      // if (!userId) { query.targetAudience = 'all' }
-      //
-      // If userId is provided but User.findById returns null, `if (!userId)` is still false.
-      // So the query will actually NOT constrain by audience in the current implementation provided.
-      // This matches the service implementation provided in the prompt, even if logically debatable.
+      const callArgs = (Announcement.find as any).mock.calls[0][0];
+      expect(callArgs.targetAudience).toBe('all');
+    });
+
+    it('should keep logged-in users limited to all announcements when they do not match extra audiences', async () => {
+      const userId = 'user456';
+      (User.findById as any).mockReturnValue({
+        lean: vi.fn().mockResolvedValue({
+          _id: userId,
+          createdAt: new Date('2023-01-01T12:00:00Z'),
+          loyaltyTier: 'bronze',
+          loyaltyPoints: 0,
+          totalOrders: 0,
+        }),
+      });
+
+      const mockSort = vi.fn().mockResolvedValue([]);
+      (Announcement.find as any).mockReturnValue({ sort: mockSort });
+
+      await announcementService.getActiveAnnouncements(userId);
 
       const callArgs = (Announcement.find as any).mock.calls[0][0];
-      expect(callArgs.targetAudience).toBeUndefined();
+      expect(callArgs.$or).toEqual(
+        expect.arrayContaining([
+          { targetAudience: 'all' },
+          {
+            targetAudience: 'specific_tier',
+            userTierFilter: 'bronze',
+          },
+        ])
+      );
+      expect(callArgs.$or).toHaveLength(2);
     });
   });
 

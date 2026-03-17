@@ -29,11 +29,18 @@ router.post('/validate', validateCheckout);
 // POST /checkout - Create checkout session
 router.post('/', createCheckoutSession);
 
-// GET /checkout/:checkoutId - Get checkout session details
-router.get('/:checkoutId', validate(checkoutParamSchema), getCheckoutSession);
-
 // GET /checkout/payment-methods - Get available payment methods
 router.get('/payment-methods', getPaymentMethods);
+
+// GET /checkout/delivery-charges - Calculate delivery charges
+router.get(
+  '/delivery-charges',
+  validate(deliveryChargesSchema),
+  getDeliveryCharges
+);
+
+// GET /checkout/:checkoutId - Get checkout session details
+router.get('/:checkoutId', validate(checkoutParamSchema), getCheckoutSession);
 
 // POST /checkout/:checkoutId/apply-coupon - Apply coupon to checkout
 router.post(
@@ -47,13 +54,6 @@ router.delete(
   '/:checkoutId/remove-coupon',
   validate(checkoutParamSchema),
   removeCoupon
-);
-
-// GET /checkout/delivery-charges - Calculate delivery charges
-router.get(
-  '/delivery-charges',
-  validate(deliveryChargesSchema),
-  getDeliveryCharges
 );
 
 // POST /checkout/:checkoutId/confirm - Confirm checkout and create order

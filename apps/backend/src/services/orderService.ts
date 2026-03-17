@@ -7,6 +7,7 @@ import { CartItem } from '../models/CartItem.js';
 import { Product } from '../models/Product.js';
 import { AddOn } from '../models/AddOn.js';
 import { AppError } from '../utils/AppError.js';
+import { notificationService } from './notificationService.js';
 import PDFDocument from 'pdfkit';
 import {
   parsePaginationParams,
@@ -726,7 +727,9 @@ export class OrderService {
    */
   async updateOrderStatus(
     orderId: string,
-    newStatus: OrderStatus
+    newStatus: OrderStatus,
+    adminId: string,
+    note?: string
   ): Promise<IOrder> {
     if (!mongoose.Types.ObjectId.isValid(orderId)) {
       throw new AppError('Invalid order ID', 400);
@@ -741,15 +744,20 @@ export class OrderService {
     // Validate status transition
     if (!this.isValidStatusTransition(order.status, newStatus)) {
       throw new AppError(
-        `Invalid status transition from ${order.status} to ${newStatus}`,
+        `Invalid status transition from '${order.status}' to '${newStatus}'`,
         400
       );
+    }
+
+    // Idempotency: skip write if status is unchanged
+    if (order.status === newStatus) {
+      return order;
     }
 
     const oldStatus = order.status;
     order.status = newStatus;
 
-    // Update timestamps based on status
+    // Set relevant timestamps
     if (newStatus === 'ready') {
       order.actualReadyTime = new Date();
     } else if (newStatus === 'picked_up') {
@@ -763,18 +771,69 @@ export class OrderService {
 
     await order.save();
 
-    // Record status change in history
+    // Record status change in history (with admin context)
     await OrderStatusHistory.create({
       orderId: order._id,
       status: newStatus,
-      notes: `Status changed from ${oldStatus} to ${newStatus} by admin`,
+      notes:
+        note || `Status changed from '${oldStatus}' to '${newStatus}' by admin`,
       changedBy: 'admin',
     });
 
-    // TODO: Send notification to user about status change
-    // This would be implemented when notification service is ready
+    // Notify the user about the status change
+    await this.notifyOrderStatusChange(order, newStatus);
 
     return order;
+  }
+
+  /**
+   * Send an in-app notification to the customer when order status changes.
+   * Only fires for status transitions that are relevant to the customer.
+   */
+  private async notifyOrderStatusChange(
+    order: IOrder,
+    newStatus: OrderStatus
+  ): Promise<void> {
+    const NOTIFY_ON: Partial<
+      Record<OrderStatus, { title: string; message: string }>
+    > = {
+      confirmed: {
+        title: '✅ Order Confirmed!',
+        message: `Your order #${order.orderNumber} has been confirmed and is in the queue.`,
+      },
+      preparing: {
+        title: "☕ We're Brewing!",
+        message: `Your order #${order.orderNumber} is now being prepared. Hang tight!`,
+      },
+      ready: {
+        title: '🔔 Ready for Pickup!',
+        message: `Your order #${order.orderNumber} is ready! Please come pick it up.`,
+      },
+      completed: {
+        title: '🙏 Enjoy Your Drink!',
+        message: `Order #${order.orderNumber} is complete. Thank you for visiting!`,
+      },
+    };
+
+    const payload = NOTIFY_ON[newStatus];
+    if (!payload) return; // No notification for pending_payment, cancelled, picked_up
+
+    try {
+      await notificationService.createNotification(String(order.userId), {
+        type: 'order_status',
+        title: payload.title,
+        message: payload.message,
+        actionType: 'order_details',
+        actionValue: String(order._id),
+        priority: newStatus === 'ready' ? 'high' : 'medium',
+      });
+    } catch (err) {
+      // Non-fatal: log but don't fail the status update
+      console.error(
+        `Failed to send notification for order ${order.orderNumber}:`,
+        err
+      );
+    }
   }
 
   /**

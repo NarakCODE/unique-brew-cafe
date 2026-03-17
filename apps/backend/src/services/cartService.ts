@@ -2,6 +2,10 @@ import { Cart } from '../models/Cart.js';
 import { CartItem } from '../models/CartItem.js';
 import { Product } from '../models/Product.js';
 import { Store } from '../models/Store.js';
+import { AddOn } from '../models/AddOn.js';
+import { ProductAddOn } from '../models/ProductAddOn.js';
+import { ProductCustomization } from '../models/ProductCustomization.js';
+import { cleanImageUrls } from './productService.js';
 import { NotFoundError, BadRequestError } from '../utils/AppError.js';
 import mongoose from 'mongoose';
 
@@ -23,6 +27,18 @@ interface AddCartItemDTO {
   addOns?: string[];
   notes?: string;
 }
+
+type ResolvedAddOn = {
+  id: string;
+  name: string;
+  price: number;
+};
+
+type PricingResult = {
+  unitPrice: number;
+  customization?: AddCartItemDTO['customization'];
+  addOns: ResolvedAddOn[];
+};
 
 interface CartValidationResult {
   isValid: boolean;
@@ -73,10 +89,19 @@ export const getCart = async (userId: string) => {
       'name slug images basePrice currency isAvailable preparationTime categoryId',
   });
 
+  const formattedItems = items.map((item) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const itemData = item.toJSON() as any;
+    if (itemData.productId && Array.isArray(itemData.productId.images)) {
+      itemData.productId.images = cleanImageUrls(itemData.productId.images);
+    }
+    return itemData;
+  });
+
   return {
     cart,
-    items,
-    itemCount: items.length,
+    items: formattedItems,
+    itemCount: formattedItems.length,
   };
 };
 
@@ -139,23 +164,24 @@ export const addItem = async (userId: string, itemData: AddCartItemDTO) => {
     });
   }
 
-  // Calculate unit price (base price + customizations + add-ons)
-  const unitPrice = product.basePrice;
+  const pricing = await resolveCartItemPricing(
+    itemData.productId,
+    product.basePrice,
+    itemData.customization,
+    itemData.addOns
+  );
 
-  // For simplicity, we're not calculating add-on prices here
-  // In a real implementation, you would fetch add-on prices and add them
-
-  const totalPrice = unitPrice * itemData.quantity;
+  const totalPrice = pricing.unitPrice * itemData.quantity;
 
   // Create cart item
   await CartItem.create({
     cartId: cart._id,
     productId: itemData.productId,
     quantity: itemData.quantity,
-    customization: itemData.customization,
-    addOns: itemData.addOns || [],
+    customization: pricing.customization,
+    addOns: pricing.addOns.map((entry) => entry.id),
     notes: itemData.notes,
-    unitPrice,
+    unitPrice: pricing.unitPrice,
     totalPrice,
   });
 
@@ -336,12 +362,27 @@ export const validateCart = async (
       });
     }
 
-    // Check if price has changed
-    if (item.unitPrice !== product.basePrice) {
+    try {
+      const pricing = await resolveCartItemPricing(
+        product._id.toString(),
+        product.basePrice,
+        item.customization,
+        item.addOns?.map((entry) => entry.toString())
+      );
+
+      if (item.unitPrice !== pricing.unitPrice) {
+        issues.push({
+          itemId: (item._id as mongoose.Types.ObjectId).toString(),
+          productId: product._id.toString(),
+          issue: `Price has changed from ${item.unitPrice} to ${pricing.unitPrice}`,
+        });
+      }
+    } catch (error) {
       issues.push({
         itemId: (item._id as mongoose.Types.ObjectId).toString(),
         productId: product._id.toString(),
-        issue: `Price has changed from ${item.unitPrice} to ${product.basePrice}`,
+        issue:
+          error instanceof Error ? error.message : 'Unable to validate item pricing',
       });
     }
   }
@@ -447,7 +488,7 @@ const calculateTotals = async (cartId: string): Promise<void> => {
   const tax = discountedSubtotal * TAX_RATE;
 
   // Delivery fee (could be calculated based on address/distance)
-  const deliveryFee = subtotal > 0 ? BASE_DELIVERY_FEE : 0;
+  const deliveryFee = subtotal > 0 && cart.deliveryAddress ? BASE_DELIVERY_FEE : 0;
 
   // Calculate total
   const total = discountedSubtotal + tax + deliveryFee;
@@ -460,3 +501,286 @@ const calculateTotals = async (cartId: string): Promise<void> => {
 
   await cart.save();
 };
+
+const CUSTOMIZATION_FIELD_MAP = {
+  size: 'size',
+  sugar_level: 'sugarLevel',
+  ice_level: 'iceLevel',
+  coffee_level: 'coffeeLevel',
+} as const;
+
+async function resolveCartItemPricing(
+  productId: string,
+  basePrice: number,
+  customization?: AddCartItemDTO['customization'],
+  addOnIds?: string[]
+): Promise<PricingResult> {
+  let unitPrice = basePrice;
+  const normalizedCustomization = { ...(customization ?? {}) };
+
+  const productCustomizations = await ProductCustomization.find({ productId });
+
+  for (const productCustomization of productCustomizations) {
+    const field =
+      CUSTOMIZATION_FIELD_MAP[
+        productCustomization.customizationType as keyof typeof CUSTOMIZATION_FIELD_MAP
+      ];
+
+    if (!field) {
+      continue;
+    }
+
+    let selectedOptionId = normalizedCustomization[field];
+
+    if (!selectedOptionId) {
+      const defaultOption = productCustomization.options.find(
+        (option) => option.isDefault
+      );
+
+      if (productCustomization.isRequired && !defaultOption) {
+        throw new BadRequestError(
+          `${formatCustomizationLabel(field)} is required for this product`
+        );
+      }
+
+      if (defaultOption) {
+        selectedOptionId = defaultOption.id;
+        normalizedCustomization[field] = defaultOption.id;
+      }
+    }
+
+    if (!selectedOptionId) {
+      continue;
+    }
+
+    const matchedOption = resolveCustomizationOption(
+      productCustomization.options,
+      field,
+      selectedOptionId
+    );
+
+    if (!matchedOption) {
+      throw new BadRequestError(
+        `Invalid ${formatCustomizationLabel(field)} selection`
+      );
+    }
+
+    normalizedCustomization[field] = matchedOption.id;
+    unitPrice += matchedOption.priceModifier;
+  }
+
+  const selectedAddOnIds = Array.from(new Set(addOnIds ?? []));
+  if (selectedAddOnIds.length === 0) {
+    return {
+      unitPrice,
+      customization:
+        Object.keys(normalizedCustomization).length > 0
+          ? normalizedCustomization
+          : undefined,
+      addOns: [],
+    };
+  }
+
+  const productAddOns = await ProductAddOn.find({
+    productId,
+    addOnId: { $in: selectedAddOnIds },
+  });
+  const availableAddOnIds = new Set(
+    productAddOns.map((entry) => entry.addOnId.toString())
+  );
+
+  if (availableAddOnIds.size !== selectedAddOnIds.length) {
+    throw new BadRequestError('One or more selected add-ons are invalid');
+  }
+
+  const addOnDocs = await AddOn.find({
+    _id: { $in: selectedAddOnIds },
+    isAvailable: true,
+  });
+
+  if (addOnDocs.length !== selectedAddOnIds.length) {
+    throw new BadRequestError('One or more selected add-ons are unavailable');
+  }
+
+  const resolvedAddOns = selectedAddOnIds.flatMap((addOnId) => {
+    const addOn = addOnDocs.find((entry) => entry._id.toString() === addOnId);
+    if (!addOn) {
+      return [];
+    }
+
+    unitPrice += addOn.price;
+
+    return [
+      {
+        id: addOn._id.toString(),
+        name: addOn.name,
+        price: addOn.price,
+      },
+    ];
+  });
+
+  return {
+    unitPrice,
+    customization:
+      Object.keys(normalizedCustomization).length > 0
+        ? normalizedCustomization
+        : undefined,
+    addOns: resolvedAddOns,
+  };
+}
+
+function formatCustomizationLabel(
+  field: keyof NonNullable<AddCartItemDTO['customization']>
+) {
+  switch (field) {
+    case 'sugarLevel':
+      return 'Sugar level';
+    case 'iceLevel':
+      return 'Ice level';
+    case 'coffeeLevel':
+      return 'Coffee level';
+    default:
+      return 'Size';
+  }
+}
+
+function resolveCustomizationOption(
+  options: Array<{
+    id: string;
+    name: string;
+    priceModifier: number;
+    isDefault: boolean;
+  }>,
+  field: keyof NonNullable<AddCartItemDTO['customization']>,
+  selectedValue: string
+) {
+  const normalizedSelectedValue = normalizeCustomizationValue(selectedValue);
+
+  return (
+    options.find(
+      (option) => normalizeCustomizationValue(option.id) === normalizedSelectedValue
+    ) ??
+    options.find(
+      (option) =>
+        normalizeCustomizationValue(option.name) === normalizedSelectedValue
+    ) ??
+    options.find((option) =>
+      getCustomizationAliases(field, option).includes(normalizedSelectedValue)
+    )
+  );
+}
+
+function getCustomizationAliases(
+  field: keyof NonNullable<AddCartItemDTO['customization']>,
+  option: {
+    id: string;
+    name: string;
+  }
+) {
+  const normalizedId = normalizeCustomizationValue(option.id);
+  const normalizedName = normalizeCustomizationValue(option.name);
+
+  switch (field) {
+    case 'size':
+      if (normalizedId === 'small' || normalizedName.includes('small')) {
+        return ['s', 'small'];
+      }
+
+      if (
+        normalizedId === 'medium' ||
+        normalizedName.includes('medium') ||
+        normalizedName.includes('regular')
+      ) {
+        return ['m', 'medium', 'regular'];
+      }
+
+      if (normalizedId === 'large' || normalizedName.includes('large')) {
+        return ['l', 'large'];
+      }
+
+      break;
+    case 'sugarLevel':
+      if (
+        normalizedId === 'nosugar' ||
+        normalizedName.includes('nosugar') ||
+        normalizedName.includes('no sugar')
+      ) {
+        return ['none', 'nosugar', 'no_sugar'];
+      }
+
+      if (
+        normalizedId === 'lesssugar' ||
+        normalizedName.includes('lesssugar') ||
+        normalizedName.includes('less sugar')
+      ) {
+        return ['low', 'lesssugar', 'less_sugar'];
+      }
+
+      if (normalizedId === 'regular' || normalizedName.includes('regular')) {
+        return ['medium', 'regular'];
+      }
+
+      if (
+        normalizedId === 'extrasugar' ||
+        normalizedName.includes('extrasugar') ||
+        normalizedName.includes('extra sugar')
+      ) {
+        return ['high', 'extrasugar', 'extra_sugar'];
+      }
+
+      break;
+    case 'iceLevel':
+      if (
+        normalizedId === 'noice' ||
+        normalizedName.includes('noice') ||
+        normalizedName.includes('no ice')
+      ) {
+        return ['none', 'noice', 'no_ice'];
+      }
+
+      if (
+        normalizedId === 'lessice' ||
+        normalizedName.includes('lessice') ||
+        normalizedName.includes('less ice')
+      ) {
+        return ['low', 'lessice', 'less_ice'];
+      }
+
+      if (normalizedId === 'regular' || normalizedName.includes('regular')) {
+        return ['medium', 'regular'];
+      }
+
+      if (
+        normalizedId === 'extraice' ||
+        normalizedName.includes('extraice') ||
+        normalizedName.includes('extra ice')
+      ) {
+        return ['high', 'extraice', 'extra_ice'];
+      }
+
+      break;
+    case 'coffeeLevel':
+      if (normalizedId === 'decaf' || normalizedName.includes('decaf')) {
+        return ['single', 'decaf'];
+      }
+
+      if (normalizedId === 'regular' || normalizedName.includes('regular')) {
+        return ['double', 'regular'];
+      }
+
+      if (
+        normalizedId === 'extrashot' ||
+        normalizedName.includes('extra shot')
+      ) {
+        return ['triple', 'extrashot', 'extra_shot'];
+      }
+
+      break;
+  }
+
+  return [];
+}
+
+function normalizeCustomizationValue(value: string) {
+  return value.trim().toLowerCase().replace(/[\s_-]+/g, '');
+}

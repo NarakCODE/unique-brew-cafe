@@ -22,7 +22,7 @@ export function useAnnouncements() {
   });
 
   return {
-    announcements: query.data?.data ?? [],
+    announcements: query.data?.data.items ?? [],
     isLoading: query.isLoading,
     error: query.error as ApiErrorResponse | null,
     refetch: query.refetch,

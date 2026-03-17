@@ -3,6 +3,7 @@ import {
   DashboardStatsResponse,
   SalesReportResponse,
   ProductPerformanceResponse,
+  OrdersReportResponse,
 } from "@/types/report";
 import { buildQueryString, withQuery } from "@/lib/search-params";
 
@@ -39,4 +40,15 @@ export const getProductPerformance = async (filters?: {
     endDate: filters?.endDate,
   });
   return apiClient.get(withQuery("/reports/products", query));
+};
+
+export const getOrdersReport = async (filters?: {
+  startDate?: string;
+  endDate?: string;
+}): Promise<OrdersReportResponse> => {
+  const query = buildQueryString({
+    startDate: filters?.startDate,
+    endDate: filters?.endDate,
+  });
+  return apiClient.get(withQuery("/reports/orders", query));
 };

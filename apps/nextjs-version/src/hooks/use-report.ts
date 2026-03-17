@@ -3,12 +3,30 @@ import {
   getDashboardStats,
   getSalesReport,
   getProductPerformance,
+  getOrdersReport,
 } from "@/api/report";
 import { ApiErrorResponse } from "@/types/api";
 
 interface DateFilters {
   startDate?: string;
   endDate?: string;
+}
+
+export function useOrdersReport(filters?: DateFilters) {
+  const query = useQuery({
+    queryKey: ["orders-report", filters],
+    queryFn: () => getOrdersReport(filters),
+    placeholderData: keepPreviousData,
+  });
+
+  return {
+    data: query.data?.data ?? [],
+    isLoading: query.isLoading,
+    isFetching: query.isFetching,
+    error: query.error as ApiErrorResponse | null,
+    refetch: query.refetch,
+    isError: query.isError,
+  };
 }
 
 export function useDashboardStats(filters?: DateFilters) {

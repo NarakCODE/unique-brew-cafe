@@ -23,6 +23,7 @@ import { useProfile } from "@/hooks/use-profile";
 import {
   PanelLeftIcon,
   Package01Icon,
+  ShoppingBag02Icon,
   Store03Icon,
   ChartBarLineIcon,
   UserGroupIcon,
@@ -68,6 +69,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             title: t("Products"),
             url: "/products",
             icon: Package01Icon,
+          },
+          {
+            title: t("Orders"),
+            url: "/orders",
+            icon: ShoppingBag02Icon,
           },
           {
             title: t("Stores"),

@@ -13,6 +13,7 @@ interface StoreFilters {
   radius?: number | undefined; // in kilometers
   city?: string | undefined;
   isActive?: boolean | undefined;
+  search?: string | undefined;
 }
 
 /**
@@ -73,6 +74,13 @@ export const getAllStoresAdmin = async (
     query.city = { $regex: filters.city, $options: 'i' };
   }
 
+  if (filters?.search) {
+    query.$or = [
+      { name: { $regex: filters.search, $options: 'i' } },
+      { description: { $regex: filters.search, $options: 'i' } },
+    ];
+  }
+
   if (filters?.isActive !== undefined) {
     query.isActive = filters.isActive;
   }
@@ -124,6 +132,13 @@ export const getAllStores = async (
   // Apply city filter
   if (filters?.city) {
     query.city = { $regex: filters.city, $options: 'i' };
+  }
+
+  if (filters?.search) {
+    query.$or = [
+      { name: { $regex: filters.search, $options: 'i' } },
+      { description: { $regex: filters.search, $options: 'i' } },
+    ];
   }
 
   // Parse pagination parameters

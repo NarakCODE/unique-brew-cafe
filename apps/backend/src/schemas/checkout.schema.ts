@@ -57,7 +57,7 @@ export const confirmCheckoutSchema = z.object({
     checkoutId: objectIdSchema,
   }),
   body: z.object({
-    paymentMethod: z.enum(['ABA', 'ACLEDA', 'Wing', 'Cash']),
+    paymentMethod: z.enum(['bakong_khqr', 'cash']),
   }),
 });
 

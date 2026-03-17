@@ -6,6 +6,7 @@ import * as z from "zod";
 import { useRouter, Link } from "@/i18n/routing";
 import { useLogin } from "@/hooks/use-login";
 import { cn } from "@/lib/utils";
+import { setSessionRole } from "@/lib/session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/password-input";
@@ -35,10 +36,28 @@ export function LoginForm2({
 
   const { login, isLoading } = useLogin({
     onSuccess: (data) => {
-      localStorage.setItem("accessToken", data.data.accessToken);
-      localStorage.setItem("refreshToken", data.data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(data.data.user));
-      router.push("/dashboard");
+      const { user, accessToken, refreshToken } = data.data;
+
+      // Persist tokens and user info in localStorage for API calls
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("refreshToken", refreshToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      // Write role to cookie so the middleware can enforce RBAC on dashboard routes
+      setSessionRole(user.role);
+
+      if (user.role === "admin") {
+        // Admins go straight to the dashboard
+        router.push("/dashboard");
+      } else {
+        // Regular users are not allowed in the dashboard — send them to the landing page
+        import("sonner").then(({ toast }) => {
+          toast.info(
+            "Access restricted. Dashboard is for admin accounts only.",
+          );
+        });
+        router.push("/landing");
+      }
     },
     onError: (error) => {
       const message = error.message || t("somethingWentWrong");

@@ -47,6 +47,7 @@ export const getAllStoresAdmin = asyncHandler(
     const filters = {
       city: req.query.city as string,
       isActive: req.query.isActive ? req.query.isActive === 'true' : undefined,
+      search: req.query.search as string,
     };
 
     const result = await storeService.getAllStoresAdmin(
@@ -67,7 +68,7 @@ export const getAllStoresAdmin = asyncHandler(
  */
 export const getAllStores = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
-    const { latitude, longitude, radius, city } = req.query;
+    const { latitude, longitude, radius, city, search } = req.query;
 
     // Parse and validate location filters if provided
     let filters: {
@@ -75,6 +76,7 @@ export const getAllStores = asyncHandler(
       longitude?: number;
       radius?: number;
       city?: string;
+      search?: string;
     } = {};
 
     if (latitude || longitude || radius) {
@@ -120,6 +122,10 @@ export const getAllStores = asyncHandler(
 
     if (city) {
       filters.city = city as string;
+    }
+
+    if (search) {
+      filters.search = search as string;
     }
 
     // Parse pagination params
