@@ -133,6 +133,36 @@ export async function getStores({
 
 type StoreApiItem = StoresApiResponse["data"]["data"][number];
 
+export type MobileStore = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  address: string;
+  city: string;
+  state: string;
+  postalCode?: string;
+  country: string;
+  phone: string;
+  email?: string;
+  latitude: number;
+  longitude: number;
+  imageUrl?: string;
+  images: string[];
+  openingHours: StoreApiItem["openingHours"];
+  specialHours: NonNullable<StoreApiItem["specialHours"]>;
+  isOpen: boolean;
+  isActive: boolean;
+  isOpenNow: boolean;
+  averagePrepTime: number;
+  rating?: number;
+  totalReviews: number;
+  features: StoreApiItem["features"];
+  distance?: number;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export async function getStoreById(id: string) {
   const response = await mobileApiClient.get<{
     statusCode: number;

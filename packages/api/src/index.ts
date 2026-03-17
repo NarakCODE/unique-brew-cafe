@@ -8,6 +8,7 @@ export * from "./types/order";
 export * from "./types/search";
 export * from "./types/store";
 export * from "./types/cart";
+export * from "./types/checkout";
 
 export * from "./utils/search-params";
 

@@ -52,6 +52,7 @@
     "@types/pdfkit": "^0.17.3",
     "@types/supertest": "^6.0.3",
     "@types/swagger-ui-express": "^4.1.8",
+    "bakong-khqr": "^1.0.20",
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.8.0",
     "compression": "^1.7.4",
@@ -68,6 +69,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "pdfkit": "^0.17.2",
+    "qrcode": "^1.5.4",
     "slugify": "^1.6.6",
     "swagger-ui-express": "^5.0.1",
     "zod": "^4.1.12"

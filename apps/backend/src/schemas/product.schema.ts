@@ -10,6 +10,7 @@ import { objectIdSchema } from './common.schema.js';
  */
 export const getProductsQuerySchema = z.object({
   query: z.object({
+    storeId: objectIdSchema.optional(),
     categoryId: objectIdSchema.optional(),
     isFeatured: z.enum(['true', 'false']).optional(),
     isBestSelling: z.enum(['true', 'false']).optional(),

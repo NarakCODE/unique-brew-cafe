@@ -12,6 +12,7 @@ import { ApiResponse } from '../utils/ApiResponse.js';
 export const getProducts = asyncHandler(
   async (req: Request, res: Response): Promise<void> => {
     const {
+      storeId,
       categoryId,
       isFeatured,
       isBestSelling,
@@ -23,6 +24,7 @@ export const getProducts = asyncHandler(
 
     // Build filters
     const filters: {
+      storeId?: string;
       categoryId?: string;
       isFeatured?: boolean;
       isBestSelling?: boolean;
@@ -31,6 +33,10 @@ export const getProducts = asyncHandler(
       maxPrice?: number;
       search?: string;
     } = {};
+
+    if (storeId) {
+      filters.storeId = storeId as string;
+    }
 
     if (categoryId) {
       filters.categoryId = categoryId as string;

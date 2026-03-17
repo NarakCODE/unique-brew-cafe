@@ -33,6 +33,7 @@ export interface Product {
 }
 
 export interface ProductFilters {
+  storeId?: string;
   page?: number;
   limit?: number;
   search?: string;

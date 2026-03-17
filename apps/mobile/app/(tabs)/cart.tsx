@@ -1,3 +1,9 @@
+import {
+  BottomSheetBackdrop,
+  BottomSheetModal,
+  BottomSheetView,
+} from "@gorhom/bottom-sheet";
+import { useRouter } from "expo-router";
 import { Image } from "expo-image";
 import { Trash2 } from "lucide-react-native";
 import * as React from "react";
@@ -6,6 +12,8 @@ import { FadeInUp } from "react-native-reanimated";
 
 import { formatCurrency } from "@/components/account/my-account-helpers";
 import { ScreenLayout } from "@/components/layout/screen-layout";
+import { ScreenTopBar } from "@/components/layout/screen-topbar";
+import { ProductDetailView } from "@/components/product/product-detail-view";
 import {
   DEFAULT_EMPTY_ILLUSTRATION,
   EmptyState,
@@ -13,12 +21,10 @@ import {
 import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import {
   useCart,
   useClearCart,
   useRemoveCartItem,
-  useUpdateCartItemQuantity,
   useValidateCart,
 } from "@/hooks/use-cart";
 import type { CartCustomization, CartItem } from "../../../../packages/api/src";
@@ -48,21 +54,25 @@ const CART_SCREEN_COPY = {
   removingAction: "Removing...",
   removeButton: "Remove",
   noImage: "No image",
+  quantityLabel: "Qty",
   subtotalLabel: "Subtotal",
   taxLabel: "Tax",
   deliveryFeeLabel: "Delivery fee",
   discountLabel: "Discount",
   totalLabel: "Total",
-  availableLabel: "Available",
-  unavailableLabel: "Unavailable",
 } as const;
 
 export default function CartScreen() {
+  const router = useRouter();
+  const productSheetRef = React.useRef<BottomSheetModal>(null);
+  const sheetSnapPoints = React.useRef(["92%"]).current;
   const cartQuery = useCart();
-  const updateQuantityMutation = useUpdateCartItemQuantity();
   const removeItemMutation = useRemoveCartItem();
   const clearCartMutation = useClearCart();
   const validateCartMutation = useValidateCart();
+  const [selectedProductId, setSelectedProductId] = React.useState<
+    string | null
+  >(null);
 
   const cart = cartQuery.data;
   const items = cart?.items ?? [];
@@ -70,44 +80,6 @@ export default function CartScreen() {
   const handleRetry = React.useCallback(() => {
     void cartQuery.refetch();
   }, [cartQuery]);
-
-  const handleDecrease = React.useCallback(
-    (item: CartItem) => {
-      if (item.quantity <= 1) {
-        Alert.alert(
-          CART_SCREEN_COPY.removeTitle,
-          `Remove ${item.product?.name ?? CART_SCREEN_COPY.removeFallbackName} from your cart?`,
-          [
-            { text: CART_SCREEN_COPY.cancelAction, style: "cancel" },
-            {
-              text: CART_SCREEN_COPY.removeAction,
-              style: "destructive",
-              onPress: () => {
-                removeItemMutation.mutate(item.id);
-              },
-            },
-          ],
-        );
-        return;
-      }
-
-      updateQuantityMutation.mutate({
-        itemId: item.id,
-        payload: { quantity: item.quantity - 1 },
-      });
-    },
-    [removeItemMutation, updateQuantityMutation],
-  );
-
-  const handleIncrease = React.useCallback(
-    (item: CartItem) => {
-      updateQuantityMutation.mutate({
-        itemId: item.id,
-        payload: { quantity: item.quantity + 1 },
-      });
-    },
-    [updateQuantityMutation],
-  );
 
   const handleRemove = React.useCallback(
     (item: CartItem) => {
@@ -150,6 +122,33 @@ export default function CartScreen() {
     validateCartMutation.mutate();
   }, [validateCartMutation]);
 
+  const handleOpenProduct = React.useCallback((item: CartItem) => {
+    if (!item.productId) {
+      return;
+    }
+
+    setSelectedProductId(item.productId);
+    productSheetRef.current?.present();
+  }, []);
+
+  const handleDismissProductSheet = React.useCallback(() => {
+    productSheetRef.current?.dismiss();
+    setSelectedProductId(null);
+  }, []);
+
+  const renderSheetBackdrop = React.useCallback(
+    (props: React.ComponentProps<typeof BottomSheetBackdrop>) => (
+      <BottomSheetBackdrop
+        {...props}
+        appearsOnIndex={0}
+        disappearsOnIndex={-1}
+        opacity={0.18}
+        pressBehavior="close"
+      />
+    ),
+    [],
+  );
+
   if (cartQuery.isLoading) {
     return <CartLoadingState />;
   }
@@ -157,7 +156,7 @@ export default function CartScreen() {
   if (cartQuery.isError) {
     return (
       <ScreenLayout contentClassName="gap-5 px-4 pt-2">
-        <ScreenTitle title={CART_SCREEN_COPY.title} />
+        <ScreenTopBar title={CART_SCREEN_COPY.title} />
         <EmptyState
           title={CART_SCREEN_COPY.loadingErrorTitle}
           description={cartQuery.error?.message}
@@ -173,7 +172,7 @@ export default function CartScreen() {
   if (!cart || items.length === 0) {
     return (
       <ScreenLayout contentClassName="gap-5 px-4 pt-2">
-        <ScreenTitle title={CART_SCREEN_COPY.title} />
+        <ScreenTopBar title={CART_SCREEN_COPY.title} />
         <EmptyState
           title={CART_SCREEN_COPY.emptyTitle}
           description={CART_SCREEN_COPY.emptyDescription}
@@ -186,145 +185,173 @@ export default function CartScreen() {
   }
 
   return (
-    <ScreenLayout contentClassName="gap-5 px-4 pt-2">
-      <ScreenTitle
-        title={CART_SCREEN_COPY.title}
-        action={
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={clearCartMutation.isPending}
-            onPress={handleClearCart}
-          >
-            <Text className="font-medium text-destructive">
-              {clearCartMutation.isPending
-                ? CART_SCREEN_COPY.clearingAction
-                : CART_SCREEN_COPY.clearButton}
-            </Text>
-          </Button>
-        }
-      />
-
-      <NativeOnlyAnimatedView entering={FadeInUp.delay(120).duration(360)}>
-        <View className="flex-row items-center justify-between rounded-[18px] border border-border bg-card px-4 py-3">
-          <View className="gap-1">
-            <Text className="text-base font-semibold text-foreground">
-              {cart.cart?.store?.name ?? CART_SCREEN_COPY.currentOrder}
-            </Text>
-            <Text className="text-sm text-muted-foreground">
-              {cart.itemCount} {cart.itemCount === 1 ? "item" : "items"}
-            </Text>
-          </View>
-        </View>
-      </NativeOnlyAnimatedView>
-
-      {validateCartMutation.data && !validateCartMutation.data.isValid ? (
-        <NativeOnlyAnimatedView entering={FadeInUp.delay(150).duration(320)}>
-          <View className="rounded-[18px] border border-destructive/20 bg-destructive/5 px-4 py-4">
-            <Text className="text-sm font-semibold text-foreground">
-              {CART_SCREEN_COPY.cartNeedsAttention}
-            </Text>
-            <View className="mt-2 gap-2">
-              {validateCartMutation.data.issues.map((issue) => (
-                <Text key={`${issue.itemId}-${issue.issue}`} className="text-sm text-muted-foreground">
-                  • {issue.issue}
-                </Text>
-              ))}
-            </View>
-          </View>
-        </NativeOnlyAnimatedView>
-      ) : null}
-
-      <View className="gap-4">
-        {items.map((item, index) => (
-          <NativeOnlyAnimatedView
-            key={item.id}
-            entering={FadeInUp.delay(170 + index * 50).duration(320)}
-          >
-            <CartItemCard
-              item={item}
-              isUpdating={
-                updateQuantityMutation.isPending &&
-                updateQuantityMutation.variables?.itemId === item.id
-              }
-              isRemoving={
-                removeItemMutation.isPending &&
-                removeItemMutation.variables === item.id
-              }
-              onDecrease={handleDecrease}
-              onIncrease={handleIncrease}
-              onRemove={handleRemove}
-            />
-          </NativeOnlyAnimatedView>
-        ))}
-      </View>
-
-      <NativeOnlyAnimatedView entering={FadeInUp.delay(280).duration(360)}>
-        <View className="gap-4 rounded-[20px] border border-border bg-card px-4 py-4">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-base font-semibold text-foreground">
-              {CART_SCREEN_COPY.summaryTitle}
-            </Text>
+    <>
+      <ScreenLayout contentClassName="gap-5 px-4 pt-2">
+        <ScreenTitle
+          title={CART_SCREEN_COPY.title}
+          action={
             <Button
               variant="ghost"
               size="sm"
-              disabled={validateCartMutation.isPending}
-              onPress={handleValidateCart}
+              disabled={clearCartMutation.isPending}
+              onPress={handleClearCart}
             >
-              <Text className="font-medium">
-                {validateCartMutation.isPending
-                  ? CART_SCREEN_COPY.checkingAction
-                  : CART_SCREEN_COPY.validateAction}
+              <Text className="font-medium text-destructive">
+                {clearCartMutation.isPending
+                  ? CART_SCREEN_COPY.clearingAction
+                  : CART_SCREEN_COPY.clearButton}
+              </Text>
+            </Button>
+          }
+        />
+
+        <NativeOnlyAnimatedView entering={FadeInUp.delay(120).duration(360)}>
+          <View className="flex-row items-center justify-between rounded-[18px] border border-border bg-card px-4 py-3">
+            <View className="gap-1">
+              <Text className="text-base font-semibold text-foreground">
+                {cart.cart?.store?.name ?? CART_SCREEN_COPY.currentOrder}
+              </Text>
+              <Text className="text-sm text-muted-foreground">
+                {cart.itemCount} {cart.itemCount === 1 ? "item" : "items"}
+              </Text>
+            </View>
+          </View>
+        </NativeOnlyAnimatedView>
+
+        {validateCartMutation.data && !validateCartMutation.data.isValid ? (
+          <NativeOnlyAnimatedView entering={FadeInUp.delay(150).duration(320)}>
+            <View className="rounded-[18px] border border-destructive/20 bg-destructive/5 px-4 py-4">
+              <Text className="text-sm font-semibold text-foreground">
+                {CART_SCREEN_COPY.cartNeedsAttention}
+              </Text>
+              <View className="mt-2 gap-2">
+                {validateCartMutation.data.issues.map((issue) => (
+                  <Text
+                    key={`${issue.itemId}-${issue.issue}`}
+                    className="text-sm text-muted-foreground"
+                  >
+                    • {issue.issue}
+                  </Text>
+                ))}
+              </View>
+            </View>
+          </NativeOnlyAnimatedView>
+        ) : null}
+
+        <View className="gap-4">
+          {items.map((item, index) => (
+            <NativeOnlyAnimatedView
+              key={item.id}
+              entering={FadeInUp.delay(170 + index * 50).duration(320)}
+            >
+              <CartItemCard
+                item={item}
+                isRemoving={
+                  removeItemMutation.isPending &&
+                  removeItemMutation.variables === item.id
+                }
+                onOpen={handleOpenProduct}
+                onRemove={handleRemove}
+              />
+            </NativeOnlyAnimatedView>
+          ))}
+        </View>
+
+        <NativeOnlyAnimatedView entering={FadeInUp.delay(280).duration(360)}>
+          <View className="gap-4 rounded-[20px] border border-border bg-card px-4 py-4">
+            <View className="flex-row items-center justify-between">
+              <Text className="text-base font-semibold text-foreground">
+                {CART_SCREEN_COPY.summaryTitle}
+              </Text>
+              <Button
+                variant="ghost"
+                size="sm"
+                disabled={validateCartMutation.isPending}
+                onPress={handleValidateCart}
+              >
+                <Text className="font-medium">
+                  {validateCartMutation.isPending
+                    ? CART_SCREEN_COPY.checkingAction
+                    : CART_SCREEN_COPY.validateAction}
+                </Text>
+              </Button>
+            </View>
+
+            <SummaryRow
+              label={CART_SCREEN_COPY.subtotalLabel}
+              value={formatCurrency(cart.subtotal, "USD")}
+            />
+            <SummaryRow
+              label={CART_SCREEN_COPY.taxLabel}
+              value={formatCurrency(cart.tax, "USD")}
+            />
+            <SummaryRow
+              label={CART_SCREEN_COPY.deliveryFeeLabel}
+              value={formatCurrency(cart.deliveryFee, "USD")}
+            />
+            {cart.discount > 0 ? (
+              <SummaryRow
+                label={CART_SCREEN_COPY.discountLabel}
+                value={formatCurrency(cart.discount, "USD")}
+              />
+            ) : null}
+
+            <View className="h-px bg-border" />
+
+            <SummaryRow
+              label={CART_SCREEN_COPY.totalLabel}
+              value={formatCurrency(cart.total, "USD")}
+              emphasized
+            />
+
+            {cart.cart?.notes ? (
+              <View className="rounded-[16px] bg-muted/40 px-3 py-3">
+                <Text className="text-xs font-semibold uppercase tracking-[1px] text-muted-foreground">
+                  {CART_SCREEN_COPY.orderNotesTitle}
+                </Text>
+                <Text className="mt-1 text-sm text-foreground">
+                  {cart.cart.notes}
+                </Text>
+              </View>
+            ) : null}
+
+            <Button
+              className="h-11 rounded-[16px]"
+              onPress={() => {
+                router.push("/checkout");
+              }}
+            >
+              <Text className="font-semibold">
+                {CART_SCREEN_COPY.proceedAction}
               </Text>
             </Button>
           </View>
+        </NativeOnlyAnimatedView>
+      </ScreenLayout>
 
-          <SummaryRow
-            label={CART_SCREEN_COPY.subtotalLabel}
-            value={formatCurrency(cart.subtotal, "USD")}
-          />
-          <SummaryRow
-            label={CART_SCREEN_COPY.taxLabel}
-            value={formatCurrency(cart.tax, "USD")}
-          />
-          <SummaryRow
-            label={CART_SCREEN_COPY.deliveryFeeLabel}
-            value={formatCurrency(cart.deliveryFee, "USD")}
-          />
-          {cart.discount > 0 ? (
-            <SummaryRow
-              label={CART_SCREEN_COPY.discountLabel}
-              value={formatCurrency(cart.discount, "USD")}
+      <BottomSheetModal
+        ref={productSheetRef}
+        snapPoints={sheetSnapPoints}
+        enableDynamicSizing={false}
+        enablePanDownToClose
+        backdropComponent={renderSheetBackdrop}
+        handleIndicatorStyle={{ backgroundColor: "#D1C4B8", width: 44 }}
+        backgroundStyle={{ backgroundColor: "#F8F5F2" }}
+        onDismiss={() => {
+          setSelectedProductId(null);
+        }}
+      >
+        <BottomSheetView className="flex-1">
+          {selectedProductId ? (
+            <ProductDetailView
+              productId={selectedProductId}
+              presentation="sheet"
+              onRequestClose={handleDismissProductSheet}
             />
           ) : null}
-
-          <View className="h-px bg-border" />
-
-          <SummaryRow
-            label={CART_SCREEN_COPY.totalLabel}
-            value={formatCurrency(cart.total, "USD")}
-            emphasized
-          />
-
-          {cart.cart?.notes ? (
-            <View className="rounded-[16px] bg-muted/40 px-3 py-3">
-              <Text className="text-xs font-semibold uppercase tracking-[1px] text-muted-foreground">
-                {CART_SCREEN_COPY.orderNotesTitle}
-              </Text>
-              <Text className="mt-1 text-sm text-foreground">
-                {cart.cart.notes}
-              </Text>
-            </View>
-          ) : null}
-
-          <Button className="h-11 rounded-[16px]">
-            <Text className="font-semibold">
-              {CART_SCREEN_COPY.proceedAction}
-            </Text>
-          </Button>
-        </View>
-      </NativeOnlyAnimatedView>
-    </ScreenLayout>
+        </BottomSheetView>
+      </BottomSheetModal>
+    </>
   );
 }
 
@@ -335,29 +362,18 @@ function ScreenTitle({
   title: string;
   action?: React.ReactNode;
 }) {
-  return (
-    <View className="relative items-center justify-center pt-1">
-      <Text className="text-2xl font-semibold text-foreground">{title}</Text>
-      {action ? (
-        <View className="absolute right-0 top-0">{action}</View>
-      ) : null}
-    </View>
-  );
+  return <ScreenTopBar title={title} rightAccessory={action} />;
 }
 
 function CartItemCard({
   item,
-  isUpdating,
   isRemoving,
-  onDecrease,
-  onIncrease,
+  onOpen,
   onRemove,
 }: {
   item: CartItem;
-  isUpdating: boolean;
   isRemoving: boolean;
-  onDecrease: (item: CartItem) => void;
-  onIncrease: (item: CartItem) => void;
+  onOpen: (item: CartItem) => void;
   onRemove: (item: CartItem) => void;
 }) {
   const imageUri = item.product?.images[0]?.trim();
@@ -365,7 +381,13 @@ function CartItemCard({
   const customizationLabel = formatCustomization(item.customization);
 
   return (
-    <View className="rounded-[20px] border border-border bg-card px-4 py-4">
+    <Pressable
+      accessibilityRole="button"
+      className="rounded-[20px] border border-border bg-card px-4 py-4 active:opacity-95"
+      onPress={() => {
+        onOpen(item);
+      }}
+    >
       <View className="flex-row gap-4">
         {imageUri ? (
           <Image
@@ -392,57 +414,35 @@ function CartItemCard({
                 {formatCurrency(item.totalPrice, item.product?.currency ?? "USD")}
               </Text>
             </View>
-
-            <Badge
-              variant={item.product?.isAvailable ? "secondary" : "outline"}
-              className="rounded-full px-2.5 py-1"
-            >
-              <Text className="text-[10px] font-medium">
-                {item.product?.isAvailable
-                  ? CART_SCREEN_COPY.availableLabel
-                  : CART_SCREEN_COPY.unavailableLabel}
-              </Text>
-            </Badge>
           </View>
 
-          {customizationLabel ? (
+          <View className="flex-row flex-wrap items-center gap-2">
             <Text className="text-sm text-muted-foreground">
-              {customizationLabel}
+              {CART_SCREEN_COPY.quantityLabel} {item.quantity}
             </Text>
-          ) : null}
+            {customizationLabel ? (
+              <Text className="text-sm text-muted-foreground">
+                • {customizationLabel}
+              </Text>
+            ) : null}
+          </View>
 
           {item.notes ? (
             <Text className="text-sm text-muted-foreground">{item.notes}</Text>
           ) : null}
 
-          <View className="flex-row items-center justify-between">
-            <View className="flex-row items-center rounded-full border border-border">
-              <QuantityButton
-                label="-"
-                disabled={isUpdating || isRemoving}
-                onPress={() => {
-                  onDecrease(item);
-                }}
-              />
-              <View className="min-w-[36px] items-center">
-                <Text className="text-sm font-semibold text-foreground">
-                  {item.quantity}
-                </Text>
-              </View>
-              <QuantityButton
-                label="+"
-                disabled={isUpdating || isRemoving}
-                onPress={() => {
-                  onIncrease(item);
-                }}
-              />
-            </View>
-
+          <View className="flex-row items-center justify-between pt-1">
+            <Text className="text-sm text-muted-foreground">
+              {item.product?.preparationTime
+                ? `${item.product.preparationTime} min prep`
+                : ""}
+            </Text>
             <Pressable
               accessibilityRole="button"
               className="flex-row items-center gap-1 rounded-full px-2 py-1 active:opacity-70"
               disabled={isRemoving}
-              onPress={() => {
+              onPress={(event) => {
+                event.stopPropagation();
                 onRemove(item);
               }}
             >
@@ -456,27 +456,6 @@ function CartItemCard({
           </View>
         </View>
       </View>
-    </View>
-  );
-}
-
-function QuantityButton({
-  label,
-  disabled,
-  onPress,
-}: {
-  label: string;
-  disabled: boolean;
-  onPress: () => void;
-}) {
-  return (
-    <Pressable
-      accessibilityRole="button"
-      className="h-9 w-9 items-center justify-center active:opacity-70"
-      disabled={disabled}
-      onPress={onPress}
-    >
-      <Text className="text-lg font-semibold text-foreground">{label}</Text>
     </Pressable>
   );
 }

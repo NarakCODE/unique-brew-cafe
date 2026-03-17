@@ -221,6 +221,17 @@ export async function getProducts(filters?: ProductFilters) {
   return normalizeProductListResponse(response);
 }
 
+export async function getStoreMenu(
+  storeId: string,
+  filters?: ProductFilters,
+) {
+  const response = await mobileApiClient.get<ProductListApiResponse>(
+    withQuery(`/stores/${storeId}/menu`, buildProductQuery(filters)),
+  );
+
+  return normalizeProductListResponse(response);
+}
+
 export async function getProductById(productId: string) {
   const response = await mobileApiClient.get<ProductDetailApiResponse>(
     `/products/${productId}`,

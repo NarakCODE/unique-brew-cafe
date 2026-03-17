@@ -1,29 +1,19 @@
-import * as React from "react";
 import { useRouter } from "expo-router";
+import { ChevronRight, CircleHelp, Headphones, Heart, History, Megaphone, MessageSquareText, Store, UserRound } from "lucide-react-native";
 import { Pressable, View } from "react-native";
-import {
-  ChevronRight,
-  Heart,
-  Headphones,
-  History,
-  Megaphone,
-  MessageSquareText,
-  CircleHelp,
-  Store,
-  UserRound,
-} from "lucide-react-native";
 
+import { getInitials } from "@/components/account/my-account-helpers";
+import { ScreenLayout } from "@/components/layout/screen-layout";
+import { ScreenTopBar } from "@/components/layout/screen-topbar";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { Text } from "@/components/ui/text";
-import { useColorScheme } from "@/lib/color-scheme";
-import { cn } from "@/lib/utils";
 import { useAuth } from "@/providers/auth-provider";
-import { ScreenLayout } from "@/components/layout/screen-layout";
 
 type AccountItem = {
   label: string;
+  description: string;
   icon: React.ComponentProps<typeof Icon>["as"];
   href:
     | "/account/my-account"
@@ -38,165 +28,205 @@ type AccountItem = {
 
 type AccountSection = {
   title: string;
+  meta: string;
   items: AccountItem[];
 };
 
-export default function AccountScreen() {
-  const router = useRouter();
-  const { colors, colorScheme } = useColorScheme();
-  const { user, signOut } = useAuth();
-
-  const sections = React.useMemo<AccountSection[]>(
-    () => [
+const ACCOUNT_SECTIONS: AccountSection[] = [
+  {
+    title: "Your Account",
+    meta: "3 options",
+    items: [
       {
-        title: "Personal",
-        items: [
-          { label: "My Account", icon: UserRound, href: "/account/my-account" },
-          { label: "History", icon: History, href: "/account/order-history" },
-          { label: "Favorites", icon: Heart, href: "/account/favorites" },
-        ],
+        label: "My Account",
+        description: "Profile, preferences, and personal details",
+        icon: UserRound,
+        href: "/account/my-account",
       },
       {
-        title: "Shortcuts",
-        items: [
-          { label: "Stores", icon: Store, href: "/account/stores" },
-          {
-            label: "Announcements",
-            icon: Megaphone,
-            href: "/account/announcements",
-          },
-        ],
+        label: "Order History",
+        description: "Review your recent and past orders",
+        icon: History,
+        href: "/account/order-history",
       },
       {
-        title: "Contact",
-        items: [
-          {
-            label: "Customer Service",
-            icon: Headphones,
-            href: "/account/customer-service",
-          },
-          {
-            label: "Feedback",
-            icon: MessageSquareText,
-            href: "/account/feedback",
-          },
-          { label: "FAQs", icon: CircleHelp, href: "/account/faqs" },
-        ],
+        label: "Favorites",
+        description: "Saved drinks and menu items",
+        icon: Heart,
+        href: "/account/favorites",
       },
     ],
-    [],
-  );
+  },
+  {
+    title: "Browse",
+    meta: "2 options",
+    items: [
+      {
+        label: "Stores",
+        description: "Find nearby stores and opening hours",
+        icon: Store,
+        href: "/account/stores",
+      },
+      {
+        label: "Announcements",
+        description: "Latest updates and promotions",
+        icon: Megaphone,
+        href: "/account/announcements",
+      },
+    ],
+  },
+  {
+    title: "Support",
+    meta: "3 options",
+    items: [
+      {
+        label: "Customer Service",
+        description: "Get help with orders and account issues",
+        icon: Headphones,
+        href: "/account/customer-service",
+      },
+      {
+        label: "Feedback",
+        description: "Share suggestions about the app and service",
+        icon: MessageSquareText,
+        href: "/account/feedback",
+      },
+      {
+        label: "FAQs",
+        description: "Answers to common questions",
+        icon: CircleHelp,
+        href: "/account/faqs",
+      },
+    ],
+  },
+];
+
+export default function AccountScreen() {
+  const router = useRouter();
+  const { user, signOut } = useAuth();
 
   const avatarFallback = getInitials(user?.fullName);
   const profileImage = user?.profileImage?.trim();
-  const rowBackground =
-    colorScheme === "dark" ? colors.card : "rgb(248, 248, 246)";
-  const iconColor =
-    colorScheme === "dark" ? colors.mutedForeground : "rgb(107, 112, 103)";
-  const chevronColor =
-    colorScheme === "dark"
-      ? "rgba(255,255,255,0.42)"
-      : "rgba(107,112,103,0.52)";
 
   return (
-    <ScreenLayout contentClassName="gap-9 px-5 pt-2">
-      <View className="flex-row items-center gap-5">
-        <Avatar className="size-[104px] bg-muted" alt="Profile Picture">
-          {profileImage ? <AvatarImage source={{ uri: profileImage }} /> : null}
-          <AvatarFallback className="bg-[#D7DDD3]">
-            <Text className="text-[30px] font-semibold text-[#374034]">
-              {avatarFallback}
-            </Text>
-          </AvatarFallback>
-        </Avatar>
+    <ScreenLayout
+      contentClassName="gap-6 px-4 pt-2"
+      bottomInsetOffset={160}
+    >
+      <ScreenTopBar title="Account" />
 
-        <View className="flex-1 gap-1">
-          <Text
-            variant="largeTitle"
-            className="text-[24px] font-extrabold tracking-[-0.7px]"
-          >
-            {user?.fullName ?? "Guest User"}
-          </Text>
-          <Text
-            color="tertiary"
-            className="text-[17px] leading-7"
-            numberOfLines={1}
-          >
-            {user?.email ?? "guest@example.com"}
-          </Text>
-        </View>
+      <View className="gap-3">
+        <Text className="px-1 text-base font-semibold text-foreground">
+          Profile
+        </Text>
+
+        <Pressable
+          accessibilityRole="button"
+          className="flex-row items-center gap-4 rounded-[20px] border border-border bg-card px-4 py-4 active:opacity-90"
+          onPress={() => {
+            router.navigate("/account/my-account");
+          }}
+        >
+          <Avatar className="size-[64px] bg-muted" alt="Profile picture">
+            {profileImage ? <AvatarImage source={{ uri: profileImage }} /> : null}
+            <AvatarFallback className="bg-muted">
+              <Text className="text-lg font-semibold text-foreground">
+                {avatarFallback}
+              </Text>
+            </AvatarFallback>
+          </Avatar>
+
+          <View className="flex-1 gap-1">
+            <Text className="text-base font-semibold text-foreground">
+              {user?.fullName ?? "Guest User"}
+            </Text>
+            <Text
+              className="text-sm leading-5 text-muted-foreground"
+              numberOfLines={1}
+            >
+              {user?.email ?? "guest@example.com"}
+            </Text>
+          </View>
+
+          <ChevronRight size={18} color="#8A7F78" strokeWidth={2.2} />
+        </Pressable>
       </View>
 
-      {sections.map((section) => (
-        <View key={section.title} className="gap-4">
-          <Text
-            color="tertiary"
-            variant="title3"
-            className="px-1 text-[19px] font-semibold"
-          >
-            {section.title}
-          </Text>
+      {ACCOUNT_SECTIONS.map((section) => (
+        <View key={section.title} className="gap-3">
+          <View className="flex-row items-center justify-between px-1">
+            <Text className="text-base font-semibold text-foreground">
+              {section.title}
+            </Text>
+            <Text className="text-sm text-muted-foreground">
+              {section.meta}
+            </Text>
+          </View>
 
-          <View className="gap-4">
-            {section.items.map((item) => (
-              <Pressable
+          <View className="overflow-hidden rounded-[20px] border border-border bg-card">
+            {section.items.map((item, index) => (
+              <AccountMenuRow
                 key={item.label}
-                accessibilityRole="button"
-                className={cn(
-                  "flex-row items-center rounded-[22px] px-5 py-6 active:opacity-85",
-                )}
+                item={item}
+                isLast={index === section.items.length - 1}
                 onPress={() => {
                   router.navigate(item.href);
                 }}
-                style={{ backgroundColor: rowBackground }}
-              >
-                <View className="w-12 items-start">
-                  <Icon
-                    as={item.icon}
-                    size={29}
-                    color={iconColor}
-                    strokeWidth={1.9}
-                  />
-                </View>
-
-                <Text className="flex-1 text-[19px] leading-7">
-                  {item.label}
-                </Text>
-
-                <ChevronRight
-                  size={30}
-                  color={chevronColor}
-                  strokeWidth={2.2}
-                />
-              </Pressable>
+              />
             ))}
           </View>
         </View>
       ))}
 
       <Button
-        variant="destructive"
-        size="lg"
+        variant="outline"
+        className="h-11 rounded-[16px] border-destructive/20 bg-destructive/5"
         onPress={() => {
           void signOut();
         }}
       >
-        <Text>Sign Out</Text>
+        <Text className="font-semibold text-destructive">Sign Out</Text>
       </Button>
     </ScreenLayout>
   );
 }
 
-function getInitials(fullName?: string) {
-  if (!fullName) {
-    return "GU";
-  }
+function AccountMenuRow({
+  item,
+  isLast,
+  onPress,
+}: {
+  item: AccountItem;
+  isLast: boolean;
+  onPress: () => void;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      className={`flex-row items-center gap-3 px-4 py-4 active:opacity-90 ${
+        isLast ? "" : "border-b border-border"
+      }`}
+      onPress={onPress}
+    >
+      <View className="h-10 w-10 items-center justify-center rounded-full bg-muted/50">
+        <Icon
+          as={item.icon}
+          size={18}
+          strokeWidth={2}
+          className="text-muted-foreground"
+        />
+      </View>
 
-  const parts = fullName.trim().split(/\s+/).filter(Boolean).slice(0, 2);
+      <View className="flex-1 gap-1">
+        <Text className="text-sm font-semibold text-foreground">
+          {item.label}
+        </Text>
+        <Text className="text-sm leading-5 text-muted-foreground">
+          {item.description}
+        </Text>
+      </View>
 
-  if (parts.length === 0) {
-    return "GU";
-  }
-
-  return parts.map((part) => part[0]?.toUpperCase() ?? "").join("");
+      <ChevronRight size={18} color="#8A7F78" strokeWidth={2.2} />
+    </Pressable>
+  );
 }

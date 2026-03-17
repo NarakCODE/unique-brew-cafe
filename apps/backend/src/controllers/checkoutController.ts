@@ -149,7 +149,7 @@ export const confirmCheckout = asyncHandler(
       throw new AppError('Payment method is required', 400);
     }
 
-    const order = await checkoutService.confirmCheckout(
+    const checkout = await checkoutService.confirmCheckout(
       req.userId,
       checkoutId,
       paymentMethod
@@ -157,6 +157,12 @@ export const confirmCheckout = asyncHandler(
 
     res
       .status(201)
-      .json(new ApiResponse(201, order, 'Order created successfully'));
+      .json(
+        new ApiResponse(
+          201,
+          checkout,
+          'Checkout confirmed successfully'
+        )
+      );
   }
 );

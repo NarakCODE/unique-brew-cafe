@@ -1,220 +1,256 @@
-import { Grid2x2, ShoppingBag } from "lucide-react-native";
+import { BottomSheetModal } from "@gorhom/bottom-sheet";
+import { ChevronDown, Grid2x2, ShoppingBag, Store as StoreIcon } from "lucide-react-native";
 import { useRouter } from "expo-router";
 import * as React from "react";
-import { Pressable, ScrollView, View } from "react-native";
+import { Pressable, View } from "react-native";
 import { FadeInUp } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { ScreenLayout } from "@/components/layout/screen-layout";
+import { ScreenTopBar } from "@/components/layout/screen-topbar";
 import { ExploreProductCard } from "@/components/product/explore-product-card";
+import { SearchInput } from "@/components/search/SearchInput";
+import { StoreSelectionSheet } from "@/components/store/store-selection-sheet";
 import { EmptyState } from "@/components/ui/empty-state";
 import { NativeOnlyAnimatedView } from "@/components/ui/native-only-animated-view";
 import { Text } from "@/components/ui/text";
-import { useCategories } from "@/hooks/use-categories";
 import { useProducts } from "@/hooks/use-products";
+import { useStores } from "@/hooks/use-stores";
 import { useColorScheme } from "@/lib/color-scheme";
-import type { MobileCategory } from "@/services/category.service";
 import type { MobileProduct } from "@/services/product.service";
-
-const ALL_CATEGORY = {
-  id: "all",
-  name: "All",
-  slug: "all",
-} as const;
+import type { MobileStore } from "@/services/store.service";
 
 export default function ExploreScreen() {
   const router = useRouter();
-  const [selectedCategoryId, setSelectedCategoryId] = React.useState<
-    string | undefined
-  >(undefined);
-  const { colors, isDarkColorScheme } = useColorScheme();
-  const categoriesQuery = useCategories();
+  const insets = useSafeAreaInsets();
+  const storeSheetRef = React.useRef<BottomSheetModal>(null);
+  const sheetSnapPoints = React.useMemo(() => ["62%"], []);
+  const [selectedStoreId, setSelectedStoreId] = React.useState<string | undefined>();
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const deferredSearchQuery = React.useDeferredValue(searchQuery.trim());
+  const { colors } = useColorScheme();
+
+  const storesQuery = useStores({ limit: 50 });
   const productsQuery = useProducts({
-    categoryId: selectedCategoryId,
+    storeId: selectedStoreId,
+    search: deferredSearchQuery || undefined,
+    limit: 100,
   });
 
-  const categories = React.useMemo(
-    () => categoriesQuery.data ?? [],
-    [categoriesQuery.data],
-  );
+  const stores = React.useMemo(() => storesQuery.data?.items ?? [], [storesQuery.data?.items]);
   const products = React.useMemo(
     () => productsQuery.data?.items ?? [],
     [productsQuery.data?.items],
   );
-  const selectedCategory = categories.find(
-    (category) => category.id === selectedCategoryId,
-  );
+  const selectedStore = stores.find((store) => store.id === selectedStoreId);
   const productRows = React.useMemo(() => groupProducts(products), [products]);
-  const productCount = productsQuery.data?.pagination.total ?? 0;
+  const productCount = products.length;
   const errorMessage =
-    categoriesQuery.error?.message ??
+    storesQuery.error?.message ??
     productsQuery.error?.message ??
     "Unable to load the cafe menu.";
 
   const handleRetry = React.useCallback(() => {
-    void categoriesQuery.refetch();
+    void storesQuery.refetch();
     void productsQuery.refetch();
-  }, [categoriesQuery, productsQuery]);
+  }, [productsQuery, storesQuery]);
 
-  const categoryChips = React.useMemo(
-    () => [ALL_CATEGORY, ...categories],
-    [categories],
-  );
+  const handleClearSearch = React.useCallback(() => {
+    setSearchQuery("");
+  }, []);
+
+  React.useEffect(() => {
+    if (!stores.length) {
+      return;
+    }
+
+    const selectedStoreExists = stores.some((store) => store.id === selectedStoreId);
+
+    if (!selectedStoreId || !selectedStoreExists) {
+      setSelectedStoreId(stores[0]?.id);
+    }
+  }, [selectedStoreId, stores]);
+
+  const handleSelectStore = React.useCallback((storeId: string) => {
+    setSelectedStoreId(storeId);
+    storeSheetRef.current?.dismiss();
+  }, []);
+
+  const handleOpenStoreSheet = React.useCallback(() => {
+    if (!stores.length) {
+      return;
+    }
+
+    storeSheetRef.current?.present();
+  }, [stores.length]);
+
+  const isInitialStoreLoading = storesQuery.isLoading && !storesQuery.data;
+  const isInitialProductLoading = productsQuery.isLoading && !productsQuery.data;
+  const hasStoreError = storesQuery.isError && !stores.length;
+  const hasNoStores = !isInitialStoreLoading && !hasStoreError && stores.length === 0;
+  const hasFiltersApplied = Boolean(deferredSearchQuery);
 
   return (
-    <ScreenLayout contentClassName="gap-5">
-      <NativeOnlyAnimatedView entering={FadeInUp.delay(120).duration(420)}>
-        <View className="items-center">
-          <Text className="text-2xl font-semibold text-foreground">
-            Explore
-          </Text>
-        </View>
-      </NativeOnlyAnimatedView>
+    <>
+      <ScreenLayout bottomInsetOffset={168} contentClassName="gap-6 px-4 pt-2">
+        <ScreenTopBar title="Explore" />
 
-      <NativeOnlyAnimatedView entering={FadeInUp.delay(160).duration(420)}>
-        <View className="gap-3">
-          {categoriesQuery.isLoading ? (
-            <CategoryChipSkeleton />
+        <NativeOnlyAnimatedView entering={FadeInUp.delay(130).duration(420)}>
+          {isInitialStoreLoading ? (
+            <StoreSelectorSkeleton />
           ) : (
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={{ paddingRight: 8 }}
-            >
-              <View className="flex-row gap-3">
-                {categoryChips.map((category) => {
-                  const isSelected =
-                    (selectedCategoryId ?? ALL_CATEGORY.id) === category.id;
-
-                  return (
-                    <Pressable
-                      key={category.id}
-                      accessibilityRole="button"
-                      accessibilityState={isSelected ? { selected: true } : {}}
-                      className="rounded-full border px-4 py-2.5"
-                      onPress={() => {
-                        setSelectedCategoryId(
-                          category.id === ALL_CATEGORY.id
-                            ? undefined
-                            : category.id,
-                        );
-                      }}
-                      style={{
-                        backgroundColor: isSelected
-                          ? isDarkColorScheme
-                            ? colors.cardForeground
-                            : colors.foreground
-                          : isDarkColorScheme
-                            ? colors.card
-                            : colors.card,
-                        borderColor: isSelected
-                          ? isDarkColorScheme
-                            ? colors.cardForeground
-                            : colors.foreground
-                          : colors.border,
-                      }}
-                    >
-                      <Text
-                        className="text-sm font-semibold"
-                        style={{
-                          color: isSelected
-                            ? isDarkColorScheme
-                              ? colors.background
-                              : colors.background
-                            : colors.foreground,
-                        }}
-                      >
-                        {category.name}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            </ScrollView>
+            <StoreSelectorButton
+              store={selectedStore}
+              disabled={!stores.length}
+              onPress={handleOpenStoreSheet}
+            />
           )}
-        </View>
-      </NativeOnlyAnimatedView>
+        </NativeOnlyAnimatedView>
 
-      <NativeOnlyAnimatedView entering={FadeInUp.delay(180).duration(420)}>
-        <View className="gap-4 px-4">
-          <View className="flex-row items-end justify-between px-1">
-            <View className="flex-1 pr-4">
-              <Text className="text-xl font-semibold text-foreground">
-                {selectedCategory?.name ?? "All products"}
-              </Text>
-              <Text className="mt-1 text-sm text-muted-foreground">
-                {buildSectionDescription(selectedCategory, productCount)}
-              </Text>
-            </View>
-
-            <View className="flex-row items-center gap-2 rounded-full border border-border px-3 py-1.5">
-              <Grid2x2
-                size={14}
-                color={colors.mutedForeground}
-                strokeWidth={2.2}
-              />
-              <Text className="text-xs font-medium uppercase tracking-[1.1px] text-muted-foreground">
-                {productCount} items
-              </Text>
-            </View>
+        <NativeOnlyAnimatedView entering={FadeInUp.delay(150).duration(420)}>
+          <View className="rounded-[20px] border border-border bg-card p-3">
+            <SearchInput
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholder="Search"
+              onClear={handleClearSearch}
+            />
           </View>
+        </NativeOnlyAnimatedView>
 
-          {categoriesQuery.isError || productsQuery.isError ? (
-            <EmptyState
-              title="Unable to load the menu"
-              description={errorMessage}
-              variant="error"
-              centered
-              actionLabel="Try again"
-              onAction={handleRetry}
-            />
-          ) : categoriesQuery.isLoading || productsQuery.isLoading ? (
-            <ProductGridSkeleton />
-          ) : products.length === 0 ? (
-            <EmptyState
-              title="Nothing available here yet"
-              description="Switch categories or come back later for fresh menu updates."
-              variant="default"
-              centered
-              icon={ShoppingBag}
-            />
-          ) : (
-            <View className="gap-4">
-              {productRows.map((row, rowIndex) => (
-                <NativeOnlyAnimatedView
-                  key={`product-row-${rowIndex}`}
-                  entering={FadeInUp.delay(220 + rowIndex * 60).duration(360)}
-                >
-                  <View className="flex-row gap-4">
-                    {row.map((product) => (
-                      <ExploreProductCard
-                        key={product.id}
-                        product={product}
-                        onPress={() => {
-                          router.push(`/product/${product.id}`);
-                        }}
-                      />
-                    ))}
-                    {row.length === 1 ? <View className="flex-1" /> : null}
-                  </View>
-                </NativeOnlyAnimatedView>
-              ))}
+        <NativeOnlyAnimatedView entering={FadeInUp.delay(210).duration(420)}>
+          <View className="gap-4">
+            <View className="flex-row items-end justify-between gap-4 px-1">
+              <View className="flex-1">
+                <Text className="text-xl font-semibold text-foreground">Products</Text>
+              </View>
+
+              <View className="items-end gap-2">
+                <View className="flex-row items-center gap-2 rounded-full border border-border px-3 py-1.5">
+                  <Grid2x2 size={14} color="#6B6F68" strokeWidth={2.2} />
+                  <Text className="text-xs font-medium uppercase tracking-[1.1px] text-muted-foreground">
+                    {formatItemCount(productCount)}
+                  </Text>
+                </View>
+
+                {productsQuery.isFetching && productsQuery.data ? <View className="h-4" /> : null}
+              </View>
             </View>
-          )}
-        </View>
-      </NativeOnlyAnimatedView>
-    </ScreenLayout>
+
+            {hasStoreError || productsQuery.isError ? (
+              <EmptyState
+                title="Unable to load the menu"
+                description={errorMessage}
+                variant="error"
+                centered
+                actionLabel="Try again"
+                onAction={handleRetry}
+              />
+            ) : hasNoStores ? (
+              <EmptyState
+                title="No stores available"
+                description="Store locations will appear here once they are available."
+                variant="default"
+                centered
+                icon={StoreIcon}
+              />
+            ) : isInitialProductLoading ? (
+              <ProductGridSkeleton />
+            ) : products.length === 0 ? (
+              <EmptyState
+                title={hasFiltersApplied ? "No matching products" : "Nothing available yet"}
+                variant="default"
+                centered
+                icon={ShoppingBag}
+                actionLabel={hasFiltersApplied ? "Clear search" : undefined}
+                onAction={hasFiltersApplied ? handleClearSearch : undefined}
+              />
+            ) : (
+              <View className="gap-4">
+                {productRows.map((row, rowIndex) => (
+                  <NativeOnlyAnimatedView
+                    key={`product-row-${rowIndex}`}
+                    entering={FadeInUp.delay(240 + rowIndex * 60).duration(360)}
+                  >
+                    <View className="flex-row gap-4">
+                      {row.map((product) => (
+                        <ExploreProductCard
+                          key={product.id}
+                          product={product}
+                          onPress={() => {
+                            router.push(`/product/${product.id}`);
+                          }}
+                        />
+                      ))}
+                      {row.length === 1 ? <View className="flex-1" /> : null}
+                    </View>
+                  </NativeOnlyAnimatedView>
+                ))}
+              </View>
+            )}
+          </View>
+        </NativeOnlyAnimatedView>
+      </ScreenLayout>
+
+      <StoreSelectionSheet
+        ref={storeSheetRef}
+        stores={stores}
+        selectedStoreId={selectedStoreId}
+        onSelectStore={handleSelectStore}
+        backgroundColor={colors.background}
+        bottomInset={insets.bottom}
+        snapPoints={sheetSnapPoints}
+      />
+    </>
   );
 }
 
-function CategoryChipSkeleton() {
+function StoreSelectorButton({
+  store,
+  disabled,
+  onPress,
+}: {
+  store?: MobileStore;
+  disabled?: boolean;
+  onPress: () => void;
+}) {
   return (
-    <View className="mt-4 flex-row gap-3">
-      {Array.from({ length: 4 }).map((_, index) => (
-        <View
-          key={`category-skeleton-${index}`}
-          className="h-11 w-24 rounded-full bg-muted"
-        />
-      ))}
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={store ? `Choose store, currently ${store.name}` : "Choose store"}
+      className="rounded-[20px] border border-border bg-card px-4 py-3 active:opacity-90"
+      disabled={disabled}
+      onPress={onPress}
+    >
+      <View className="flex-row items-center justify-between gap-3">
+        {store ? (
+          <Text className="flex-1 text-base font-semibold text-foreground" numberOfLines={1}>
+            {store.name}
+          </Text>
+        ) : (
+          <View className="flex-row items-center gap-2">
+            <StoreIcon size={16} color="#7C806F" strokeWidth={2} />
+            <Text className="text-sm text-muted-foreground">Select store</Text>
+          </View>
+        )}
+        <ChevronDown size={18} color="#7C806F" strokeWidth={2.2} />
+      </View>
+    </Pressable>
+  );
+}
+
+function StoreSelectorSkeleton() {
+  return (
+    <View className="rounded-[24px] border border-border bg-card px-4 py-4">
+      <View className="flex-row items-center gap-3">
+        <View className="h-12 w-12 rounded-full bg-muted" />
+        <View className="flex-1 gap-2">
+          <View className="h-3 w-20 rounded-full bg-muted" />
+          <View className="h-5 w-40 rounded-full bg-muted" />
+          <View className="h-4 w-32 rounded-full bg-muted" />
+        </View>
+        <View className="h-5 w-14 rounded-full bg-muted" />
+      </View>
     </View>
   );
 }
@@ -230,14 +266,20 @@ function ProductGridSkeleton() {
           {Array.from({ length: 2 }).map((_, columnIndex) => (
             <View
               key={`product-card-skeleton-${rowIndex}-${columnIndex}`}
-              className="flex-1 overflow-hidden rounded-[24px] border border-border bg-card"
+              className="flex-1 overflow-hidden rounded-[18px] border border-border bg-card"
             >
               <View className="h-36 bg-muted" />
               <View className="gap-3 px-4 py-4">
                 <View className="h-5 w-4/5 rounded-full bg-muted" />
-                <View className="h-4 w-1/2 rounded-full bg-muted" />
                 <View className="h-4 w-full rounded-full bg-muted" />
-                <View className="h-4 w-2/3 rounded-full bg-muted" />
+                <View className="flex-row gap-2">
+                  <View className="h-7 w-20 rounded-full bg-muted" />
+                  <View className="h-7 w-16 rounded-full bg-muted" />
+                </View>
+                <View className="flex-row items-center gap-3">
+                  <View className="h-4 w-20 rounded-full bg-muted" />
+                  <View className="h-11 w-11 rounded-full bg-muted" />
+                </View>
               </View>
             </View>
           ))}
@@ -257,13 +299,6 @@ function groupProducts(products: MobileProduct[]) {
   return rows;
 }
 
-function buildSectionDescription(
-  category: MobileCategory | undefined,
-  productCount: number,
-) {
-  if (category) {
-    return `${productCount} items in ${category.name.toLowerCase()}.`;
-  }
-
-  return `${productCount} available picks across the full menu.`;
+function formatItemCount(count: number) {
+  return `${count} ${count === 1 ? "item" : "items"}`;
 }

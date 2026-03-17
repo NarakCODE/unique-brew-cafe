@@ -47,6 +47,7 @@ export const cleanImageUrls = (images: unknown[] | undefined): string[] => {
 };
 
 interface ProductFilters {
+  storeId?: string;
   categoryId?: string;
   isAvailable?: boolean;
   isFeatured?: boolean;
@@ -142,7 +143,26 @@ export const getProducts = async (
   }
 
   // Category filter
-  if (filters?.categoryId) {
+  if (filters?.storeId) {
+    if (!mongoose.Types.ObjectId.isValid(filters.storeId)) {
+      throw new BadRequestError('Invalid store ID');
+    }
+
+    const categoryDocs = await Category.find({ storeId: filters.storeId })
+      .select('_id')
+      .lean();
+    const storeCategoryIds = categoryDocs.map((category) => category._id);
+
+    if (filters.categoryId) {
+      query.categoryId = storeCategoryIds.some(
+        (categoryId) => categoryId.toString() === filters.categoryId
+      )
+        ? filters.categoryId
+        : { $in: [] };
+    } else {
+      query.categoryId = { $in: storeCategoryIds };
+    }
+  } else if (filters?.categoryId) {
     query.categoryId = filters.categoryId;
   }
 

@@ -9,6 +9,7 @@ import { buildQueryString, withQuery } from "../utils/search-params";
 
 export function buildProductQuery(filters?: ProductFilters) {
   return buildQueryString({
+    storeId: filters?.storeId,
     search: filters?.search,
     page: filters?.page,
     limit: filters?.limit,
